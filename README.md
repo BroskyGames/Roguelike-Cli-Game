@@ -2,6 +2,10 @@
 pip install windows-curses
 py: 3.13.1
 
+# Ideas
+While rendering double the width to keep the ascpect ratio 1:1.
+Most likly by inserting spaces between characters.
+
 # Cycle
 - input
 - update:
