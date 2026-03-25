@@ -4,13 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8fadf3f6-90e2-4340-809a-122ea574255f" name="Changes" comment="Add requirements.txt">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/Roguelike.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Roguelike.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/game/logic/map.py" beforeDir="false" afterPath="$PROJECT_DIR$/game/logic/map.py" afterDir="false" />
-    </list>
+    <list default="true" id="8fadf3f6-90e2-4340-809a-122ea574255f" name="Changes" comment="Added .gitignore, Template rotate return now Template, completed display" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -174,7 +168,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1774298264214</updated>
-      <workItem from="1774435863449" duration="3210000" />
+      <workItem from="1774435863449" duration="3512000" />
     </task>
     <task id="LOCAL-00001" summary="curses example">
       <option name="closed" value="true" />
@@ -208,7 +202,15 @@
       <option name="project" value="LOCAL" />
       <updated>1774436417969</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Added .gitignore, Template rotate return now Template, completed display">
+      <option name="closed" value="true" />
+      <created>1774439414164</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1774439414164</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -230,7 +232,8 @@
     <MESSAGE value="Room class" />
     <MESSAGE value="Structure refactor to allow package" />
     <MESSAGE value="Add requirements.txt" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add requirements.txt" />
+    <MESSAGE value="Added .gitignore, Template rotate return now Template, completed display" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added .gitignore, Template rotate return now Template, completed display" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
