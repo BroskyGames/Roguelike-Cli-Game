@@ -7,10 +7,9 @@ Pos = Tuple[int, int]
 
 @dataclass(frozen=True)
 class RoomTemplate:
-    name: Optional[str]
-    asci_layout: InitVar[Optional[Tuple[str, ...]]]
+    name: Optional[str] = None
+    asci_layout: InitVar[Optional[Tuple[str, ...]]] = None
     layout: List[List[str]] = field(default_factory=list)
-
 
     registry: ClassVar[Dict[str, "RoomTemplate"]] = {}
 
@@ -24,18 +23,17 @@ class RoomTemplate:
         if self.name:
             RoomTemplate.registry[self.name] = self
 
-    def rotate(self, rotation: int) -> List[List[str]]:
+    def rotate(self, rotation: int) -> Self:
         grid = self.layout
         for _ in range(rotation % 4):
             w, h = len(grid), len(grid[0])
             rotated = [[grid[x][h - 1 - y] for x in range(w)] for y in range(h)]
             grid = rotated
-        return grid
+        return RoomTemplate(layout=grid)
 
     def display(self):
-        raise NotImplemented
-        for y in range(len(self.layout)):
-            for x in range(len(self.layout[0])):
+        for y in range(len(self.layout[0])):
+            for x in range(len(self.layout)):
                 print(self.layout[x][y], end=" ")
             print()
 
@@ -84,7 +82,7 @@ class Room:
     doors: List[Pos] = field(default_factory=list)
 
     def __post_init__(self):
-        self.shape = RoomTemplate.registry[self.template].rotate(self.rotate)
+        self.shape = RoomTemplate.registry[self.template].rotate(self.rotate).layout
         self._resolve_doors()
 
     def _resolve_doors(self):
@@ -113,4 +111,4 @@ class Room:
         return len(self.shape)
 
 if __name__ == '__main__':
-    RoomTemplate.registry["L-shape"].rotate(0)
+    RoomTemplate.registry["square"].rotate(2).display()
