@@ -4,7 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8fadf3f6-90e2-4340-809a-122ea574255f" name="Changes" comment="Added .gitignore, Template rotate return now Template, completed display" />
+    <list default="true" id="8fadf3f6-90e2-4340-809a-122ea574255f" name="Changes" comment="n">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/game/logic/map.py" beforeDir="false" afterPath="$PROJECT_DIR$/game/logic/map.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -168,7 +171,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1774298264214</updated>
-      <workItem from="1774435863449" duration="3943000" />
+      <workItem from="1774435863449" duration="5079000" />
     </task>
     <task id="LOCAL-00001" summary="curses example">
       <option name="closed" value="true" />
@@ -218,7 +221,15 @@
       <option name="project" value="LOCAL" />
       <updated>1774439769069</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="n">
+      <option name="closed" value="true" />
+      <created>1774440221321</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1774440221321</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -241,17 +252,8 @@
     <MESSAGE value="Structure refactor to allow package" />
     <MESSAGE value="Add requirements.txt" />
     <MESSAGE value="Added .gitignore, Template rotate return now Template, completed display" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added .gitignore, Template rotate return now Template, completed display" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/game/logic/map.py</url>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
+    <MESSAGE value="n" />
+    <option name="LAST_COMMIT_MESSAGE" value="n" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Roguelike_Cli_Game$map__1_.coverage" NAME="map (1) Coverage Results" MODIFIED="1774438885576" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/game/logic" />
