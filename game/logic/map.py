@@ -7,10 +7,9 @@ Pos = Tuple[int, int]
 
 @dataclass(frozen=True)
 class RoomTemplate:
-    name: Optional[str]
-    asci_layout: InitVar[Optional[Tuple[str, ...]]]
+    name: Optional[str] = None
+    asci_layout: InitVar[Optional[Tuple[str, ...]]] = None
     layout: List[List[str]] = field(default_factory=list)
-
 
     registry: ClassVar[Dict[str, "RoomTemplate"]] = {}
 
@@ -24,18 +23,17 @@ class RoomTemplate:
         if self.name:
             RoomTemplate.registry[self.name] = self
 
-    def rotate(self, rotation: int) -> List[List[str]]:
+    def rotate(self, rotation: int) -> Self:
         grid = self.layout
         for _ in range(rotation % 4):
             w, h = len(grid), len(grid[0])
             rotated = [[grid[x][h - 1 - y] for x in range(w)] for y in range(h)]
             grid = rotated
-        return grid
+        return RoomTemplate(layout=grid)
 
     def display(self):
-        raise NotImplemented
-        for y in range(len(self.layout)):
-            for x in range(len(self.layout[0])):
+        for y in range(len(self.layout[0])):
+            for x in range(len(self.layout)):
                 print(self.layout[x][y], end=" ")
             print()
 
@@ -80,7 +78,7 @@ class Room:
         self.min_doors: int = min_doors
         self.door_chance: float = door_chance
 
-        self.shape: List[List[str]] = RoomTemplate.registry[self.template].rotate(self.rotate)
+        self.shape: List[List[str]] = RoomTemplate.registry[self.template].rotate(self.rotate).layout
         self.doors: List[Pos] = []
         self._resolve_doors()
 
@@ -109,5 +107,69 @@ class Room:
     def height(self) -> int:
         return len(self.shape)
 
+# Not tested
+
+from collections import deque
+
+@dataclass
+class Corridor:
+    start: Pos
+    end: Pos
+    grid: List[List[str]]  # reference to dungeon map
+    path: List[Pos] = field(default_factory=list)
+
+    def __post_init__(self):
+        self.path = self._find_path()
+        self._carve()
+
+    def _neighbors(self, x: int, y: int) -> List[Pos]:
+        # deterministic order (important!)
+        return [
+            (x + 1, y),
+            (x - 1, y),
+            (x, y + 1),
+            (x, y - 1),
+        ]
+
+    def _is_walkable(self, x: int, y: int) -> bool:
+        if y < 0 or y >= len(self.grid):
+            return False
+        if x < 0 or x >= len(self.grid[0]):
+            return False
+        return self.grid[y][x] in (' ', '.', '+')  # allow empty + doors
+
+    def _find_path(self) -> List[Pos]:
+        queue = deque([self.start])
+        came_from: Dict[Pos, Optional[Pos]] = {self.start: None}
+
+        while queue:
+            current = queue.popleft()
+
+            if current == self.end:
+                break
+
+            for nx, ny in self._neighbors(*current):
+                if (nx, ny) not in came_from and self._is_walkable(nx, ny):
+                    came_from[(nx, ny)] = current
+                    queue.append((nx, ny))
+
+        # reconstruct path
+        if self.end not in came_from:
+            return []  # no valid path
+
+        path = []
+        cur = self.end
+        while cur:
+            path.append(cur)
+            cur = came_from[cur]
+        path.reverse()
+        return path
+
+    def _carve(self):
+        for x, y in self.path:
+            if self.grid[y][x] == ' ':
+                self.grid[y][x] = '.'
+
+
 if __name__ == '__main__':
-    RoomTemplate.registry["L-shape"].rotate(0)
+    RoomTemplate.registry["square"].rotate(2).display()
