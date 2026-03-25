@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, InitVar
 from pprint import pprint
 from typing import List, Tuple, Dict, Optional, Sequence, ClassVar, Self
 import random
@@ -7,29 +7,37 @@ Pos = Tuple[int, int]
 
 @dataclass(frozen=True)
 class RoomTemplate:
-    name: str
-    ascii_layout: Optional[Tuple[str, ...]] = None
+    name: Optional[str]
+    asci_layout: InitVar[Optional[Tuple[str, ...]]]
     layout: List[List[str]] = field(default_factory=list)
 
-    registry: ClassVar[dict] = {}
 
-    def __post_init__(self):
+    registry: ClassVar[Dict[str, "RoomTemplate"]] = {}
+
+    def __post_init__(self, ascii_layout: Optional[Tuple[str, ...]]) -> None:
         # asci => grid
-        if self.ascii_layout:
-            col_major = [[self.ascii_layout[y][x] for y in range(len(self.ascii_layout))]
-                         for x in range(len(self.ascii_layout[0]))]
+        if ascii_layout:
+            col_major = [[ascii_layout[y][x] for y in range(len(ascii_layout))]
+                         for x in range(len(ascii_layout[0]))]
             object.__setattr__(self, 'layout', col_major)
 
-        RoomTemplate.registry[self.name] = self
+        if self.name:
+            RoomTemplate.registry[self.name] = self
 
     def rotate(self, rotation: int) -> List[List[str]]:
         grid = self.layout
         for _ in range(rotation % 4):
-            # rotate 90 degrees clockwise in column-major
             w, h = len(grid), len(grid[0])
             rotated = [[grid[x][h - 1 - y] for x in range(w)] for y in range(h)]
             grid = rotated
         return grid
+
+    def display(self):
+        raise NotImplemented
+        for y in range(len(self.layout)):
+            for x in range(len(self.layout[0])):
+                print(self.layout[x][y], end=" ")
+            print()
 
 RoomTemplate(
     "square", (
@@ -105,4 +113,4 @@ class Room:
         return len(self.shape)
 
 if __name__ == '__main__':
-    pprint(RoomTemplate.registry)
+    RoomTemplate.registry["L-shape"].rotate(0)
