@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="8fadf3f6-90e2-4340-809a-122ea574255f" name="Changes" comment="Structure refactor to allow package">
+    <list default="true" id="8fadf3f6-90e2-4340-809a-122ea574255f" name="Changes" comment="Retype of Init RoomTemplate, incomplete display">
+      <change afterPath="$PROJECT_DIR$/game/logic/graph.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/game/utils.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/game/logic/map.py" beforeDir="false" afterPath="$PROJECT_DIR$/game/logic/map.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/game/__main__.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -44,6 +47,8 @@
   "keyToString": {
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "Python.Emulate Terminal.executor": "Run",
+    "Python.__main__.executor": "Run",
+    "Python.graph.executor": "Run",
     "Python.main.executor": "Run",
     "Python.map (1).executor": "Run",
     "Python.map_gen.executor": "Run",
@@ -55,10 +60,11 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\Programy\Python\Roguelike\game" />
       <recent name="D:\Programy\Python\Roguelike\game\logic" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.map (1)">
+  <component name="RunManager" selected="Python.__main__">
     <configuration name="Emulate Terminal" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="Roguelike" />
       <option name="ENV_FILES" value="" />
@@ -73,7 +79,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="RUN_TOOL" value="" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main.py" />
+      <option name="SCRIPT_NAME" value="D:\Programy\Python\Roguelike\game\__main__.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="true" />
@@ -82,7 +88,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="map (1)" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="__main__" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Roguelike" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -91,35 +97,12 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/game/logic" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/game" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="RUN_TOOL" value="" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/game/logic/map.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="map" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="Roguelike" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="RUN_TOOL" value="" />
-      <option name="SCRIPT_NAME" value="D:\Programy\Python\Roguelike\game\logic\map.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/game/__main__.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -130,8 +113,7 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.map (1)" />
-        <item itemvalue="Python.map_gen" />
+        <item itemvalue="Python.__main__" />
         <item itemvalue="Python.Emulate Terminal" />
       </list>
     </recent_temporary>
@@ -175,7 +157,15 @@
       <option name="project" value="LOCAL" />
       <updated>1774425914934</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Retype of Init RoomTemplate, incomplete display">
+      <option name="closed" value="true" />
+      <created>1774427286330</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1774427286330</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -193,6 +183,7 @@
     <MESSAGE value="curses example" />
     <MESSAGE value="Room class" />
     <MESSAGE value="Structure refactor to allow package" />
-    <option name="LAST_COMMIT_MESSAGE" value="Structure refactor to allow package" />
+    <MESSAGE value="Retype of Init RoomTemplate, incomplete display" />
+    <option name="LAST_COMMIT_MESSAGE" value="Retype of Init RoomTemplate, incomplete display" />
   </component>
 </project>

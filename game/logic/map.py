@@ -72,19 +72,16 @@ RoomTemplate(
     )
 )
 
-@dataclass
 class Room:
-    pos: Pos
-    template: str
-    rotate: int = 0
-    min_doors: int = 1
-    door_probability: float = 0.5
+    def __init__(self, pos: Pos, template: str, rotate: int = 0, min_doors: int = 1, door_chance: float = 0.5) -> None:
+        self.pos: Pos = pos
+        self.template: str = template
+        self.rotate: int = rotate
+        self.min_doors: int = min_doors
+        self.door_chance: float = door_chance
 
-    shape: List[List[str]] = field(default_factory=list)
-    doors: List[Pos] = field(default_factory=list)
-
-    def __post_init__(self):
-        self.shape = RoomTemplate.registry[self.template].rotate(self.rotate)
+        self.shape: List[List[str]] = RoomTemplate.registry[self.template].rotate(self.rotate)
+        self.doors: List[Pos] = []
         self._resolve_doors()
 
     def _resolve_doors(self):
@@ -98,7 +95,7 @@ class Room:
         random.shuffle(prop)
         while prop:
             x, y = prop.pop(0)
-            if random.random() < self.door_probability or self.min_doors - len(self.doors) == len(prop) + 1:
+            if random.random() < self.door_chance or self.min_doors - len(self.doors) == len(prop) + 1:
                 self.doors.append((x, y))
                 self.shape[y][x] = '+'
             else:
