@@ -1,9 +1,6 @@
 from random import Random
 from typing import Optional
 
-Pos = tuple[int, int]
-Size = tuple[int, int]
-
 _rng: Optional[Random] = None
 
 def init_rng(seed: int):

@@ -1,9 +1,9 @@
 from collections import deque
 from dataclasses import dataclass, field
 from enum import Enum
-from pprint import pprint
-from typing import Self, Optional
-from ..utils import Pos, Size, get_rng, init_rng
+from typing import Self
+from ..utils import get_rng
+
 
 class RoomTags(Enum):
     NORMAL = 0
@@ -73,3 +73,35 @@ def find_longest_path(spawn: RoomNode) -> list[RoomNode]:
         room.tag = RoomTags.MAIN
     path[-1].tag = RoomTags.BOSS
     return path
+
+def print_nodes(node: RoomNode, visited=None, prefix="", is_last=True):
+    if visited is None:
+        visited = set()
+    if node.id in visited:
+        return
+    visited.add(node.id)
+
+    connector = "└─ " if is_last else "├─ "
+    match node.tag:
+        case RoomTags.NORMAL:
+            icon = 'N'
+        case RoomTags.SPAWN:
+            icon = 'S'
+        case RoomTags.MAIN:
+            icon = 'M'
+        case RoomTags.BOSS:
+            icon = 'B'
+        case RoomTags.CHEST:
+            icon = 'C'
+        case _:
+            raise AssertionError(f"Unhandled case: {node.tag}")
+
+    print(prefix + connector + f"{icon}{node.id}")
+
+    new_prefix = prefix + ("   " if is_last else "│  ")
+
+    children = [n for n in node.connections if n.id not in visited]
+
+    for i, child in enumerate(children):
+        is_last_child = i == len(children) - 1
+        print_nodes(child, visited, new_prefix, is_last_child)
