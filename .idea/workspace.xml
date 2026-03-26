@@ -4,7 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8fadf3f6-90e2-4340-809a-122ea574255f" name="Changes" comment="Corridors incomplete" />
+    <list default="true" id="8fadf3f6-90e2-4340-809a-122ea574255f" name="Changes" comment="Corridors incomplete">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/game/logic/map.py" beforeDir="false" afterPath="$PROJECT_DIR$/game/logic/map.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -169,6 +172,7 @@
       <option name="presentableId" value="Default" />
       <updated>1774298264214</updated>
       <workItem from="1774435863449" duration="5245000" />
+      <workItem from="1774521891509" duration="209000" />
     </task>
     <task id="LOCAL-00001" summary="curses example">
       <option name="closed" value="true" />
@@ -234,7 +238,15 @@
       <option name="project" value="LOCAL" />
       <updated>1774441199127</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="Corridors incomplete">
+      <option name="closed" value="true" />
+      <created>1774522074903</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1774522074903</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
