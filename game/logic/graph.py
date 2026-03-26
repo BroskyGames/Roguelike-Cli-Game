@@ -16,22 +16,23 @@ class RoomTags(Enum):
 
 @dataclass()
 class RoomNode:
-    """
-    [depth] is relative to spawn
-    first element of [connections] is parent node
-    """
     id: int
     depth: int
     connections: list[Self] = field(default_factory=list, init=False)
+    parent: Self = field(init=False)
     tag: RoomTags = RoomTags.NORMAL
+
+    def append(self, child: Self):
+        self.connections.append(child)
+        child.parent = self
 
 def generate_graph(max_rooms = 20, bias_weight: dict[int, float] = None) -> RoomNode:
     rooms = [RoomNode(0, 0, RoomTags.SPAWN)]
     if bias_weight is None:
-        bias_weight = {0: .1, 1: 1.5, 2: 1, 3: .75,  4: .5}
+        bias_weight = {0: 1.25, 1: 1, 2: .75}
 
     for i in range (1, max_rooms):
-        candidates = [r for r in rooms if len(r.connections) < 4]
+        candidates = [r for r in rooms if len(r.connections) < 3]
         if not candidates:
             break
 
@@ -42,8 +43,7 @@ def generate_graph(max_rooms = 20, bias_weight: dict[int, float] = None) -> Room
 
         parent = get_rng().choices(candidates, weights=weights, k=1)[0]
         new_room = RoomNode(i, parent.depth+1)
-        parent.connections.append(new_room)
-        new_room.connections.append(parent)
+        parent.append(new_room)
         rooms.append(new_room)
 
     return rooms[0]
@@ -59,19 +59,19 @@ def find_longest_path(spawn: RoomNode) -> list[RoomNode]:
         last = node
 
         for child in node.connections:
-            if child.id not in visited:
-                queue.append(child)
+            queue.append(child)
 
     path = []
     while last.tag != RoomTags.SPAWN:
         path.append(last)
-        last = last.connections[0]
+        last = last.parent
 
     path.reverse()
 
     for room in path:
         room.tag = RoomTags.MAIN
     path[-1].tag = RoomTags.BOSS
+
     return path
 
 def print_nodes(node: RoomNode, visited=None, prefix="", is_last=True):
