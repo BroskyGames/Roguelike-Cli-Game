@@ -1,9 +1,9 @@
-from random import Random
+from random import Random, SystemRandom
 from typing import Optional
 
 _rng: Optional[Random] = None
 
-def init_rng(seed: int):
+def init_rng(seed: int = None):
     global _rng
     _rng = Random(seed)
 

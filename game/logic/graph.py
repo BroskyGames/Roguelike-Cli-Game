@@ -1,44 +1,44 @@
-from collections import deque
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import Enum, auto
 from typing import Self
-from ..utils import get_rng
+from ..utils import bfs, get_rng
 
 
 class RoomTags(Enum):
-    NORMAL = 0
-    SPAWN = 1
-    MAIN = 2
-    BOSS = 3
-    CHEST = 4
-    # TRAP
+    NORMAL = auto()
+    SPAWN = auto()
+    MAIN = auto()
+    BOSS = auto()
+    TREASURE = auto()
+    TRAP = auto()
     # SHOP
 
 @dataclass()
 class RoomNode:
     id: int
     depth: int
-    connections: list[Self] = field(default_factory=list, init=False)
+    children: list[Self] = field(default_factory=list, init=False)
     parent: Self = field(init=False)
     tag: RoomTags = RoomTags.NORMAL
 
     def append(self, child: Self):
-        self.connections.append(child)
+        self.children.append(child)
         child.parent = self
 
 def generate_graph(max_rooms = 20, bias_weight: dict[int, float] = None) -> RoomNode:
     rooms = [RoomNode(0, 0, RoomTags.SPAWN)]
     if bias_weight is None:
-        bias_weight = {0: 1.25, 1: 1, 2: .75}
+        bias_weight = {0: 1.25, 1: 1, 2: .75, 3: .4}
 
     for i in range (1, max_rooms):
-        candidates = [r for r in rooms if len(r.connections) < 3]
+        candidates = [r for r in rooms if len(r.children) < 3 or
+                      (r.tag == RoomTags.SPAWN and len(r.children) > 4)]
         if not candidates:
             break
 
         weights = []
         for r in candidates:
-            conn = len(r.connections)
+            conn = len(r.children)
             weights.append(bias_weight.get(conn, 0.1))
 
         parent = get_rng().choices(candidates, weights=weights, k=1)[0]
@@ -48,18 +48,37 @@ def generate_graph(max_rooms = 20, bias_weight: dict[int, float] = None) -> Room
 
     return rooms[0]
 
+def distribute_tags(spawn: RoomNode, treasure_chance: float, trap_chances: float) -> None:
+    rng = get_rng()
+    # Main path, Boss room
+    def return_room(r: RoomNode, _: RoomNode) -> RoomNode:
+        return r
+    last = bfs(spawn, return_room)
+    last.tag = RoomTags.BOSS
+    last = last.parent
+    while last.tag != RoomTags.SPAWN:
+        last.tag = RoomTags.MAIN
+        last = last.parent
+
+    # Treasure rooms
+    def detect_treasure_rooms(r: RoomNode, arr: list[RoomNode]) -> list[RoomNode]:
+        if arr is None:
+            arr = []
+        return arr + [r] if len(r.children) == 0 and r.tag != RoomTags.BOSS and rng.random() < treasure_chance else arr
+    for room in bfs(spawn, detect_treasure_rooms):
+        room.tag = RoomTags.TREASURE
+
+    # Traps
+    def detect_trap_rooms(r: RoomNode, arr: list[RoomNode]) -> list[RoomNode]:
+        if arr is None:
+            arr = []
+        return arr + [r] if r.tag == RoomTags.NORMAL and rng.random() < trap_chances else arr
+
+    for room in bfs(spawn, detect_trap_rooms):
+        room.tag = RoomTags.TRAP
+
 def find_longest_path(spawn: RoomNode) -> list[RoomNode]:
-    visited = {spawn.id}
-    queue = deque([spawn])
-    last = spawn
-
-    while queue:
-        node = queue.popleft()
-        visited.add(node.id)
-        last = node
-
-        for child in node.connections:
-            queue.append(child)
+    last = bfs(spawn, lambda r, *_: r)
 
     path = []
     while last.tag != RoomTags.SPAWN:
@@ -74,13 +93,7 @@ def find_longest_path(spawn: RoomNode) -> list[RoomNode]:
 
     return path
 
-def print_nodes(node: RoomNode, visited=None, prefix="", is_last=True):
-    if visited is None:
-        visited = set()
-    if node.id in visited:
-        return
-    visited.add(node.id)
-
+def print_nodes(node: RoomNode,  prefix="", is_last=True):
     connector = "└─ " if is_last else "├─ "
     match node.tag:
         case RoomTags.NORMAL:
@@ -91,8 +104,10 @@ def print_nodes(node: RoomNode, visited=None, prefix="", is_last=True):
             icon = 'M'
         case RoomTags.BOSS:
             icon = 'B'
-        case RoomTags.CHEST:
+        case RoomTags.TREASURE:
             icon = 'C'
+        case RoomTags.TRAP:
+            icon = 'T'
         case _:
             raise AssertionError(f"Unhandled case: {node.tag}")
 
@@ -100,8 +115,6 @@ def print_nodes(node: RoomNode, visited=None, prefix="", is_last=True):
 
     new_prefix = prefix + ("   " if is_last else "│  ")
 
-    children = [n for n in node.connections if n.id not in visited]
-
-    for i, child in enumerate(children):
-        is_last_child = i == len(children) - 1
-        print_nodes(child, visited, new_prefix, is_last_child)
+    for i, child in enumerate(node.children):
+        is_last_child = i == len(node.children) - 1
+        print_nodes(child, new_prefix, is_last_child)
