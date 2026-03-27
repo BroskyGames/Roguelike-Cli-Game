@@ -27,19 +27,15 @@ class Game:
   traps: List[Trap] // maybe
 ```
 
-# Dungeon
-```
+# Level
+```python
 class Map:
   seed: int
-  // limiting by size or amount
   
-  rooms: List[Room]
-  corridors: List[Corridor]
+  rooms: list[Room]
+  corridors: list[Corridor]
 
-  grid: Dict[Pos, str]
-  
-  def init:
-    spawn_room creation
+  grid: dict[Pos, str]
 
 class Room:
   pos: Pos
@@ -48,10 +44,16 @@ class Room:
   min_doors: int
 
   shape: (asci)
-  doors: List[Pos]
+  doors: list[Pos]
 
 class Corridor:
   start: Pos
   end: Pos
-  path: List[Pos]
+  path: list[Pos]
+```
+
+# UI
+```python
+class UI:
+  def map_render(self, x, y, w, h):
 ```
