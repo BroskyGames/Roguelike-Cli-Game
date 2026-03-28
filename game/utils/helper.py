@@ -9,7 +9,7 @@ def bfs[T](start: "RoomNode", function: Callable[["RoomNode", T | None], T], ini
     queue = deque([start])
     while queue:
         node = queue.popleft()
-        result = function(node, result)
+        results = function(node, results)
         for child in node.children:
             queue.append(child)
     return result
