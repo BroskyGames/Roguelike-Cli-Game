@@ -1,6 +1,6 @@
 import random
 
-from .logic.graph import RoomNode, RoomTags, generate_graph, distribute_tags, print_nodes
+from .logic.graph import assign_tags, generate_graph, print_nodes
 from .utils import init_rng
 
 if __name__ == "__main__":
@@ -8,6 +8,6 @@ if __name__ == "__main__":
 
     start = generate_graph(25, {0: 1.2, 1: 1.1, 2: 1})
 
-    distribute_tags(start, .25, .33)
+    assign_tags(start, .25, .33)
 
     print_nodes(start)

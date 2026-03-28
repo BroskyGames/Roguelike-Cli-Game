@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Self
-from ..utils import bfs, get_rng
+from typing import Self, cast
+from ..utils import bfs, combine_reducers, get_rng
 
 
 class RoomTags(Enum):
@@ -48,50 +48,33 @@ def generate_graph(max_rooms = 20, bias_weight: dict[int, float] = None) -> Room
 
     return rooms[0]
 
-def distribute_tags(spawn: RoomNode, treasure_chance: float, trap_chances: float) -> None:
+def assign_tags(spawn: RoomNode, treasure_chance: float, trap_chances: float) -> None:
     rng = get_rng()
-    # Main path, Boss room
-    def return_room(r: RoomNode, _: RoomNode) -> RoomNode:
+
+    def return_room(r: RoomNode, _: None) -> RoomNode:
         return r
-    last = bfs(spawn, return_room)
+
+    def assign_treasure_rooms(r: RoomNode, _: None) -> None:
+        if (len(r.children) == 0 and
+                r.tag != RoomTags.BOSS and
+                rng.random() < treasure_chance):
+            r.tag = RoomTags.TREASURE
+
+    def assign_trap_rooms(r: RoomNode, _: None) -> None:
+        if r.tag == RoomTags.NORMAL and rng.random() < trap_chances:
+            r.tag = RoomTags.TRAP
+
+    last = cast(RoomNode, bfs(spawn, combine_reducers([return_room,
+                                        assign_treasure_rooms,
+                                        assign_trap_rooms]),
+               (None, None, None))[0])
+
     last.tag = RoomTags.BOSS
     last = last.parent
+
     while last.tag != RoomTags.SPAWN:
         last.tag = RoomTags.MAIN
         last = last.parent
-
-    # Treasure rooms
-    def detect_treasure_rooms(r: RoomNode, arr: list[RoomNode]) -> list[RoomNode]:
-        if arr is None:
-            arr = []
-        return arr + [r] if len(r.children) == 0 and r.tag != RoomTags.BOSS and rng.random() < treasure_chance else arr
-    for room in bfs(spawn, detect_treasure_rooms):
-        room.tag = RoomTags.TREASURE
-
-    # Traps
-    def detect_trap_rooms(r: RoomNode, arr: list[RoomNode]) -> list[RoomNode]:
-        if arr is None:
-            arr = []
-        return arr + [r] if r.tag == RoomTags.NORMAL and rng.random() < trap_chances else arr
-
-    for room in bfs(spawn, detect_trap_rooms):
-        room.tag = RoomTags.TRAP
-
-def find_longest_path(spawn: RoomNode) -> list[RoomNode]:
-    last = bfs(spawn, lambda r, *_: r)
-
-    path = []
-    while last.tag != RoomTags.SPAWN:
-        path.append(last)
-        last = last.parent
-
-    path.reverse()
-
-    for room in path:
-        room.tag = RoomTags.MAIN
-    path[-1].tag = RoomTags.BOSS
-
-    return path
 
 def print_nodes(node: RoomNode,  prefix="", is_last=True):
     connector = "└─ " if is_last else "├─ "
