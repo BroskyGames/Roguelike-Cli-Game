@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import Self, cast
-from ..utils import bfs, combine_reducers, get_rng
+from ..utils import Reducer, bfs, combine_reducers, get_rng
 
 
 class RoomTags(Enum):
@@ -64,10 +64,10 @@ def assign_tags(spawn: RoomNode, treasure_chance: float, trap_chances: float) ->
         if r.tag == RoomTags.NORMAL and rng.random() < trap_chances:
             r.tag = RoomTags.TRAP
 
-    last = cast(RoomNode, bfs(spawn, combine_reducers([return_room,
-                                        assign_treasure_rooms,
-                                        assign_trap_rooms]),
-               (None, None, None))[0])
+    last = bfs(spawn, combine_reducers(
+        Reducer(return_room, None),
+        Reducer(assign_treasure_rooms, None),
+        Reducer(assign_trap_rooms, None)))[0]
 
     last.tag = RoomTags.BOSS
     last = last.parent
