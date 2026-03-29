@@ -55,9 +55,7 @@ def assign_tags(spawn: RoomNode, treasure_chance: float, trap_chances: float) ->
         return r
 
     def assign_treasure_rooms(r: RoomNode, _: None) -> None:
-        if (len(r.children) == 0 and
-                r.tag != RoomTags.BOSS and
-                rng.random() < treasure_chance):
+        if len(r.children) == 0 and rng.random() < treasure_chance:
             r.tag = RoomTags.TREASURE
 
     def assign_trap_rooms(r: RoomNode, _: None) -> None:

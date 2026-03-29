@@ -8,27 +8,26 @@ from ..utils import Pos, Size, get_rng, init_rng
 @dataclass
 class Room:
     id: int
-    x: int
-    y: int
-    width: int
-    height: int
+    pos: Pos
+    size: Size
     tag: RoomTags = RoomTags.NORMAL
+    _possible_doors: list[Pos] = field(default_factory=list)
     doors: list[Pos] = field(default_factory=list)
     connections: list[Self] = field(default_factory=list)
 
     def center(self) -> Pos:
-        return self.x + self.width // 2, self.y + self.height // 2
+        return Pos(self.pos.x + self.size.width // 2, self.pos.y + self.size.height // 2)
 
-    def add_connection(self, other: Self, door_pos: tuple[int, int]):
+    def add_connection(self, other: Self, door: int):
         self.connections.append(other)
-        self.doors.append(door_pos)
+        self.doors.append(self._possible_doors.pop(door))
 
-    def nearest_doors(self, other: Self) -> Pos:
+    def nearest_doors(self, other: Self) -> tuple[int, int]:
         min_d = float('inf')
         best_pair = (None, None)
 
-        for i, (x1, y1) in enumerate(self.doors):
-            for j, (x2, y2) in enumerate(other.doors):
+        for i, (x1, y1) in enumerate(self._possible_doors):
+            for j, (x2, y2) in enumerate(other._possible_doors):
                 d = abs(x1 - x2) + abs(y1 - y2)
                 if d < min_d:
                     min_d = d
@@ -36,45 +35,82 @@ class Room:
 
         return best_pair
 
-def get_room_size(node: RoomNode, min_size=6, max_size=12, main_diff=2) -> Size:
+    def if_overlap(self, other: Self, padding: int = 1) -> bool:
+        return (
+                self.pos.x + self.size.width + padding > other.pos.x and
+                self.pos.x < other.pos.x + other.size.width + padding and
+                self.pos.y + self.size.height + padding > other.pos.y and
+                self.pos.y < other.pos.y + other.size.height + padding
+        )
+
+
+def get_room_size(node: RoomNode, min_max_size: range, main_diff: int) -> Size:
     if node.tag == RoomTags.BOSS or node.tag == RoomTags.SPAWN:
         raise NotImplementedError()
 
-    w, h = get_rng().randint(min_size, max_size), get_rng().randint(min_size, max_size)
+    w, h = get_rng().choices(min_max_size, k=2)
     if node.tag == RoomTags.MAIN:
         w += main_diff
         h += main_diff
-    return w, h
+    return Size(w, h)
 
-def create_rooms_from_graph(spawn_node: RoomNode, min_size=6, max_size=12, main_diff=2,  spacing=2) -> dict[int, Room]:
+def get_room_pos(size: Size, parent: Room, padding: range, rooms: list[Room], max_attempts: int = 5, search_radius: int = 10) -> Pos:
+    pad = get_rng().choice(padding)
+    if parent is None:
+        return Pos(0, 0)
+
+    for _ in range(max_attempts):
+        direction = get_rng().choice(range(4))
+        match direction:
+            case 0:
+                x = parent.pos.x + get_rng().randint(-size.width, parent.size.width + size.width)
+                y = parent.pos.y - size.height - pad
+            case 1:
+                x = parent.pos.x + parent.size.width + pad
+                y = parent.pos.y + get_rng().randint(-size.height, parent.size.height + size.height)
+            case 2:
+                x = parent.pos.x + get_rng().randint(-size.width, parent.size.width + size.width)
+                y = parent.pos.y + parent.size.height + pad
+            case 3:
+                x = parent.pos.x - size.width - pad
+                y = parent.pos.y + get_rng().randint(-size.height, parent.size.height + size.height)
+            case _:
+                raise AssertionError('Unhandled case')
+
+        # pos = Pos(x, y)
+        # if not rooms_overlap(pos, size, existing_rooms, padding=pad):
+        #     return pos
+
+    # parent_center = parent.center()
+    # for dx in range(-search_radius, search_radius + 1):
+    #     for dy in range(-search_radius, search_radius + 1):
+    #         pos = Pos(parent_center.x + dx, parent_center.y + dy)
+    #         if not rooms_overlap(pos, size, existing_rooms, padding=pad):
+    #             return pos
+    #
+    # return pos
+
+
+def create_rooms_from_graph(spawn_node: RoomNode, min_max_size: range = range(6,13), main_diff: int = 2, padding: range = range(2, 5)) -> dict[int, Room]:
     rooms = {}
 
-    def place_room(node: RoomNode, parent_room: Room = None, depth=0):
-        rng = get_rng()
-
-        width, height = get_room_size(node, min_size, max_size, main_diff)
-
-        if parent_room is None:
-            x, y = 40, 20
-        else:
-            px, py = parent_room.center()
-            x = px + rng.randint(parent_room.width // 2 + spacing, parent_room.width + spacing + width)
-            y = py + rng.randint(-height // 2, height // 2)
+    def place_room(node: RoomNode, parent: Room = None, depth=0):
+        size = get_room_size(node, min_max_size, main_diff)
+        pos = get_room_pos(size, parent, padding, list(rooms.values()))
 
         room = Room(
             id=node.id,
             tag=node.tag,
-            x=x,
-            y=y,
-            width=width,
-            height=height
+            pos=pos,
+            size=size
         )
         rooms[node.id] = room
 
-        if parent_room:
-            door, parent_door = room.nearest_doors(parent_room)
-            parent_room.add_connection(room, parent_room.doors[parent_door])
-            room.add_connection(parent_room, room.doors[door])
+        if parent:
+            # TODO: Implement a real corridor connection
+            door, parent_door = room.nearest_doors(parent)
+            parent.add_connection(room, parent_door)
+            room.add_connection(parent, door)
 
         for child in node.children:
             place_room(child, room, depth + 1)
