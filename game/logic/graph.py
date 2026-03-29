@@ -1,6 +1,5 @@
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Self, cast
 from ..utils import Reducer, bfs, combine_reducers, get_rng
 
 
@@ -15,13 +14,14 @@ class RoomTags(Enum):
 
 @dataclass()
 class RoomNode:
+    """Node that represents abstract form of room to be used as a base for graph structure"""
     id: int
     depth: int
-    children: list[Self] = field(default_factory=list, init=False)
-    parent: Self = field(init=False)
+    children: list["RoomNode"] = field(default_factory=list, init=False)
+    parent: "RoomNode" = field(init=False)
     tag: RoomTags = RoomTags.NORMAL
 
-    def append(self, child: Self):
+    def append(self, child: "RoomNode"):
         self.children.append(child)
         child.parent = self
 

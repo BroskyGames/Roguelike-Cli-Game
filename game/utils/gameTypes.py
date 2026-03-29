@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from enum import IntEnum, auto
 from typing import NamedTuple
 
 class Pos(NamedTuple):
@@ -14,3 +15,10 @@ class MutablePos:
     x: int
     y: int
 
+class DirectionsEnum(IntEnum):
+    NORTH = auto()
+    EAST = auto()
+    SOUTH = auto()
+    WEST = auto()
+
+Directions = {DirectionsEnum.NORTH, DirectionsEnum.EAST, DirectionsEnum.SOUTH, DirectionsEnum.WEST}
