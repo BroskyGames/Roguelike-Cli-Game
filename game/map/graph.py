@@ -1,17 +1,15 @@
 from collections import deque
 from dataclasses import dataclass, field
-from enum import StrEnum, auto
-from ..utils import Reducer, combine_reducers, get_rng
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from random import Random
+
+from .room_tags import RoomTags
+from ..utils import Reducer, combine_reducers
 
 
-class RoomTags(StrEnum):
-    NORMAL = 'N'
-    SPAWN = 'S'
-    MAIN = 'M'
-    BOSS = 'B'
-    GENETIC = 'G'
-    TRAP = 'T'
-    # SHOP
+
 
 @dataclass()
 class RoomNode:
@@ -19,7 +17,7 @@ class RoomNode:
     id: int
     depth: int
     children: list["RoomNode"] = field(default_factory=list, init=False)
-    parent: "RoomNode" = field(init=False)
+    parent: "RoomNode" = field(init=False, default=None)
     tag: RoomTags = RoomTags.NORMAL
 
     def append(self, child: "RoomNode"):
@@ -35,12 +33,13 @@ def bfs[T](start: RoomNode, reducer: Reducer[T, RoomNode]) -> T:
             queue.append(child)
     return reducer.acc
 
-def generate_graph(max_rooms = 20, bias_weight: dict[int, float] = None) -> RoomNode:
+def generate_graph(rng: "Random", rooms_amount = 20, bias_weight=None) -> RoomNode:
     rooms = [RoomNode(0, 0, RoomTags.SPAWN)]
+
     if bias_weight is None:
         bias_weight = {0: 1.25, 1: 1, 2: .75}
 
-    for i in range (1, max_rooms):
+    for i in range (1, rooms_amount):
         candidates = [r for r in rooms if len(r.children) < 3 or
                       (r.tag == RoomTags.SPAWN and len(r.children) > 4)]
         if not candidates:
@@ -51,16 +50,14 @@ def generate_graph(max_rooms = 20, bias_weight: dict[int, float] = None) -> Room
             conn = len(r.children)
             weights.append(bias_weight.get(conn, 0.1))
 
-        parent = get_rng().choices(candidates, weights=weights, k=1)[0]
+        parent = rng.choices(candidates, weights=weights, k=1)[0]
         new_room = RoomNode(i, parent.depth+1)
         parent.append(new_room)
         rooms.append(new_room)
 
     return rooms[0]
 
-def assign_tags(spawn: RoomNode, genetic_chance: float, trap_chances: float) -> None:
-    rng = get_rng()
-
+def assign_tags(spawn: RoomNode, rng: "Random", genetic_chance: float, trap_chances: float) -> None:
     def return_room(r: RoomNode, _: None) -> RoomNode:
         return r
 
@@ -80,17 +77,7 @@ def assign_tags(spawn: RoomNode, genetic_chance: float, trap_chances: float) -> 
     last.tag = RoomTags.BOSS
     last = last.parent
 
-    while last.tag != RoomTags.SPAWN:
+    while last.parent is not None:
         last.tag = RoomTags.MAIN
         last = last.parent
 
-def print_nodes(node: RoomNode,  prefix="", is_last=True):
-    connector = "└─ " if is_last else "├─ "
-
-    print(prefix + connector + f"{node.tag.value}{node.id}")
-
-    new_prefix = prefix + ("   " if is_last else "│  ")
-
-    for i, child in enumerate(node.children):
-        is_last_child = i == len(node.children) - 1
-        print_nodes(child, new_prefix, is_last_child)

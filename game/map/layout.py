@@ -1,0 +1,199 @@
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
+
+from ..utils import Reducer
+
+if TYPE_CHECKING:
+    from random import Random
+
+from .graph import RoomNode, bfs
+from game.core.types import Directions, DirectionsEnum, Pos, Size
+from .room_tags import RoomTags
+
+class RoomPlacementError(Exception):
+    """Raised when a room cannot be placed on the map."""
+    pass
+
+# TODO: Implement handling of special rooms: shapes, sizes, unused_doors
+@dataclass(slots=True)
+class Room:
+    """Room object that stores the data of ingame room
+    [id] = -1 is temporary room used for methods and type safety
+    [graph_id] maps to id of RoomNode corresponding to this Room"""
+    id: int
+    pos: Pos
+    size: Size
+    tag: RoomTags = RoomTags.NORMAL
+    doors: list[Pos] = field(default_factory=list)
+    connections: list[int] = field(default_factory=list)
+    graph_id: int = -1
+
+    def __repr__(self):
+        return f"Room(id={self.id}, pos=({self.x}, {self.y}), size=({self.width}, {self.height}), tag='{str(self.tag)}', connections={self.connections})"
+
+    @property
+    def x(self) -> int:
+        return self.pos.x
+
+    @property
+    def y(self) -> int:
+        return self.pos.y
+
+    @property
+    def width(self) -> int:
+        return self.size.width
+
+    @property
+    def height(self) -> int:
+        return self.size.height
+
+    def get_center(self) -> Pos:
+        return Pos(self.x + self.width // 2, self.y + self.height // 2)
+
+    def connected_directions(self) -> set[DirectionsEnum]:
+        connected = set()
+        for door in self.doors:
+            if door.y == self.y:
+                connected.add(DirectionsEnum.NORTH)
+            if door.x == self.x + self.width:
+                connected.add(DirectionsEnum.EAST)
+            if door.y == self.y + self.height:
+                connected.add(DirectionsEnum.SOUTH)
+            if door.x == self.x:
+                connected.add(DirectionsEnum.WEST)
+        return connected
+
+def compute_unused_doors(room: Room) -> tuple[Pos, ...]:
+    # if room.tag == RoomTags.BOSS or room.tag == RoomTags.SPAWN:
+        # raise NotImplementedError()
+    cx, cy = room.get_center()
+    return Pos(cx, room.y), Pos(room.x+room.width, cy), Pos(cx, room.y+room.height), Pos(room.x, cy)
+
+def find_connection_for(a: Room, b: Room) -> tuple[Pos, Pos]:
+    min_d = float('inf')
+    best_pair = (None, None)
+
+    for x1, y1 in compute_unused_doors(a):
+        for x2, y2 in compute_unused_doors(b):
+            d = abs(x1 - x2) + abs(y1 - y2)
+            if d < min_d:
+                min_d = d
+                best_pair = (Pos(x1, y1), Pos(x2, y2))
+
+    return best_pair
+
+# TODO: Implement a real corridor connection
+def connect_rooms(a: Room, b: Room):
+    door_a, door_b = find_connection_for(a, b)
+
+    a.connections.append(b.id)
+    a.doors.append(door_a)
+    b.connections.append(a.id)
+    b.doors.append(door_b)
+
+def overlaps(a: Room, b: Room, padding: int = 1) -> bool:
+    return (
+            a.x + a.width + padding > b.x and
+            a.x < b.x + b.width + padding and
+            a.y + a.height + padding > b.y and
+            a.y < b.y + b.height + padding
+    )
+
+def sample_room_size(node: RoomNode, size_range: tuple[int, int], rng: "Random", main_diff: int = 0) -> Size:
+    # if node.tag == RoomTags.BOSS or node.tag == RoomTags.SPAWN:
+    #     raise NotImplementedError()
+
+    w = rng.randint(*size_range)
+    h = rng.randint(*size_range)
+    if node.tag == RoomTags.MAIN:
+        w += main_diff
+        h += main_diff
+    return Size(w, h)
+
+def find_room_placement(
+        size: Size, parent: Room, rooms: list[Room], rng: "Random",
+        padding_range: tuple[int, int], max_attempts: int, search_radius: int
+) -> Pos:
+    # noinspection PyShadowingNames
+    def try_place_in_direction(direction: DirectionsEnum) -> Pos | None:
+        match direction:
+            case DirectionsEnum.NORTH:
+                x = parent.pos.x + rng.randint(-size.width, parent.size.width)
+                y = parent.pos.y - size.height - pad
+            case DirectionsEnum.EAST:
+                x = parent.pos.x + parent.size.width + pad
+                y = parent.pos.y + rng.randint(-size.height, parent.size.height)
+            case DirectionsEnum.SOUTH:
+                x = parent.pos.x + rng.randint(-size.width, parent.size.width)
+                y = parent.pos.y + parent.size.height + pad
+            case DirectionsEnum.WEST:
+                x = parent.pos.x - size.width - pad
+                y = parent.pos.y + rng.randint(-size.height, parent.size.height)
+            case _:
+                raise TypeError(direction)
+
+        position = Pos(x, y)
+        if not any([overlaps(Room(-1, position, size), r, pad) for r in rooms]):
+            return position
+
+        return None
+    def search_nearby(padding_check: int) -> Pos | None:
+        parent_center = parent.get_center()
+
+        for dist in range(search_radius + 1):
+            for dx in range(-dist, dist + 1):
+                dy = dist - abs(dx)
+
+                for sign in (-1, 1) if dy != 0 else (1,):
+                    x = parent_center.x + dx
+                    y = parent_center.y + sign * dy
+
+                    position = Pos(x, y)
+
+                    if not any(overlaps(Room(-1, position, size), r, padding_check) for r in rooms):
+                        return position
+        return None
+
+    pad = rng.randint(*padding_range)
+    if parent is None:
+        return Pos(0, 0)
+
+    for _ in range(max_attempts):
+        direction = rng.choice(tuple(Directions - parent.connected_directions()))
+        if (pos := try_place_in_direction(direction)) is not None:
+            return pos
+
+    if (pos := search_nearby(pad)) is not None:
+        return pos
+
+    if (pos := search_nearby(padding_range[0])) is not None:
+        return pos
+
+    raise RoomPlacementError()
+
+def build_rooms_from_graph(
+        start: RoomNode, rng: "Random",
+        size_range: tuple[int, int] = (6, 12), main_diff: int = 2,
+        padding_range: tuple[int, int] = (2, 4), max_attempts: int = 5, search_radius: int = 15
+) -> list[Room]:
+    def place_room(node: RoomNode, rooms: list[Room]) -> list[Room]:
+        parent = next(room for room in rooms if node.parent.id == room.graph_id) if node.parent is not None else None
+
+        size = sample_room_size(node, size_range, rng, main_diff)
+        pos = find_room_placement(size, parent, rooms, rng, padding_range, max_attempts, search_radius)
+
+        room = Room(
+            id=len(rooms),
+            tag=node.tag,
+            pos=pos,
+            size=size,
+            graph_id=node.id
+        )
+        rooms.append(room)
+
+        if parent:
+            connect_rooms(room, parent)
+
+        return rooms
+
+    return bfs(start, Reducer(place_room, []))
