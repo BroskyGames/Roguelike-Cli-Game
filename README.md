@@ -1,59 +1,53 @@
-# Pre-download
-pip install windows-curses
 py: 3.13.1
 
+# Game overview
+A roguelike dungeon crawler turn-based cli game being build in python with curses.
+
+## Entity Actions
+Player and enemies share the same system of actions.\
+AI/ Input decides on a queue of actions that are le than `action_points` of the entity. \
+Acceptable actions are for example: `Move(Direction)`, `Attack(Entity)`, `Use(Item)` \
+Actions share `action_cost` and `perform()`.
+
+## UI
+Made using curses and abstracted to widgets like: MapScreen, PlayerInfo, Logs, LevelInfo.
+
+## Generation
+Map generation starting with creating a graph of connections between rooms.\
+Assigning tags to nodes:
+- Spawn: first node in graph
+- Boss: deepest node
+- Main: connect boss to spawn
+- Genetic-labs: random & childrenless
+- Traps: random & remaining untagged
+
+Creating actual rooms with data and corridors based on tags.
+
+## Progression
+### Stages
+Each main room has a chance to separate stages of the dungeon. Each stage is\
+progressively harder (more enemies with higher stats), equality of stages is not \
+guaranteed (new stage may happen right after another and branches may not even exist).
+### Modifiers
+Killing enemies gives xp allowing to grow in stats. Genetic-labs allow to gain traits \
+that apply both buffs & debuffs through modifying (visibility, costs of actions,\
+affinities with types of damage). 
+### Win condition
+At the end of level (killing the boss), starts another level clearing xp, but preserving the traits. \
+Killing the third boss is the win condition.
+
 # Ideas
-While rendering double the width to keep the ascpect ratio 1:1.
-Most likly by inserting spaces between characters.
+While rendering double the width to keep the aspect ratio 1:1.
+Most likely by inserting spaces between characters.
 
 # Cycle
 - input
 - update:
   - player_action
   - enemy_update
-  - enviroment_update
+  - environment_update
 - render:
   - map
-  - entites
+  - entities
   - ui
 - tick_counter
-
-# Game
-```
-class Game:
-  player: Player
-  map: Map
-  eniemies: List[Eniemies]
-  traps: List[Trap] // maybe
-```
-
-# Level
-```python
-class Map:
-  seed: int
-  
-  rooms: list[Room]
-  corridors: list[Corridor]
-
-  grid: dict[Pos, str]
-
-class Room:
-  pos: Pos
-  template: (str/ enum/ class_instance)
-  rotate: int
-  min_doors: int
-
-  shape: (asci)
-  doors: list[Pos]
-
-class Corridor:
-  start: Pos
-  end: Pos
-  path: list[Pos]
-```
-
-# UI
-```python
-class UI:
-  def map_render(self, x, y, w, h):
-```
