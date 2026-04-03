@@ -1,15 +1,16 @@
+from collections import deque
 from dataclasses import dataclass, field
-from enum import Enum, auto
-from ..utils import Reducer, bfs, combine_reducers, get_rng
+from enum import StrEnum, auto
+from ..utils import Reducer, combine_reducers, get_rng
 
 
-class RoomTags(Enum):
-    NORMAL = auto()
-    SPAWN = auto()
-    MAIN = auto()
-    BOSS = auto()
-    TREASURE = auto()
-    TRAP = auto()
+class RoomTags(StrEnum):
+    NORMAL = 'N'
+    SPAWN = 'S'
+    MAIN = 'M'
+    BOSS = 'B'
+    GENETIC = 'G'
+    TRAP = 'T'
     # SHOP
 
 @dataclass()
@@ -25,10 +26,19 @@ class RoomNode:
         self.children.append(child)
         child.parent = self
 
+def bfs[T](start: RoomNode, reducer: Reducer[T, RoomNode]) -> T:
+    queue = deque([start])
+    while queue:
+        node = queue.popleft()
+        reducer(node)
+        for child in node.children:
+            queue.append(child)
+    return reducer.acc
+
 def generate_graph(max_rooms = 20, bias_weight: dict[int, float] = None) -> RoomNode:
     rooms = [RoomNode(0, 0, RoomTags.SPAWN)]
     if bias_weight is None:
-        bias_weight = {0: 1.25, 1: 1, 2: .75, 3: .4}
+        bias_weight = {0: 1.25, 1: 1, 2: .75}
 
     for i in range (1, max_rooms):
         candidates = [r for r in rooms if len(r.children) < 3 or
@@ -48,15 +58,15 @@ def generate_graph(max_rooms = 20, bias_weight: dict[int, float] = None) -> Room
 
     return rooms[0]
 
-def assign_tags(spawn: RoomNode, treasure_chance: float, trap_chances: float) -> None:
+def assign_tags(spawn: RoomNode, genetic_chance: float, trap_chances: float) -> None:
     rng = get_rng()
 
     def return_room(r: RoomNode, _: None) -> RoomNode:
         return r
 
-    def assign_treasure_rooms(r: RoomNode, _: None) -> None:
-        if len(r.children) == 0 and rng.random() < treasure_chance:
-            r.tag = RoomTags.TREASURE
+    def assign_genetic_labs(r: RoomNode, _: None) -> None:
+        if len(r.children) == 0 and rng.random() < genetic_chance:
+            r.tag = RoomTags.GENETIC
 
     def assign_trap_rooms(r: RoomNode, _: None) -> None:
         if r.tag == RoomTags.NORMAL and rng.random() < trap_chances:
@@ -64,7 +74,7 @@ def assign_tags(spawn: RoomNode, treasure_chance: float, trap_chances: float) ->
 
     last = bfs(spawn, combine_reducers(
         Reducer(return_room, None),
-        Reducer(assign_treasure_rooms, None),
+        Reducer(assign_genetic_labs, None),
         Reducer(assign_trap_rooms, None)))[0]
 
     last.tag = RoomTags.BOSS
@@ -76,23 +86,8 @@ def assign_tags(spawn: RoomNode, treasure_chance: float, trap_chances: float) ->
 
 def print_nodes(node: RoomNode,  prefix="", is_last=True):
     connector = "└─ " if is_last else "├─ "
-    match node.tag:
-        case RoomTags.NORMAL:
-            icon = 'N'
-        case RoomTags.SPAWN:
-            icon = 'S'
-        case RoomTags.MAIN:
-            icon = 'M'
-        case RoomTags.BOSS:
-            icon = 'B'
-        case RoomTags.TREASURE:
-            icon = 'C'
-        case RoomTags.TRAP:
-            icon = 'T'
-        case _:
-            raise AssertionError(f"Unhandled case: {node.tag}")
 
-    print(prefix + connector + f"{icon}{node.id}")
+    print(prefix + connector + f"{node.tag.value}{node.id}")
 
     new_prefix = prefix + ("   " if is_last else "│  ")
 

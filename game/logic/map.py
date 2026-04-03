@@ -4,7 +4,7 @@ from .graph import RoomNode, RoomTags
 from ..utils import Directions, DirectionsEnum, Pos, Size, get_rng
 
 # TODO: Implement handling of special rooms: shapes, sizes, unused_doors
-@dataclass
+@dataclass(slots=True)
 class Room:
     """Room object that stores the data of ingame room
     [id] = -1 is temporary room used for methods and type safety"""
@@ -46,6 +46,9 @@ class Room:
                  # if self.tag == RoomTags.BOSS or self.tag == RoomTags.SPAWN:
                  #     raise NotImplementedError()
                 shape[Pos(x, y)] = '#' if x == self.x or y == self.y or x == self.x + self.width or y == self.y + self.height else '.'
+        shape[Pos(self.x + self.width // 2-1, self.y + self.height // 2)] = self.tag.value
+        shape[Pos(self.x + self.width // 2, self.y + self.height // 2)] = str(self.id // 10)
+        shape[Pos(self.x + self.width // 2+1, self.y + self.height // 2)] = str(self.id % 10)
         return shape
 
     def _find_unused_doors(self):

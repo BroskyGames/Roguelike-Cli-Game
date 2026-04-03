@@ -1,4 +1,4 @@
-from typing import Any, Callable, TypeVar, overload
+from typing import Any, Callable, overload
 
 
 class Reducer[T, V]:

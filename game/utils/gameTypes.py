@@ -10,7 +10,7 @@ class Size(NamedTuple):
     width: int
     height: int
 
-@dataclass
+@dataclass(slots=True)
 class MutablePos:
     x: int
     y: int
