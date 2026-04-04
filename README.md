@@ -53,6 +53,7 @@ Most likely by inserting spaces between characters.
 - tick_counter
 
 # File Structure:
+```
 game/
   core/
     state.py # only rng handling for now 
@@ -69,3 +70,4 @@ game/
     widget.py # scratch
   utils/
     reducers.py
+```
