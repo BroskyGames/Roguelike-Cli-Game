@@ -1,11 +1,12 @@
 from pprint import pprint
 from random import Random
 
-from game.interface.debug import display_shape, print_nodes
-from game.map.graph import assign_tags, generate_graph
-from game.map.layout import Room, RoomPlacementError, build_rooms_from_graph
-from game.map.map import Tile, build_map
-from game.core.types import Pos
+from .corridor import build_corridors
+from ..interface.debug import display_shape, print_nodes
+from ..core.core_types import Pos
+from .graph import assign_tags, generate_graph
+from .layout import Room, RoomPlacementError, build_rooms_from_graph
+from .tile_map import Tile, build_map
 
 
 def generate_level(
@@ -30,10 +31,14 @@ def generate_level(
         except RoomPlacementError:
             print("Failed to place rooms, retrying...")
 
-    game_map = build_map(rooms)
-
     if display_debug:
         pprint(rooms)
+
+    corridors = build_corridors(rooms)
+
+    game_map = build_map(rooms, corridors)
+
+    if display_debug:
         display_shape(game_map)
 
     return rooms, game_map

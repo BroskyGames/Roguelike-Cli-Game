@@ -1,6 +1,6 @@
 from game.map.graph import RoomNode
-from game.map.map import Tile, TileEnum
-from game.core.types import Pos
+from game.map.tile_map import Tile, TileEnum
+from game.core.core_types import Pos
 
 
 def display_shape(shape: dict[Pos, Tile]):
@@ -12,7 +12,7 @@ def display_shape(shape: dict[Pos, Tile]):
     for y in range(min_y, max_y + 1):
         row = ""
         for x in range(min_x, max_x + 1):
-            tile = shape.get(Pos(x, y), Tile(TileEnum.EMPTY))
+            tile = shape.get(Pos(x, y), Tile(TileEnum.EMPTY)) if not (x, y) == (0, 0) else "+"
             row += str(tile) + ' '
         print(row)
 

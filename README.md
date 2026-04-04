@@ -51,3 +51,21 @@ Most likely by inserting spaces between characters.
   - entities
   - ui
 - tick_counter
+
+# File Structure:
+game/
+  core/
+    state.py # only rng handling for now 
+    types.py
+  map/
+    graph.py
+    layout.py
+    tile_map.py
+    level.py
+    room_tags.py
+  interface/
+    debug.py
+    rederer.py # empty
+    widget.py # scratch
+  utils/
+    reducers.py
