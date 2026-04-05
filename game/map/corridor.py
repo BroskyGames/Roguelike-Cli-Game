@@ -1,27 +1,21 @@
 from dataclasses import dataclass
-from functools import lru_cache
+# from functools import lru_cache
 from heapq import heappush, heappop
 from itertools import count
 from typing import Callable
 
 from .layout import Door, Room
 from ..core.core_types import DirectionVectors, Pos, Vector2
-# TODO: Allow 2 corridors be used on the same door
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
 class Corridor:
-    path: list[Pos]
+    path: tuple[Pos, ...]
     connects: tuple[Door, Door]
 
 MAX_SEARCH_DIST = 100
 
 def door_exit(door: Door) -> Pos:
     return door.pos + DirectionVectors[door.direction]
-
-def get_connection_doors(room: Room, target: Room) -> tuple[Door, Door]:
-    door = room.doors[room.connections.index(target.id)]
-    target_door = target.doors[target.connections.index(room.id)]
-    return door, target_door
 
 def manhattan(a: Pos, b: Pos) -> int:
     return abs(a.x - b.x) + abs(a.y - b.y)
@@ -51,7 +45,7 @@ def astar(start: Pos, goal: Pos, is_blocked_fn: Callable[[Pos], bool], start_dir
             if is_blocked_fn(neighbor):
                 continue
 
-            if manhattan(neighbor, start) > 100:
+            if manhattan(neighbor, start) > MAX_SEARCH_DIST:
                 continue
 
             start_penalty = 0 if (prev_dir is not None) or (move_dir == start_dir) else .45
@@ -74,8 +68,8 @@ def astar(start: Pos, goal: Pos, is_blocked_fn: Callable[[Pos], bool], start_dir
     print(start, goal)
     raise RuntimeError("No path found between doors")
 
-def make_is_blocked_fn(rooms: list["Room"], corridors: list[Corridor], padding: int = 1) -> Callable[[Pos], bool]:
-    @lru_cache(maxsize=1000)
+def make_is_blocked_fn(rooms: list["Room"], corridors: list[Corridor], allowed: set[Corridor], padding: int = 1) -> Callable[[Pos], bool]:
+    # @lru_cache(maxsize=500)
     def is_blocked(pos: "Pos") -> bool:
         return any(
             room.x - padding <= pos.x <= room.x + room.width - 1 + padding and
@@ -85,27 +79,28 @@ def make_is_blocked_fn(rooms: list["Room"], corridors: list[Corridor], padding: 
             abs(tile.x - pos.x) <= padding and
             abs(tile.y - pos.y) <= padding
             for corridor in corridors
+            if corridor not in allowed
             for tile in corridor.path
         )
 
     return is_blocked
 
 def build_corridors(rooms: list[Room]) -> list[Corridor]:
-    corridors = []
+    corridors: list[Corridor] = []
 
     for room in rooms:
-        for target_id in room.connections:
-            if room.id > target_id:
-                continue
+        for door in room.doors:
+            for target_door in door.connections:
+                if room.id > target_door.belongs_to:
+                    continue
 
-            target = rooms[target_id]
-            door, target_door = get_connection_doors(room, target)
+                allowed: set[Corridor] = {c for c in corridors if door in c.connects or target_door in c.connects}
 
-            start = door_exit(door)
-            end = door_exit(target_door)
+                start = door_exit(door)
+                end = door_exit(target_door)
 
-            path = astar(start, end, make_is_blocked_fn(rooms, corridors), DirectionVectors[door.direction], DirectionVectors[target_door.direction])
+                path = astar(start, end, make_is_blocked_fn(rooms, corridors, allowed), DirectionVectors[door.direction], DirectionVectors[target_door.direction])
 
-            corridors.append(Corridor(path, (door, target_door)))
+                corridors.append(Corridor(tuple(path), (door, target_door)))
 
     return corridors

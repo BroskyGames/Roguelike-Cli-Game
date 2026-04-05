@@ -1,7 +1,7 @@
 from enum import StrEnum
 
 
-class RoomTags(StrEnum):
+class RoomTypes(StrEnum):
     NORMAL = 'N'
     SPAWN = 'S'
     MAIN = 'M'

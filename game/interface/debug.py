@@ -19,7 +19,7 @@ def display_shape(shape: dict[Pos, Tile]):
 def print_nodes(node: RoomNode,  prefix="", is_last=True):
     connector = "└─ " if is_last else "├─ "
 
-    print(prefix + connector + f"{node.tag.value}{node.id}")
+    print(prefix + connector + f"{node.type.value}{node.id}")
 
     new_prefix = prefix + ("   " if is_last else "│  ")
 

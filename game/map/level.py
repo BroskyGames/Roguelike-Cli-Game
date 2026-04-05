@@ -5,7 +5,7 @@ from .corridor import build_corridors
 from ..interface.debug import display_shape, print_nodes
 from ..core.core_types import Pos
 from .graph import assign_tags, generate_graph
-from .layout import Room, RoomPlacementError, build_rooms_from_graph
+from .layout import Room, build_rooms_from_graph
 from .tile_map import Tile, build_map
 
 
@@ -27,14 +27,14 @@ def generate_level(
     while True:
         try:
             rooms = build_rooms_from_graph(start, rng, size_range, main_size_increment, padding_range, max_attempts, search_radius)
+
+            if display_debug:
+                pprint(rooms)
+
+            corridors = build_corridors(rooms)
             break
-        except RoomPlacementError:
-            print("Failed to place rooms, retrying...")
-
-    if display_debug:
-        pprint(rooms)
-
-    corridors = build_corridors(rooms)
+        except RuntimeError as e:
+            print(f"{e}, retrying...")
 
     game_map = build_map(rooms, corridors)
 

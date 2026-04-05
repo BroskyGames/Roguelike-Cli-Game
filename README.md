@@ -61,6 +61,7 @@ game/
   map/
     graph.py
     layout.py
+    corridor.py
     tile_map.py
     level.py
     room_tags.py

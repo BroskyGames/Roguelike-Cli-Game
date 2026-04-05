@@ -1,23 +1,22 @@
 from dataclasses import InitVar, dataclass, field
-from typing import TYPE_CHECKING
+from typing import ClassVar, TYPE_CHECKING
 from ..utils import Reducer
 from .graph import RoomNode, bfs
 from game.core.core_types import Directions, DirectionsEnum, Pos, Size
-from .room_tags import RoomTags
+from .room_types import RoomTypes
 if TYPE_CHECKING:
     from random import Random
-
-class RoomPlacementError(Exception):
-    """Raised when a room cannot be placed on the map."""
-    pass
 
 @dataclass(slots=True, frozen=True)
 class Door:
     pos: Pos
     belongs_to: int = field(init=False)
     direction: DirectionsEnum = field(init=False)
+    connections: list["Door"] = field(default_factory=list, init=False, compare=False, hash=False)
 
     room: InitVar["Room"]
+
+    MAX_CONNECTIONS: ClassVar[int] = 2
 
     def __post_init__(self, room: "Room"):
         object.__setattr__(self, 'belongs_to', room.id)
@@ -30,7 +29,7 @@ class Door:
         elif self.x == room.x - 1:
             direction = DirectionsEnum.WEST
         else:
-            raise "Not a valid door position"
+            raise AssertionError("Not a valid door position")
 
         object.__setattr__(self, 'direction', direction)
 
@@ -45,23 +44,30 @@ class Door:
     def y(self) -> int:
         return self.pos.y
 
-# TODO: Implement handling of special rooms: shapes, sizes, unused_doors
+    def can_connect(self) -> bool:
+        return len(self.connections) < self.MAX_CONNECTIONS
+
+    def add_connection(self, door: "Door"):
+        if not self.can_connect():
+            raise RuntimeError("Door at capacity")
+
+        self.connections.append(door)
+
+# TODO: Implement handling of special rooms: shapes, sizes, finding doors
 @dataclass(slots=True)
 class Room:
     """Room object that stores the data of ingame room
     [id] = -1 is temporary room used for methods and type safety
-    [graph_id] maps to id of RoomNode corresponding to this Room
-    [doors] and [connections] are aligned"""
+    [graph_id] maps to id of RoomNode corresponding to this Room"""
     id: int
     pos: Pos
     size: Size
-    tag: RoomTags = RoomTags.NORMAL
+    tag: RoomTypes = RoomTypes.NORMAL
     doors: list[Door] = field(default_factory=list)
-    connections: list[int] = field(default_factory=list)
     graph_id: int = -1
 
     def __repr__(self):
-        return f"Room(id={self.id}, pos=({self.x}, {self.y}), size=({self.width}, {self.height}), tag='{str(self.tag)}', connections={self.connections}, doors={self.doors})"
+        return f"Room(id={self.id}, pos=({self.x}, {self.y}), size=({self.width}, {self.height}), tag='{str(self.type)}', doors={self.doors})"
 
     @property
     def x(self) -> int:
@@ -88,18 +94,23 @@ class Room:
             connected.add(door.direction)
         return connected
 
-def compute_unused_doors_pos(room: Room) -> set[Pos]:
-    # if room.tag == RoomTags.BOSS or room.tag == RoomTags.SPAWN:
+
+def compute_door_pos(room: Room) -> tuple[Pos, ...]:
+    # if room.type == RoomTags.BOSS or room.type == RoomTags.SPAWN:
         # raise NotImplementedError()
     cx, cy = room.get_center()
-    return {Pos(cx, room.y - 1), Pos(room.x + room.width, cy), Pos(cx, room.y + room.height), Pos(room.x - 1, cy)} - {door.pos for door in room.doors}
+    return Pos(cx, room.y - 1), Pos(room.x + room.width, cy), Pos(cx, room.y + room.height), Pos(room.x - 1, cy)
+
+def get_available_door_pos(room: Room) -> tuple[Pos, ...]:
+    cant_connect_pos = {d.pos for d in room.doors if not d.can_connect()}
+    return tuple(pos for pos in compute_door_pos(room) if pos not in cant_connect_pos)
 
 def find_connection_for(a: Room, b: Room) -> tuple[Pos, Pos]:
     min_d = float('inf')
     best_pair = (None, None)
 
-    for x1, y1 in compute_unused_doors_pos(a):
-        for x2, y2 in compute_unused_doors_pos(b):
+    for x1, y1 in get_available_door_pos(a):
+        for x2, y2 in get_available_door_pos(b):
             d = abs(x1 - x2) + abs(y1 - y2)
             if d < min_d:
                 min_d = d
@@ -107,13 +118,22 @@ def find_connection_for(a: Room, b: Room) -> tuple[Pos, Pos]:
 
     return best_pair
 
+def find_or_create_door(pos: Pos, room: Room) -> Door:
+    for door in room.doors:
+        if pos == door.pos:
+            return door
+
+    door = Door(pos, room)
+    room.doors.append(door)
+    return door
+
 def connect_rooms(a: Room, b: Room):
     door_a_pos, door_b_pos = find_connection_for(a, b)
+    door_a = find_or_create_door(door_a_pos, a)
+    door_b = find_or_create_door(door_b_pos, b)
 
-    a.connections.append(b.id)
-    a.doors.append(Door(door_a_pos, a))
-    b.connections.append(a.id)
-    b.doors.append(Door(door_b_pos, b))
+    door_a.add_connection(door_b)
+    door_b.add_connection(door_a)
 
 def rooms_overlap(a: Room, b: Room, padding: int = 1) -> bool:
     return (
@@ -124,12 +144,12 @@ def rooms_overlap(a: Room, b: Room, padding: int = 1) -> bool:
     )
 
 def sample_room_size(node: RoomNode, size_range: tuple[int, int], rng: "Random", main_diff: int = 0) -> Size:
-    # if node.tag == RoomTags.BOSS or node.tag == RoomTags.SPAWN:
+    # if node.type == RoomTags.BOSS or node.type == RoomTags.SPAWN:
     #     raise NotImplementedError()
 
     w = rng.randint(*size_range)
     h = rng.randint(*size_range)
-    if node.tag == RoomTags.MAIN:
+    if node.type == RoomTypes.MAIN:
         w += main_diff
         h += main_diff
     return Size(w, h)
@@ -183,7 +203,7 @@ def find_room_placement(
         return Pos(0, 0)
 
     for _ in range(max_attempts):
-        direction = rng.choice(tuple(Directions - parent.connected_directions()))
+        direction = rng.choice(sorted(Directions - parent.connected_directions()))
         if (pos := try_place_in_direction(direction)) is not None:
             return pos
 
@@ -193,7 +213,7 @@ def find_room_placement(
     if (pos := search_nearby(padding_range[0])) is not None:
         return pos
 
-    raise RoomPlacementError()
+    raise RuntimeError("Failed to place rooms")
 
 def build_rooms_from_graph(
         start: RoomNode, rng: "Random",
@@ -208,7 +228,7 @@ def build_rooms_from_graph(
 
         room = Room(
             id=len(rooms),
-            tag=node.tag,
+            tag=node.type,
             pos=pos,
             size=size,
             graph_id=node.id
