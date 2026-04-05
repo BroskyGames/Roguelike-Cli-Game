@@ -62,7 +62,7 @@ class Room:
     id: int
     pos: Pos
     size: Size
-    tag: RoomTypes = RoomTypes.NORMAL
+    type: RoomTypes = RoomTypes.NORMAL
     doors: list[Door] = field(default_factory=list)
     graph_id: int = -1
 
@@ -228,7 +228,7 @@ def build_rooms_from_graph(
 
         room = Room(
             id=len(rooms),
-            tag=node.type,
+            type=node.type,
             pos=pos,
             size=size,
             graph_id=node.id
