@@ -6,7 +6,7 @@ from typing import Callable
 
 from .layout import Door, Room
 from ..core.core_types import DirectionVectors, Pos, Vector2
-
+# TODO: Allow 2 corridors be used on the same door
 
 @dataclass(slots=True)
 class Corridor:
@@ -54,10 +54,11 @@ def astar(start: Pos, goal: Pos, is_blocked_fn: Callable[[Pos], bool], start_dir
             if manhattan(neighbor, start) > 100:
                 continue
 
-            start_penalty = 0 if (prev_dir is not None) or (move_dir == start_dir) else .1
-            end_penalty = 0 if (neighbor != goal) or (move_dir == -end_dir) else .1
+            start_penalty = 0 if (prev_dir is not None) or (move_dir == start_dir) else .45
+            end_penalty = 0 if (neighbor != goal) or (move_dir == -end_dir) else .45
+            change_dir_penalty = 0 if prev_dir == move_dir else .1
 
-            tentative_g = g_score[current] + 1 + start_penalty + end_penalty
+            tentative_g = g_score[current] + 1 + start_penalty + end_penalty + change_dir_penalty
 
             if tentative_g < g_score.get(neighbor, 1_000_000):
                 came_from[neighbor] = current
