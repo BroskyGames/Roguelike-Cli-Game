@@ -1,5 +1,7 @@
 from dataclasses import InitVar, dataclass, field
 from typing import ClassVar, TYPE_CHECKING
+
+from .special_templates import ROOM_TEMPLATES, accumulate_ascii_doors, ascii_traverser, get_template_size
 from ..utils import Reducer
 from .graph import RoomNode, bfs
 from game.core.core_types import Directions, DirectionsEnum, Pos, Size
@@ -29,12 +31,14 @@ class Door:
         elif self.x == room.x - 1:
             direction = DirectionsEnum.WEST
         else:
+            print(self)
+            print(room)
             raise AssertionError("Not a valid door position")
 
         object.__setattr__(self, 'direction', direction)
 
     def __repr__(self):
-        return f"Door(x={self.x}, y={self.y}, room_id={self.belongs_to}, direction={int(self.direction)})"
+        return f"Door(x={self.x}, y={self.y}, room_id={self.belongs_to}, " # direction={int(self.direction)})
 
     @property
     def x(self) -> int:
@@ -58,13 +62,15 @@ class Door:
 class Room:
     """Room object that stores the data of ingame room
     [id] = -1 is temporary room used for methods and type safety
-    [graph_id] maps to id of RoomNode corresponding to this Room"""
+    [graph_id] maps to id of RoomNode corresponding to this Room
+    [template] is index of ROOM_TEMPLATES[self.type][i]"""
     id: int
     pos: Pos
     size: Size
     type: RoomTypes = RoomTypes.NORMAL
     doors: list[Door] = field(default_factory=list)
     graph_id: int = -1
+    template: int | None = None
 
     def __repr__(self):
         return f"Room(id={self.id}, pos=({self.x}, {self.y}), size=({self.width}, {self.height}), tag='{str(self.type)}', doors={self.doors})"
@@ -96,8 +102,8 @@ class Room:
 
 
 def compute_door_pos(room: Room) -> tuple[Pos, ...]:
-    # if room.type == RoomTags.BOSS or room.type == RoomTags.SPAWN:
-        # raise NotImplementedError()
+    if  room.type == RoomTypes.SPAWN: # or room.type == RoomTypes.BOSS
+        return ascii_traverser(ROOM_TEMPLATES[room.type][room.template], Reducer(accumulate_ascii_doors, ()), room.pos)
     cx, cy = room.get_center()
     return Pos(cx, room.y - 1), Pos(room.x + room.width, cy), Pos(cx, room.y + room.height), Pos(room.x - 1, cy)
 
@@ -144,8 +150,8 @@ def rooms_overlap(a: Room, b: Room, padding: int = 1) -> bool:
     )
 
 def sample_room_size(node: RoomNode, size_range: tuple[int, int], rng: "Random", main_diff: int = 0) -> Size:
-    # if node.type == RoomTags.BOSS or node.type == RoomTags.SPAWN:
-    #     raise NotImplementedError()
+    if node.type == RoomTypes.SPAWN: # or node.type == RoomTypes.BOSS
+        return rng.choice(tuple(get_template_size(t) for t in ROOM_TEMPLATES[node.type]))
 
     w = rng.randint(*size_range)
     h = rng.randint(*size_range)
@@ -226,13 +232,26 @@ def build_rooms_from_graph(
         size = sample_room_size(node, size_range, rng, main_diff)
         pos = find_room_placement(size, parent, rooms, rng, padding_range, max_attempts, search_radius)
 
-        room = Room(
-            id=len(rooms),
-            type=node.type,
-            pos=pos,
-            size=size,
-            graph_id=node.id
-        )
+        if node.type == RoomTypes.SPAWN: # or node.type == RoomTypes.BOSS
+            template = rng.choice(tuple(ROOM_TEMPLATES[node.type].index(t) for t in ROOM_TEMPLATES[node.type] if get_template_size(t) == size))
+
+            room = Room(
+                id=len(rooms),
+                type=node.type,
+                pos=pos,
+                size=size,
+                graph_id=node.id,
+                template=template
+            )
+        else:
+            room = Room(
+                id=len(rooms),
+                type=node.type,
+                pos=pos,
+                size=size,
+                graph_id=node.id
+            )
+
         rooms.append(room)
 
         if parent:
