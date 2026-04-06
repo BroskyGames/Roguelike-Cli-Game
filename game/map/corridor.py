@@ -65,7 +65,6 @@ def astar(start: Pos, goal: Pos, is_blocked_fn: Callable[[Pos], bool], start_dir
                     neighbor,
                     move_dir
                 ))
-    print(start, goal)
     raise RuntimeError("No path found between doors")
 
 def make_is_blocked_fn(rooms: list["Room"], corridors: list[Corridor], allowed: set[Corridor], padding: int = 1) -> Callable[[Pos], bool]:

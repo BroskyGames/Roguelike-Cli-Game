@@ -1,13 +1,15 @@
-from random import Random, randint
-from typing import Optional
+from dataclasses import dataclass, field
+from typing import Any, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .core_types import Pos
+    from ..map.tile_map import Tile
 
 
+@dataclass(slots=True)
 class GameState:
-    __slots__ = ["rng", "seed", "map"]
-    def __init__(self, seed: Optional[int] = None, debug: bool = False):
-        if seed is None:
-            seed = randint(0, 2**32 - 1)
-        self.seed = seed
-        if debug:
-            print(f"Seed: {seed}")
-        self.rng = Random(seed)
+    seed: int = None
+    rng_state: Any = None
+    map: dict["Pos", "Tile"] = field(default_factory=dict)
+
+    debug: bool = False
