@@ -5,7 +5,7 @@ from itertools import count
 from typing import Callable
 
 from .layout import Door, Room
-from ..core.core_types import DirectionVectors, Pos, Vector2
+from ..core.core_types import BaseDirections, Directions, Pos
 
 @dataclass(slots=True, frozen=True)
 class Corridor:
@@ -15,12 +15,12 @@ class Corridor:
 MAX_SEARCH_DIST = 100
 
 def door_exit(door: Door) -> Pos:
-    return door.pos + DirectionVectors[door.direction]
+    return door.pos + door.direction.vector()
 
 def manhattan(a: Pos, b: Pos) -> int:
     return abs(a.x - b.x) + abs(a.y - b.y)
 
-def astar(start: Pos, goal: Pos, is_blocked_fn: Callable[[Pos], bool], start_dir: Vector2, end_dir: Vector2) -> list[Pos]:
+def astar(start: Pos, goal: Pos, is_blocked_fn: Callable[[Pos], bool], start_dir: Directions, end_dir: Directions) -> list[Pos]:
     heap = []
     counter = count()
     heappush(heap, (0, next(counter), start, None))
@@ -39,8 +39,8 @@ def astar(start: Pos, goal: Pos, is_blocked_fn: Callable[[Pos], bool], start_dir
             path.reverse()
             return path
 
-        for move_dir in DirectionVectors.values():
-            neighbor = current + move_dir
+        for move_dir in BaseDirections:
+            neighbor = current + move_dir.vector()
 
             if is_blocked_fn(neighbor):
                 continue
@@ -49,7 +49,7 @@ def astar(start: Pos, goal: Pos, is_blocked_fn: Callable[[Pos], bool], start_dir
                 continue
 
             start_penalty = 0 if (prev_dir is not None) or (move_dir == start_dir) else .45
-            end_penalty = 0 if (neighbor != goal) or (move_dir == -end_dir) else .45
+            end_penalty = 0 if (neighbor != goal) or (move_dir.vector() == -end_dir.vector()) else .45
             change_dir_penalty = 0 if prev_dir == move_dir else .1
 
             tentative_g = g_score[current] + 1 + start_penalty + end_penalty + change_dir_penalty
@@ -99,7 +99,7 @@ def build_corridors(rooms: list[Room]) -> list[Corridor]:
                 start = door_exit(door)
                 end = door_exit(target_door)
 
-                path = astar(start, end, make_is_blocked_fn(rooms, corridors, allowed), DirectionVectors[door.direction], DirectionVectors[target_door.direction])
+                path = astar(start, end, make_is_blocked_fn(rooms, corridors, allowed), door.direction, target_door.direction)
 
                 corridors.append(Corridor(tuple(path), (door, target_door)))
 

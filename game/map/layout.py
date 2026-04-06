@@ -4,7 +4,7 @@ from typing import ClassVar, TYPE_CHECKING
 from .special_templates import ROOM_TEMPLATES, accumulate_ascii_doors, ascii_traverser, get_template_size
 from ..utils import Reducer
 from .graph import RoomNode, bfs
-from game.core.core_types import Directions, DirectionsEnum, Pos, Size
+from game.core.core_types import BaseDirections, Directions, Pos, Size
 from .room_types import RoomTypes
 if TYPE_CHECKING:
     from random import Random
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 class Door:
     pos: Pos
     belongs_to: int = field(init=False)
-    direction: DirectionsEnum = field(init=False)
+    direction: Directions = field(init=False)
     connections: list["Door"] = field(default_factory=list, init=False, compare=False, hash=False)
 
     room: InitVar["Room"]
@@ -23,13 +23,13 @@ class Door:
     def __post_init__(self, room: "Room"):
         object.__setattr__(self, 'belongs_to', room.id)
         if self.y == room.y - 1:
-            direction = DirectionsEnum.NORTH
+            direction = Directions.NORTH
         elif self.x == room.x + room.width:
-            direction = DirectionsEnum.EAST
+            direction = Directions.EAST
         elif self.y == room.y + room.height:
-            direction = DirectionsEnum.SOUTH
+            direction = Directions.SOUTH
         elif self.x == room.x - 1:
-            direction = DirectionsEnum.WEST
+            direction = Directions.WEST
         else:
             print(self)
             print(room)
@@ -94,7 +94,7 @@ class Room:
     def get_center(self) -> Pos:
         return Pos(self.x + self.width // 2, self.y + self.height // 2)
 
-    def connected_directions(self) -> set[DirectionsEnum]:
+    def connected_directions(self) -> set[Directions]:
         connected = set()
         for door in self.doors:
             connected.add(door.direction)
@@ -165,18 +165,18 @@ def find_room_placement(
         padding_range: tuple[int, int], max_attempts: int, search_radius: int
 ) -> Pos:
     # noinspection PyShadowingNames
-    def try_place_in_direction(direction: DirectionsEnum) -> Pos | None:
+    def try_place_in_direction(direction: Directions) -> Pos | None:
         match direction:
-            case DirectionsEnum.NORTH:
+            case Directions.NORTH:
                 x = parent.pos.x + rng.randint(-size.width, parent.size.width)
                 y = parent.pos.y - size.height - pad
-            case DirectionsEnum.EAST:
+            case Directions.EAST:
                 x = parent.pos.x + parent.size.width + pad
                 y = parent.pos.y + rng.randint(-size.height, parent.size.height)
-            case DirectionsEnum.SOUTH:
+            case Directions.SOUTH:
                 x = parent.pos.x + rng.randint(-size.width, parent.size.width)
                 y = parent.pos.y + parent.size.height + pad
-            case DirectionsEnum.WEST:
+            case Directions.WEST:
                 x = parent.pos.x - size.width - pad
                 y = parent.pos.y + rng.randint(-size.height, parent.size.height)
             case _:
@@ -209,7 +209,7 @@ def find_room_placement(
         return Pos(0, 0)
 
     for _ in range(max_attempts):
-        direction = rng.choice(sorted(Directions - parent.connected_directions()))
+        direction = rng.choice(sorted(BaseDirections - parent.connected_directions()))
         if (pos := try_place_in_direction(direction)) is not None:
             return pos
 

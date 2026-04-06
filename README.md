@@ -57,7 +57,7 @@ Most likely by inserting spaces between characters.
 game/
   core/
     state.py # only rng handling for now 
-    types.py
+    core_types.py
   map/
     graph.py
     layout.py
@@ -65,6 +65,7 @@ game/
     tile_map.py
     level.py
     room_tags.py
+    special_templates.py
   interface/
     debug.py
     rederer.py # empty

@@ -1,7 +1,7 @@
 from abc import ABC
 from dataclasses import dataclass
-from enum import IntEnum, auto
-from typing import Iterator, Literal, NamedTuple, Protocol, Self, runtime_checkable
+from enum import  IntFlag, auto
+from typing import Iterator, NamedTuple, Protocol, Self, runtime_checkable
 
 
 @runtime_checkable
@@ -71,20 +71,29 @@ class Size(NamedTuple):
     width: int
     height: int
 
-class DirectionsEnum(IntEnum):
+class Directions(IntFlag):
     NORTH = auto()
     EAST = auto()
     SOUTH = auto()
     WEST = auto()
 
-Directions = {DirectionsEnum.NORTH, DirectionsEnum.EAST, DirectionsEnum.SOUTH, DirectionsEnum.WEST}
+    def vector(self):
+        x = 0
+        y = 0
+        if self & Directions.NORTH:
+            y -= 1
+        if self & Directions.SOUTH:
+            y += 1
+        if self & Directions.EAST:
+            x += 1
+        if self & Directions.WEST:
+            x -= 1
+        return Vector2(x, y)
 
-DirectionVectors = {
-    DirectionsEnum.NORTH: Vector2(0, -1),
-    DirectionsEnum.EAST:  Vector2(1, 0),
-    DirectionsEnum.SOUTH: Vector2(0, 1),
-    DirectionsEnum.WEST:  Vector2(-1, 0),
-}
+BaseDirections: set[Directions]  = set(Directions)
+DirectionsDiagonals: set[Directions]  = set(Directions) | {Directions.NORTH | Directions.EAST, Directions.EAST | Directions.SOUTH,
+                                        Directions.SOUTH | Directions.WEST, Directions.WEST | Directions.NORTH}
 
 if __name__ == "__main__":
-    print(Pos(3, 2) - Pos(3, 2))
+    # print(Pos(3, 2) - Pos(3, 2))
+    print((Directions.NORTH | Directions.EAST).vector())

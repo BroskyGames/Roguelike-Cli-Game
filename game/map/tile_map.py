@@ -4,7 +4,7 @@ from enum import StrEnum
 from .corridor import Corridor
 from .layout import Room
 from .room_types import RoomTypes
-from ..core.core_types import Pos
+from ..core.core_types import BaseDirections, DirectionsDiagonals, Pos
 from .special_templates import ROOM_TEMPLATES, ascii_traverser
 from ..utils import Reducer
 
@@ -25,15 +25,25 @@ class Tile:
         return self.debug if self.debug else str(self.kind)
 
 
+def merge_tile(base: Tile, new: Tile) -> Tile:
+    priority = {
+        TileEnum.DOOR: 3,
+        TileEnum.FLOOR: 2,
+        TileEnum.WALL: 1,
+        TileEnum.EMPTY: 0
+    }
+    return new if priority[new.kind] >= priority[base.kind] else base
+
 def get_room_shape(room: Room, display_debug: bool = False) -> dict[Pos, Tile]:
     def accumulate_ascii_shape(data: tuple[Pos, str], acc: dict[Pos, Tile]) -> dict[Pos, Tile]:
         pos, char = data
-        acc |= {
-            pos: Tile(TileEnum.FLOOR, room.id) if char == '.' else
-            Tile(TileEnum.WALL, room.id) if char == '#' else
-            Tile(TileEnum.EMPTY) if char == ' ' else
-            Tile(TileEnum.DOOR)
-        }
+        match char:
+            case '.':
+                acc[pos] = Tile(TileEnum.FLOOR, room.id)
+            case '#':
+                acc[pos] = Tile(TileEnum.WALL, room.id)
+            case 'D':
+                acc[pos] = Tile(TileEnum.DOOR, room.id)
         return acc
 
     shape: dict[Pos, Tile] = {}
@@ -50,19 +60,33 @@ def get_room_shape(room: Room, display_debug: bool = False) -> dict[Pos, Tile]:
                         Tile(TileEnum.WALL, room.id)
 
     if display_debug:
-        shape[Pos(room.x + room.width // 2 - 1, room.y + room.height // 2)] = Tile(TileEnum.EMPTY, debug=room.type.value)
-        shape[Pos(room.x + room.width // 2, room.y + room.height // 2)] = Tile(TileEnum.EMPTY, debug=str(room.id // 10))
-        shape[Pos(room.x + room.width // 2 + 1, room.y + room.height // 2)] = Tile(TileEnum.EMPTY, debug=str(room.id % 10))
+        shape[Pos(room.x + room.width // 2 - 1, room.y + room.height // 2)] = Tile(TileEnum.FLOOR, debug=room.type.value)
+        shape[Pos(room.x + room.width // 2, room.y + room.height // 2)] = Tile(TileEnum.FLOOR, debug=str(room.id // 10))
+        shape[Pos(room.x + room.width // 2 + 1, room.y + room.height // 2)] = Tile(TileEnum.FLOOR, debug=str(room.id % 10))
 
     return shape
 
 def get_corridor_shape(corridor: Corridor) -> dict[Pos, Tile]:
-    return {pos: Tile(TileEnum.FLOOR) for pos in corridor.path}
+    shape = {pos: Tile(TileEnum.FLOOR) for pos in corridor.path}
+    doors = {d.pos for d in corridor.connects}
+
+    for pos in corridor.path:
+        for direction in BaseDirections:
+            neighbor = pos + direction.vector()
+            if neighbor in doors:
+                continue
+            if neighbor in shape:
+                continue
+            shape[neighbor] = Tile(TileEnum.WALL)
+
+    return shape
 
 def build_map(rooms: list[Room], corridors: list[Corridor]) -> dict[Pos, Tile]:
     game_map = {}
     for room in rooms:
-        game_map |= get_room_shape(room, True)
+        for pos, tile in get_room_shape(room, True).items():
+            game_map[pos] = merge_tile(game_map.get(pos, Tile(TileEnum.EMPTY)), tile)
     for corridor in corridors:
-        game_map |= get_corridor_shape(corridor)
+        for pos, tile in get_corridor_shape(corridor).items():
+            game_map[pos] = merge_tile(game_map.get(pos, Tile(TileEnum.EMPTY)), tile)
     return game_map
