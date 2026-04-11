@@ -1,26 +1,34 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 # from functools import lru_cache
-from heapq import heappush, heappop
+from heapq import heappop, heappush
 from itertools import count
 from typing import Callable
 
 from .layout import Door, Room
 from ..core.core_types import BaseDirections, Directions, Pos
 
+
 @dataclass(slots=True, frozen=True)
 class Corridor:
     path: tuple[Pos, ...]
     connects: tuple[Door, Door]
 
+
 MAX_SEARCH_DIST = 100
+
 
 def door_exit(door: Door) -> Pos:
     return door.pos + door.direction.vector()
 
+
 def manhattan(a: Pos, b: Pos) -> int:
     return abs(a.x - b.x) + abs(a.y - b.y)
 
-def astar(start: Pos, goal: Pos, is_blocked_fn: Callable[[Pos], bool], start_dir: Directions, end_dir: Directions) -> list[Pos]:
+
+def astar(start: Pos, goal: Pos, is_blocked_fn: Callable[[Pos], bool], start_dir: Directions, end_dir: Directions) -> \
+        list[Pos]:
     heap = []
     counter = count()
     heappush(heap, (0, next(counter), start, None))
@@ -29,7 +37,7 @@ def astar(start: Pos, goal: Pos, is_blocked_fn: Callable[[Pos], bool], start_dir
     g_score: dict[Pos, float] = {start: 0}
 
     while heap:
-        _,  _, current, prev_dir = heappop(heap)
+        _, _, current, prev_dir = heappop(heap)
 
         if current == goal:
             path = [current]
@@ -67,14 +75,16 @@ def astar(start: Pos, goal: Pos, is_blocked_fn: Callable[[Pos], bool], start_dir
                 ))
     raise RuntimeError("No path found between doors")
 
-def make_is_blocked_fn(rooms: list["Room"], corridors: list[Corridor], allowed: set[Corridor], padding: int = 1) -> Callable[[Pos], bool]:
+
+def make_is_blocked_fn(rooms: list[Room], corridors: list[Corridor], allowed: set[Corridor], padding: int = 1) -> \
+        Callable[[Pos], bool]:
     # @lru_cache(maxsize=500)
-    def is_blocked(pos: "Pos") -> bool:
+    def is_blocked(pos: Pos) -> bool:
         return any(
             room.x - padding <= pos.x <= room.x + room.width - 1 + padding and
             room.y - padding <= pos.y <= room.y + room.height - 1 + padding
             for room in rooms
-        ) or any (
+        ) or any(
             abs(tile.x - pos.x) <= padding and
             abs(tile.y - pos.y) <= padding
             for corridor in corridors
@@ -83,6 +93,7 @@ def make_is_blocked_fn(rooms: list["Room"], corridors: list[Corridor], allowed: 
         )
 
     return is_blocked
+
 
 def build_corridors(rooms: list[Room]) -> list[Corridor]:
     corridors: list[Corridor] = []
@@ -98,7 +109,8 @@ def build_corridors(rooms: list[Room]) -> list[Corridor]:
                 start = door_exit(door)
                 end = door_exit(target_door)
 
-                path = astar(start, end, make_is_blocked_fn(rooms, corridors, allowed), door.direction, target_door.direction)
+                path = astar(start, end, make_is_blocked_fn(rooms, corridors, allowed), door.direction,
+                             target_door.direction)
 
                 corridors.append(Corridor(tuple(path), (door, target_door)))
 

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from collections import deque
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
@@ -9,20 +11,19 @@ from .room_types import RoomTypes
 from ..utils import Reducer, combine_reducers
 
 
-
-
 @dataclass(slots=True)
 class RoomNode:
     """Node that represents abstract form of room to be used as a base for graph structure"""
     id: int
     depth: int
-    children: list["RoomNode"] = field(default_factory=list, init=False)
-    parent: "RoomNode" = field(init=False, default=None)
+    children: list[RoomNode] = field(default_factory=list, init=False)
+    parent: RoomNode = field(init=False, default=None)
     type: RoomTypes = RoomTypes.NORMAL
 
-    def append(self, child: "RoomNode"):
+    def append(self, child: RoomNode):
         self.children.append(child)
         child.parent = self
+
 
 def bfs[T](start: RoomNode, reducer: Reducer[T, RoomNode]) -> T:
     queue = deque([start])
@@ -33,13 +34,14 @@ def bfs[T](start: RoomNode, reducer: Reducer[T, RoomNode]) -> T:
             queue.append(child)
     return reducer.acc
 
-def generate_graph(rng: "Random", rooms_amount = 20, bias_weight=None) -> RoomNode:
+
+def generate_graph(rng: Random, rooms_amount=20, bias_weight=None) -> RoomNode:
     rooms = [RoomNode(0, 0, RoomTypes.SPAWN)]
 
     if bias_weight is None:
         bias_weight = {0: 1.25, 1: 1, 2: .75}
 
-    for i in range (1, rooms_amount):
+    for i in range(1, rooms_amount):
         candidates = [r for r in rooms if len(r.children) < 3 or
                       (r.type == RoomTypes.SPAWN and len(r.children) > 4)]
         if not candidates:
@@ -51,13 +53,14 @@ def generate_graph(rng: "Random", rooms_amount = 20, bias_weight=None) -> RoomNo
             weights.append(bias_weight.get(conn, 0.1))
 
         parent = rng.choices(candidates, weights=weights, k=1)[0]
-        new_room = RoomNode(i, parent.depth+1)
+        new_room = RoomNode(i, parent.depth + 1)
         parent.append(new_room)
         rooms.append(new_room)
 
     return rooms[0]
 
-def assign_tags(spawn: RoomNode, rng: "Random", genetic_chance: float, trap_chances: float) -> None:
+
+def assign_tags(spawn: RoomNode, rng: Random, genetic_chance: float, trap_chances: float) -> None:
     def return_room(r: RoomNode, _: None) -> RoomNode:
         return r
 
@@ -80,4 +83,3 @@ def assign_tags(spawn: RoomNode, rng: "Random", genetic_chance: float, trap_chan
     while last.parent is not None:
         last.type = RoomTypes.MAIN
         last = last.parent
-

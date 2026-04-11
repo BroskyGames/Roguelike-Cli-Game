@@ -1,26 +1,30 @@
+from __future__ import annotations
+
 from dataclasses import InitVar, dataclass, field
 from typing import ClassVar, TYPE_CHECKING
 
+from game.core.core_types import BaseDirections, Directions, Pos, Size
+from .graph import RoomNode, bfs
+from .room_types import RoomTypes
 from .special_templates import ROOM_TEMPLATES, accumulate_ascii_doors, ascii_traverser, get_template_size
 from ..utils import Reducer
-from .graph import RoomNode, bfs
-from game.core.core_types import BaseDirections, Directions, Pos, Size
-from .room_types import RoomTypes
+
 if TYPE_CHECKING:
     from random import Random
+
 
 @dataclass(slots=True, frozen=True)
 class Door:
     pos: Pos
     belongs_to: int = field(init=False)
     direction: Directions = field(init=False)
-    connections: list["Door"] = field(default_factory=list, init=False, compare=False, hash=False)
+    connections: list[Door] = field(default_factory=list, init=False, compare=False, hash=False)
 
-    room: InitVar["Room"]
+    room: InitVar[Room]
 
     MAX_CONNECTIONS: ClassVar[int] = 2
 
-    def __post_init__(self, room: "Room"):
+    def __post_init__(self, room: Room):
         object.__setattr__(self, 'belongs_to', room.id)
         if self.y == room.y - 1:
             direction = Directions.NORTH
@@ -38,7 +42,7 @@ class Door:
         object.__setattr__(self, 'direction', direction)
 
     def __repr__(self):
-        return f"Door(x={self.x}, y={self.y}, room_id={self.belongs_to}, " # direction={int(self.direction)})
+        return f"Door(x={self.x}, y={self.y}, room_id={self.belongs_to}, "  # direction={int(self.direction)})
 
     @property
     def x(self) -> int:
@@ -51,11 +55,12 @@ class Door:
     def can_connect(self) -> bool:
         return len(self.connections) < self.MAX_CONNECTIONS
 
-    def add_connection(self, door: "Door"):
+    def add_connection(self, door: Door):
         if not self.can_connect():
             raise RuntimeError("Door at capacity")
 
         self.connections.append(door)
+
 
 # TODO: Implement handling of special rooms: shapes, sizes, finding doors
 @dataclass(slots=True)
@@ -102,14 +107,16 @@ class Room:
 
 
 def compute_door_pos(room: Room) -> tuple[Pos, ...]:
-    if  room.type == RoomTypes.SPAWN: # or room.type == RoomTypes.BOSS
+    if room.type == RoomTypes.SPAWN:  # or room.type == RoomTypes.BOSS
         return ascii_traverser(ROOM_TEMPLATES[room.type][room.template], Reducer(accumulate_ascii_doors, ()), room.pos)
     cx, cy = room.get_center()
     return Pos(cx, room.y - 1), Pos(room.x + room.width, cy), Pos(cx, room.y + room.height), Pos(room.x - 1, cy)
 
+
 def get_available_door_pos(room: Room) -> tuple[Pos, ...]:
     cant_connect_pos = {d.pos for d in room.doors if not d.can_connect()}
     return tuple(pos for pos in compute_door_pos(room) if pos not in cant_connect_pos)
+
 
 def find_connection_for(a: Room, b: Room) -> tuple[Pos, Pos]:
     min_d = float('inf')
@@ -124,6 +131,7 @@ def find_connection_for(a: Room, b: Room) -> tuple[Pos, Pos]:
 
     return best_pair
 
+
 def find_or_create_door(pos: Pos, room: Room) -> Door:
     for door in room.doors:
         if pos == door.pos:
@@ -133,6 +141,7 @@ def find_or_create_door(pos: Pos, room: Room) -> Door:
     room.doors.append(door)
     return door
 
+
 def connect_rooms(a: Room, b: Room):
     door_a_pos, door_b_pos = find_connection_for(a, b)
     door_a = find_or_create_door(door_a_pos, a)
@@ -140,6 +149,7 @@ def connect_rooms(a: Room, b: Room):
 
     door_a.add_connection(door_b)
     door_b.add_connection(door_a)
+
 
 def rooms_overlap(a: Room, b: Room, padding: int = 1) -> bool:
     return (
@@ -149,8 +159,9 @@ def rooms_overlap(a: Room, b: Room, padding: int = 1) -> bool:
             a.y < b.y + b.height + padding
     )
 
-def sample_room_size(node: RoomNode, size_range: tuple[int, int], rng: "Random", main_diff: int = 0) -> Size:
-    if node.type == RoomTypes.SPAWN: # or node.type == RoomTypes.BOSS
+
+def sample_room_size(node: RoomNode, size_range: tuple[int, int], rng: Random, main_diff: int = 0) -> Size:
+    if node.type == RoomTypes.SPAWN:  # or node.type == RoomTypes.BOSS
         return rng.choice(tuple(get_template_size(t) for t in ROOM_TEMPLATES[node.type]))
 
     w = rng.randint(*size_range)
@@ -160,8 +171,9 @@ def sample_room_size(node: RoomNode, size_range: tuple[int, int], rng: "Random",
         h += main_diff
     return Size(w, h)
 
+
 def find_room_placement(
-        size: Size, parent: Room, rooms: list[Room], rng: "Random",
+        size: Size, parent: Room, rooms: list[Room], rng: Random,
         padding_range: tuple[int, int], max_attempts: int, search_radius: int
 ) -> Pos:
     # noinspection PyShadowingNames
@@ -187,6 +199,7 @@ def find_room_placement(
             return position
 
         return None
+
     def search_nearby(padding_check: int) -> Pos | None:
         parent_center = parent.get_center()
 
@@ -221,8 +234,9 @@ def find_room_placement(
 
     raise RuntimeError("Failed to place rooms")
 
+
 def build_rooms_from_graph(
-        start: RoomNode, rng: "Random",
+        start: RoomNode, rng: Random,
         size_range: tuple[int, int] = (6, 12), main_diff: int = 2,
         padding_range: tuple[int, int] = (2, 4), max_attempts: int = 5, search_radius: int = 15
 ) -> list[Room]:
@@ -232,8 +246,9 @@ def build_rooms_from_graph(
         size = sample_room_size(node, size_range, rng, main_diff)
         pos = find_room_placement(size, parent, rooms, rng, padding_range, max_attempts, search_radius)
 
-        if node.type == RoomTypes.SPAWN: # or node.type == RoomTypes.BOSS
-            template = rng.choice(tuple(ROOM_TEMPLATES[node.type].index(t) for t in ROOM_TEMPLATES[node.type] if get_template_size(t) == size))
+        if node.type == RoomTypes.SPAWN:  # or node.type == RoomTypes.BOSS
+            template = rng.choice(tuple(
+                ROOM_TEMPLATES[node.type].index(t) for t in ROOM_TEMPLATES[node.type] if get_template_size(t) == size))
 
             room = Room(
                 id=len(rooms),

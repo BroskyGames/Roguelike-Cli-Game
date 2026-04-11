@@ -1,6 +1,6 @@
 from abc import ABC
 from dataclasses import dataclass
-from enum import  IntFlag, auto
+from enum import IntFlag, auto
 from typing import Iterator, NamedTuple, Protocol, Self, runtime_checkable
 
 
@@ -8,8 +8,10 @@ from typing import Iterator, NamedTuple, Protocol, Self, runtime_checkable
 class IsPosition(Protocol):
     @property
     def x(self) -> int: ...
+
     @property
     def y(self) -> int: ...
+
 
 class PositionOps(ABC):
     def __add__(self: Self, other: "Vector2") -> Self:
@@ -33,10 +35,12 @@ class PositionOps(ABC):
             return self.y
         raise IndexError
 
+
 @dataclass(slots=True, frozen=True)
 class Pos(PositionOps):
     x: int
     y: int
+
 
 @dataclass(slots=True)
 class MutablePos(PositionOps):
@@ -47,6 +51,7 @@ class MutablePos(PositionOps):
         self.x += other.x
         self.y += other.y
         return self
+
 
 @dataclass(slots=True, frozen=True)
 class Vector2:
@@ -67,9 +72,11 @@ class Vector2:
     def __neg__(self) -> "Vector2":
         return Vector2(-self.x, -self.y)
 
+
 class Size(NamedTuple):
     width: int
     height: int
+
 
 class Directions(IntFlag):
     NORTH = auto()
@@ -90,9 +97,12 @@ class Directions(IntFlag):
             x -= 1
         return Vector2(x, y)
 
-BaseDirections: set[Directions]  = set(Directions)
-DirectionsDiagonals: set[Directions]  = set(Directions) | {Directions.NORTH | Directions.EAST, Directions.EAST | Directions.SOUTH,
-                                        Directions.SOUTH | Directions.WEST, Directions.WEST | Directions.NORTH}
+
+BaseDirections: set[Directions] = set(Directions)
+DirectionsDiagonals: set[Directions] = set(Directions) | {Directions.NORTH | Directions.EAST,
+                                                          Directions.EAST | Directions.SOUTH,
+                                                          Directions.SOUTH | Directions.WEST,
+                                                          Directions.WEST | Directions.NORTH}
 
 if __name__ == "__main__":
     # print(Pos(3, 2) - Pos(3, 2))

@@ -3,11 +3,12 @@ from pprint import pprint
 from random import Random
 
 from .corridor import build_corridors
-from ..interface.debug import display_shape, print_nodes
-from ..core.core_types import Pos
 from .graph import assign_tags, generate_graph
 from .layout import Room, build_rooms_from_graph
 from .tile_map import Tile, build_map
+from ..core.core_types import Pos
+from ..ui.debug import display_shape, print_nodes
+
 
 @dataclass(frozen=True)
 class LevelConfig:
@@ -20,6 +21,7 @@ class LevelConfig:
     padding_range: tuple[int, int] = field(default_factory=lambda: (5, 8))
     max_attempts: int = 5
     search_radius: int = 25
+
 
 def generate_level(
         rng: Random,

@@ -11,5 +11,6 @@ class GameState:
     seed: int = None
     rng_state: Any = None
     map: dict["Pos", "Tile"] = field(default_factory=dict)
+    curr_room: int = None
 
     debug: bool = False
