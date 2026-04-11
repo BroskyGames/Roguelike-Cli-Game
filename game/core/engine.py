@@ -4,12 +4,11 @@ from .state import GameState
 
 class GameEngine:
     def __init__(self, state: GameState) -> None:
-        self.seed = state.seed
-        self.rng = Random(self.seed)
+        self.rng = Random(state.seed)
         self.state = state
 
         if state.rng_state is not None:
             self.rng.setstate(state.rng_state)
 
         if self.state.debug:
-            print(f"Seed: {self.seed}")
+            print(f"Seed: {state.seed}")
