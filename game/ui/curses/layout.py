@@ -1,45 +1,79 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Callable, TYPE_CHECKING
+from asyncio import Protocol
 
-from .rect import WindowRect
-
-if TYPE_CHECKING:
-    from .basic import GameWindow
-
-MAX_ROWS = 24
-MAX_COLS = 80
-
-LayoutFn = Callable[[int, int], tuple[WindowRect, ...]]
-WindowFactory = tuple[type[GameWindow], ...]
+from game.ui.curses.rect import WindowRect
 
 
-@dataclass(slots=True)
-class UILayout:
-    layout_fn: LayoutFn
-    window_types: WindowFactory
+class LayoutBuilder:
+    def __init__(self, layout: LayoutNode) -> None:
+        self.layout = layout
+
+    def build(self, h: int, w: int) -> dict[str, WindowRect]:
+        windows: dict[str, WindowRect] = {}
+        self.layout.compute(h, w, 0, 0, windows)
+        return windows
 
 
-def compute_game_layout(rows: int, cols: int) -> tuple[WindowRect, ...]:
-    actual_rows = min(rows, MAX_ROWS)
-    actual_cols = min(cols, MAX_COLS)
+class SplitSpec:
+    def __init__(self, ratio: float | None = None, fixed: int | None = None, reverse: bool = False):
+        assert (ratio is not None) ^ (fixed is not None), "You must provide either ratio or fixed"
+        self.ratio = ratio
+        self.fixed = fixed
+        self.reverse = reverse
 
-    offset_y = (rows - actual_rows) // 2
-    offset_x = (cols - actual_cols) // 2
-
-    log_h = 6
-    stat_w = cols // 3
-    map_w = cols - stat_w
-    map_h = rows - log_h
-    stat_h = map_h // 2
-
-    return (
-        WindowRect(map_h, map_w, 0 + offset_x, 0 + offset_x),
-        WindowRect(stat_h, stat_w, 0 + offset_y, map_w + offset_x),
-        WindowRect(map_h - stat_h, stat_w, stat_h + offset_y, map_w + offset_x),
-        WindowRect(log_h, cols, map_h + offset_y, 0 + offset_x),
-    )
+    def compute(self, total) -> tuple[int, int]:
+        if self.fixed is not None:
+            a = self.fixed
+        elif self.ratio is not None:
+            a = int(self.ratio * total)
+        else:
+            raise RuntimeError("Either ratio or fixed must exist")
+        b = total - a
+        if not self.reverse:
+            return a, b
+        else:
+            return b, a
 
 
-GAME_LAYOUT = UILayout(compute_game_layout, ())  # TODO: Add log, stats, level, map windows
+class LayoutNode(Protocol):
+    def compute(self, h: int, w: int, y: int, x: int, rects: dict[str, WindowRect]) -> None:
+        ...
+
+
+class WindowNode(LayoutNode):
+    def __init__(self, name: str):
+        self.name = name
+
+    def compute(self, h, w, y, x, rects):
+        rects[self.name] = WindowRect(h, w, y, x)
+
+
+class HSplit(LayoutNode):
+    __slots__ = ("left", "right", "split")
+
+    def __init__(self, left: LayoutNode, right: LayoutNode, split: SplitSpec):
+        self.left = left
+        self.right = right
+        self.split = split
+
+    def compute(self, h, w, y, x, rects):
+        left_w, right_w = self.split.compute(w)
+
+        self.left.compute(h, left_w, y, x, rects)
+        self.right.compute(h, right_w, y, x + left_w, rects)
+
+
+class VSplit(LayoutNode):
+    __slots__ = ("top", "bottom", "split")
+
+    def __init__(self, top: LayoutNode, bottom: LayoutNode, split: SplitSpec):
+        self.top = top
+        self.bottom = bottom
+        self.split = split
+
+    def compute(self, h, w, y, x, rects):
+        top_h, bottom_h = self.split.compute(h)
+
+        self.top.compute(top_h, w, y, x, rects)
+        self.bottom.compute(bottom_h, w, y + top_h, x, rects)

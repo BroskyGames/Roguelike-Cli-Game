@@ -5,8 +5,9 @@ from random import Random
 from .corridor import build_corridors
 from .graph import assign_tags, generate_graph
 from .layout import Room, build_rooms_from_graph
-from .tile_map import Tile, build_map
-from ..core.core_types import Pos
+from .tile_map import build_map
+from ..core.geometry import Pos
+from ..core.map import Tile
 from ..ui.debug import display_shape, print_nodes
 
 

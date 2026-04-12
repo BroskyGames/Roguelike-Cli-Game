@@ -7,7 +7,7 @@ from itertools import count
 from typing import Callable
 
 from .layout import Door, Room
-from ..core.core_types import BaseDirections, Directions, Pos
+from ..core.geometry import BaseDirections, Directions, Pos
 
 
 @dataclass(slots=True, frozen=True)

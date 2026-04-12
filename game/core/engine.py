@@ -1,10 +1,10 @@
 from random import Random
 
-from .state import GameState
+from .state import State
 
 
-class GameEngine:
-    def __init__(self, state: GameState) -> None:
+class Engine:
+    def __init__(self, state: State) -> None:
         self.rng = Random(state.seed)
         self.state = state
 
@@ -17,3 +17,6 @@ class GameEngine:
     def get_save(self):
         self.state.rng_state = self.rng.getstate()
         return self.state
+
+    def handle_input(self, key: int) -> None:
+        ...

@@ -1,29 +1,9 @@
-from dataclasses import dataclass
-from enum import StrEnum
-
 from .corridor import Corridor
 from .layout import Room
-from .room_types import RoomTypes
 from .special_templates import ROOM_TEMPLATES, ascii_traverser
-from ..core.core_types import BaseDirections, Pos
+from ..core.geometry import BaseDirections, Pos
+from ..core.map import RoomTypes, Tile, TileEnum
 from ..utils import Reducer
-
-
-class TileEnum(StrEnum):
-    EMPTY = ' '
-    FLOOR = '.'
-    WALL = '#'
-    DOOR = 'D'
-
-
-@dataclass(slots=True)
-class Tile:
-    kind: TileEnum
-    room_id: int = -1
-    debug: str = ''
-
-    def __str__(self):
-        return self.debug if self.debug else str(self.kind)
 
 
 def merge_tile(base: Tile, new: Tile) -> Tile:
@@ -68,6 +48,8 @@ def get_room_shape(room: Room, display_debug: bool = False) -> dict[Pos, Tile]:
         shape[Pos(room.x + room.width // 2, room.y + room.height // 2)] = Tile(TileEnum.FLOOR, debug=str(room.id // 10))
         shape[Pos(room.x + room.width // 2 + 1, room.y + room.height // 2)] = Tile(TileEnum.FLOOR,
                                                                                    debug=str(room.id % 10))
+        shape[Pos(0, 0)] = Tile(shape[Pos(0, 0)].kind if shape.get(Pos(0, 0)) is not None else TileEnum.EMPTY,
+                                debug='+')
 
     return shape
 

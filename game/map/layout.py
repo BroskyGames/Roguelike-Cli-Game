@@ -3,10 +3,10 @@ from __future__ import annotations
 from dataclasses import InitVar, dataclass, field
 from typing import ClassVar, TYPE_CHECKING
 
-from game.core.core_types import BaseDirections, Directions, Pos, Size
+from game.core.geometry import BaseDirections, Directions, Pos, Size
 from .graph import RoomNode, bfs
-from .room_types import RoomTypes
 from .special_templates import ROOM_TEMPLATES, accumulate_ascii_doors, ascii_traverser, get_template_size
+from ..core.map import RoomTypes
 from ..utils import Reducer
 
 if TYPE_CHECKING:

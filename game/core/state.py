@@ -1,16 +1,18 @@
-from dataclasses import dataclass, field
-from typing import Any, TYPE_CHECKING
+from __future__ import annotations
 
-if TYPE_CHECKING:
-    from .core_types import Pos
-    from ..map.tile_map import Tile
+from dataclasses import dataclass, field
+from typing import Any
+
+from .geometry import Pos
+from .map import Tile
 
 
 @dataclass(slots=True)
-class GameState:
+class State:
     seed: int = None
     rng_state: Any = None
-    map: dict["Pos", "Tile"] = field(default_factory=dict)
+    map: dict[Pos, Tile] = field(default_factory=dict)
     curr_room: int = None
+    camera_center: Pos = Pos(0, 0)
 
     debug: bool = False
