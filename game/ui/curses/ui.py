@@ -1,9 +1,10 @@
 import curses
 
 from game.core.engine import Engine
-from game.ui.curses.layout import HSplit, LayoutBuilder, SplitSpec, VSplit, WindowNode
+from game.ui.curses.border import bordered
 from game.ui.curses.manager import WindowManager
 from game.ui.curses.windows.map_window import MapWindow
+from game.ui.layout import HSplit, LayoutBuilder, SplitSpec, VSplit, WindowNode
 
 GameLayout = LayoutBuilder(VSplit(
     top=HSplit(
@@ -31,12 +32,14 @@ class UI:
     def _main(self, stdscr: curses.window) -> None:
         curses.curs_set(0)
         curses.start_color()
+        stdscr.noutrefresh()
         self._wm = WindowManager(stdscr, GameLayout, {
-            "map": lambda r: MapWindow(r, self._engine.state.map, self._engine.state.camera_center)
+            "map": bordered(lambda r: MapWindow(r, self._engine.state.map, self._engine.state.camera_center))
         })
 
+        self._wm.draw()
+
         while True:
-            self._wm.draw()
             key = stdscr.getch()
 
             if key == curses.KEY_RESIZE:
@@ -45,3 +48,4 @@ class UI:
                 break
             else:
                 self._engine.handle_input(key)
+                self._wm.draw()

@@ -3,37 +3,7 @@ from __future__ import annotations
 from asyncio import Protocol
 
 from game.ui.curses.rect import WindowRect
-
-
-class LayoutBuilder:
-    def __init__(self, layout: LayoutNode) -> None:
-        self.layout = layout
-
-    def build(self, h: int, w: int) -> dict[str, WindowRect]:
-        windows: dict[str, WindowRect] = {}
-        self.layout.compute(h, w, 0, 0, windows)
-        return windows
-
-
-class SplitSpec:
-    def __init__(self, ratio: float | None = None, fixed: int | None = None, reverse: bool = False):
-        assert (ratio is not None) ^ (fixed is not None), "You must provide either ratio or fixed"
-        self.ratio = ratio
-        self.fixed = fixed
-        self.reverse = reverse
-
-    def compute(self, total) -> tuple[int, int]:
-        if self.fixed is not None:
-            a = self.fixed
-        elif self.ratio is not None:
-            a = int(self.ratio * total)
-        else:
-            raise RuntimeError("Either ratio or fixed must exist")
-        b = total - a
-        if not self.reverse:
-            return a, b
-        else:
-            return b, a
+from game.ui.layout.splits import SplitSpec
 
 
 class LayoutNode(Protocol):

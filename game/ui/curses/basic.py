@@ -7,6 +7,7 @@ from .rect import WindowRect
 
 
 class Window(ABC):
+
     def __init__(self, rect: WindowRect):
         self.win = curses.newwin(*rect)
 
@@ -19,4 +20,5 @@ class Window(ABC):
 
     @abstractmethod
     def draw(self) -> None:
+        """self.win.noutrefresh() call required"""
         ...

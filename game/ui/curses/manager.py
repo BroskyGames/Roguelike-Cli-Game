@@ -3,8 +3,8 @@ from __future__ import annotations
 import curses
 from typing import Callable
 
+from game.ui.layout import LayoutBuilder
 from .basic import Window
-from .layout import LayoutBuilder
 from .rect import WindowRect
 
 WindowFactory = dict[str, Callable[[WindowRect], Window]]
@@ -43,7 +43,5 @@ class WindowManager:
     def draw(self):
         # self._draw_background()
         for window in self.windows.values():
-            window.win.erase()
             window.draw()
-            window.win.noutrefresh()
         curses.doupdate()

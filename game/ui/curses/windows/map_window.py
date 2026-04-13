@@ -14,6 +14,8 @@ class MapWindow(Window):
         self.camera_center = camera_center.y, camera_center.x
 
     def draw(self) -> None:
+        print("draw")
+        self.win.erase()
         h, w = self.win.getmaxyx()
         start_y = self.camera_center[0] - (h // 2)
         start_x = self.camera_center[1] - (w // 4)
@@ -32,5 +34,6 @@ class MapWindow(Window):
                 try:
                     self.win.addch(screen_y, screen_x, char)
                 except curses.error:
+                    # print(screen_y, screen_x, h, w)
                     pass
-        self.win.border()
+        self.win.noutrefresh()
