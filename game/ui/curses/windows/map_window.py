@@ -1,9 +1,9 @@
 import curses
 
 from game.core.geometry import Pos
-from game.core.map import Tile
+from game.core.map_types import Tile
 from game.ui.curses.basic import Window
-from game.ui.curses.rect import WindowRect
+from game.ui.rect import WindowRect
 
 
 # TODO: Complete MapWindow

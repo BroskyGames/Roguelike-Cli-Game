@@ -74,7 +74,8 @@ game/
   core/
     state.py
     engine.py
-    core_types.py
+    geometry.py
+    map_types.py
   map/
     graph.py
     layout.py
@@ -85,11 +86,15 @@ game/
     special_templates.py
   ui/
     debug.py
+    rect.py
+    layout/
+      builder.py
+      nodes.py
+      splits.py
     curses/
       basic.py
-      layout.py
       manager.py
-      rect.py
+      border.py
       windows/
         map_window.py
   utils/

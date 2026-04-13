@@ -1,5 +1,5 @@
-from game.ui.curses.rect import WindowRect
 from game.ui.layout.nodes import LayoutNode
+from game.ui.rect import WindowRect
 
 
 class LayoutBuilder:

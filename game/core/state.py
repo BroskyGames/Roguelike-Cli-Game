@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from .geometry import Pos
-from .map import Tile
+from .map_types import Tile
 
 
 @dataclass(slots=True)

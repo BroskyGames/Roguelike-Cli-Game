@@ -3,7 +3,7 @@ from __future__ import annotations
 import curses
 from abc import ABC, abstractmethod
 
-from .rect import WindowRect
+from game.ui.rect import WindowRect
 
 
 class Window(ABC):

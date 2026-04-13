@@ -4,8 +4,8 @@ import curses
 from typing import Callable
 
 from game.ui.layout import LayoutBuilder
+from game.ui.rect import WindowRect
 from .basic import Window
-from .rect import WindowRect
 
 WindowFactory = dict[str, Callable[[WindowRect], Window]]
 

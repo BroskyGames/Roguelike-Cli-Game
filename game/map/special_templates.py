@@ -1,5 +1,5 @@
 from game.core.geometry import Pos, Size, Vector2
-from game.core.map import RoomTypes
+from game.core.map_types import RoomTypes
 from game.utils import Reducer
 
 type ASCII = tuple[tuple[str, ...], ...]

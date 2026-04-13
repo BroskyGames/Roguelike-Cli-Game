@@ -1,5 +1,5 @@
 from game.core.geometry import Pos
-from game.core.map import Tile
+from game.core.map_types import Tile
 from game.map.graph import RoomNode
 
 

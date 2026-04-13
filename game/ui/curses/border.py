@@ -1,7 +1,7 @@
 from typing import Callable
 
 from game.ui.curses.basic import Window
-from game.ui.curses.rect import WindowRect
+from game.ui.rect import WindowRect
 
 
 class BorderedWindow(Window):

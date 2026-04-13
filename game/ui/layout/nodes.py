@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from game.ui.curses.rect import WindowRect
 from game.ui.layout.splits import SplitSpec
+from game.ui.rect import WindowRect
 
 
 class LayoutNode(Protocol):

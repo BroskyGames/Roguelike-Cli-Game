@@ -7,7 +7,7 @@ from .graph import assign_tags, generate_graph
 from .layout import Room, build_rooms_from_graph
 from .tile_map import build_map
 from ..core.geometry import Pos
-from ..core.map import Tile
+from ..core.map_types import Tile
 from ..ui.debug import display_shape, print_nodes
 
 

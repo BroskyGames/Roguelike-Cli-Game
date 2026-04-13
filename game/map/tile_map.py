@@ -2,7 +2,7 @@ from .corridor import Corridor
 from .layout import Room
 from .special_templates import ROOM_TEMPLATES, ascii_traverser
 from ..core.geometry import BaseDirections, Pos
-from ..core.map import RoomTypes, Tile, TileEnum
+from ..core.map_types import RoomTypes, Tile, TileEnum
 from ..utils import Reducer
 
 
