@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from asyncio import Protocol
+from typing import Protocol
 
 from game.ui.curses.rect import WindowRect
 from game.ui.layout.splits import SplitSpec
