@@ -1,13 +1,21 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from collections import deque
+from dataclasses import dataclass, field
+from enum import StrEnum, auto
 from typing import Any, TYPE_CHECKING
 
+from game.core.actions import Action
 from game.core.geometry import Pos
 from game.core.map_types import Tile
 
 if TYPE_CHECKING:
     from game.map.layout import Room
+
+
+class Phase(StrEnum):
+    PLANNING = auto()
+    RESOLUTION = auto()
 
 
 @dataclass(slots=True)
@@ -19,3 +27,9 @@ class State:
 
     rng_state: Any = None
     debug: bool = False
+
+    phase: Phase = field(init=False, default=Phase.PLANNING)
+    pending_actions: list[Action] = field(init=False, default_factory=list)
+    action_queue: deque[Action] = field(init=False, default_factory=deque)
+    player_ap: int = field(init=False, default=3)
+    player_ap_max: int = field(init=False, default=3)

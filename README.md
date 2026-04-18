@@ -77,8 +77,8 @@ Most likely by inserting spaces between characters.
 game/
   __main__.py
   game_factory.py
-  state.py
   core/
+    state.py
     engine.py
     geometry.py
     map_types.py

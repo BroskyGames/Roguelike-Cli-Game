@@ -7,10 +7,9 @@ from game.ui.rect import Rect
 class MapView:
     def __init__(self, state: State):
         self._state = state
-        self.map = state.map
 
     def get_tile(self, y: int, x: int) -> Tile:
-        return self.map.get(Pos(x, y), Tile(TileEnum.EMPTY))
+        return self._state.map.get(Pos(x, y), Tile(TileEnum.EMPTY))
 
     def get_view(self, rect: Rect) -> tuple[tuple[Tile, ...], ...]:
         return tuple(
