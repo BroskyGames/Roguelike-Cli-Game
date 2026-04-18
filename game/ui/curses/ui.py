@@ -37,7 +37,7 @@ class UI:
         curses.start_color()
         stdscr.noutrefresh()
         self._wm = WindowManager(stdscr, GameLayout, {
-            "map": bordered(lambda r: MapWindow(r, MapView(self._engine.state.map), self._engine.state.camera_center))
+            "map": bordered(lambda r: MapWindow(r, MapView(self._engine.state)))
         })
 
         self._wm.draw()

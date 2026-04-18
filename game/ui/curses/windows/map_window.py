@@ -1,24 +1,23 @@
 import curses
 
-from game.core.geometry import Pos, Size
 from game.ui.curses.basic import Window
-from game.ui.rect import WindowRect
+from game.ui.rect import Rect
 from game.ui.views.map_view import MapView
 
 
 class MapWindow(Window):
-    def __init__(self, rect: WindowRect, map_view: MapView, camera_center: Pos):
+    def __init__(self, rect: Rect, map_view: MapView):
         super().__init__(rect)
-        self.map = map_view
-        self.camera_center = camera_center.y, camera_center.x
+        self.map_view = map_view
 
     def draw(self) -> None:
         self.win.erase()
         h, w = self.win.getmaxyx()
-        start_y = self.camera_center[0] - (h // 2)
-        start_x = self.camera_center[1] - (w // 4)
+        cam = self.map_view.get_camera()
+        start_y = cam[0] - (h // 2)
+        start_x = cam[1] - (w // 4)
 
-        view = self.map.get_view(Pos(start_x, start_y), Size(w // 2, h))
+        view = self.map_view.get_view(Rect(h, w // 2, start_y, start_x))
 
         for y, row in enumerate(view):
             for x, tile in enumerate(row):

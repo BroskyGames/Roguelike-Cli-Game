@@ -1,6 +1,6 @@
 from random import Random
 
-from game.state import State
+from game.core.state import State
 
 
 class Engine:

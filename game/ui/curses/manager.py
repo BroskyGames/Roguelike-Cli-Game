@@ -4,10 +4,10 @@ import curses
 from typing import Callable
 
 from game.ui.layout import LayoutBuilder
-from game.ui.rect import WindowRect
+from game.ui.rect import Rect
 from .basic import Window
 
-WindowFactory = dict[str, Callable[[WindowRect], Window]]
+WindowFactory = dict[str, Callable[[Rect], Window]]
 
 
 class WindowManager:
@@ -20,7 +20,6 @@ class WindowManager:
             for name, rect in layout.items()
             if name in windows_factory.keys()
         }
-        print(layout)
 
     def handle_resize(self):
         curses.update_lines_cols()

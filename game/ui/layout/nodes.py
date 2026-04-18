@@ -3,11 +3,11 @@ from __future__ import annotations
 from typing import Protocol
 
 from game.ui.layout.splits import SplitSpec
-from game.ui.rect import WindowRect
+from game.ui.rect import Rect
 
 
 class LayoutNode(Protocol):
-    def compute(self, h: int, w: int, y: int, x: int, rects: dict[str, WindowRect]) -> None:
+    def compute(self, h: int, w: int, y: int, x: int, rects: dict[str, Rect]) -> None:
         ...
 
 
@@ -16,7 +16,7 @@ class WindowNode(LayoutNode):
         self.name = name
 
     def compute(self, h, w, y, x, rects):
-        rects[self.name] = WindowRect(h, w, y, x)
+        rects[self.name] = Rect(h, w, y, x)
 
 
 class HSplit(LayoutNode):
