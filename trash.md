@@ -1,4 +1,57 @@
+# Mutable_Pos
+
+```python
+@runtime_checkable
+class IsPosition(Protocol):
+    @property
+    def x(self) -> int: ...
+
+    @property
+    def y(self) -> int: ...
+
+
+class PositionOps(ABC):
+    def __add__(self: Self, other: "Vector2") -> Self:
+        if isinstance(other, Vector2):
+            return self.__class__(self.x + other.x, self.y + other.y)
+        return NotImplemented
+
+    def __sub__(self: Self, other: IsPosition) -> "Vector2":
+        if isinstance(other, IsPosition):
+            return Vector2(self.x - other.x, self.y - other.y)
+        return NotImplemented
+
+    def __iter__(self: Self) -> Iterator[int]:
+        yield self.x
+        yield self.y
+
+    def __getitem__(self: Self, index: int) -> int:
+        if index == 0:
+            return self.x
+        if index == 1:
+            return self.y
+        raise IndexError
+
+
+@dataclass(slots=True, frozen=True)
+class Pos(PositionOps):
+    x: int
+    y: int
+
+
+@dataclass(slots=True)
+class MutablePos(PositionOps):
+    x: int
+    y: int
+
+    def __iadd__(self: "MutablePos", other: IsPosition) -> "MutablePos":
+        self.x += other.x
+        self.y += other.y
+        return self
+```
+
 # Rooms
+
 ```python
 class Room:
     def __init__(self, pos: Pos, template: str, rotate: int = 0, min_doors: int = 1, door_chance: float = 0.5) -> None:
@@ -39,6 +92,7 @@ class Room:
 ```
 
 # Templates
+
 ```python
 @dataclass(frozen=True)
 class RoomTemplate:
@@ -71,6 +125,7 @@ class RoomTemplate:
             for x in range(len(self.layout)):
                 print(self.layout[x][y], end=" ")
             print()
+
 
 RoomTemplate(
     "square", (
@@ -106,13 +161,14 @@ RoomTemplate(
 )
 ```
 
-# Corridors 
+# Corridors
+
 ```python
 @dataclass
 class Corridor:
     start: Pos
     end: Pos
-    grid: List[List[str]] # reference to dungeon map
+    grid: List[List[str]]  # reference to dungeon map
     path: List[Pos] = field(default_factory=list)
 
     def __post_init__(self):
@@ -133,7 +189,7 @@ class Corridor:
             return False
         if x < 0 or x >= len(self.grid[0]):
             return False
-        return self.grid[y][x] in (' ', '.', '+') # allow empty + doors
+        return self.grid[y][x] in (' ', '.', '+')  # allow empty + doors
 
     def _find_path(self) -> List[Pos]:
         queue = deque([self.start])
@@ -152,7 +208,7 @@ class Corridor:
 
         # reconstruct path
         if self.end not in came_from:
-            return [] # no valid path
+            return []  # no valid path
 
         path = []
         cur = self.end
@@ -169,21 +225,24 @@ class Corridor:
 ```
 
 # Curses Example
+
 ```python
-def cursor_movement(k: int, cx: int, cy: int, w: int,  h: int) -> tuple[int, int]:
+def cursor_movement(k: int, cx: int, cy: int, w: int, h: int) -> tuple[int, int]:
     if k == curses.KEY_DOWN:
-        cy = min(h-1, cy+1)
+        cy = min(h - 1, cy + 1)
     elif k == curses.KEY_UP:
-        cy = max(0, cy-1)
+        cy = max(0, cy - 1)
     elif k == curses.KEY_RIGHT:
-        cx = min(w-1, cx+1)
+        cx = min(w - 1, cx + 1)
     elif k == curses.KEY_LEFT:
-        cx = max(0, cx-1)
+        cx = max(0, cx - 1)
 
     return cx, cy
 
+
 def center_x_str(string: str, width: int) -> int:
     return (width // 2) - (len(string) // 2)
+
 
 def draw_menu(stdscr):
     k = 0
@@ -208,12 +267,12 @@ def draw_menu(stdscr):
         cursor_x, cursor_y = cursor_movement(k, cursor_x, cursor_y, width, height)
 
         # Strings
-        title = "Curses example"[:width-1]
-        subtitle = "Written by Clay McLeod"[:width-1]
-        keystr = "Last key pressed: {}".format(k)[:width-1]
-        statusbarstr = f"Press 'q' to exit | STATUS BAR | Pos: {cursor_x}, {cursor_y}"[:width-1]
+        title = "Curses example"[:width - 1]
+        subtitle = "Written by Clay McLeod"[:width - 1]
+        keystr = "Last key pressed: {}".format(k)[:width - 1]
+        statusbarstr = f"Press 'q' to exit | STATUS BAR | Pos: {cursor_x}, {cursor_y}"[:width - 1]
         if k == 0:
-            keystr = "No key press detected..."[:width-1]
+            keystr = "No key press detected..."[:width - 1]
         start_y = (height // 2) - 3
 
         # Rendering some text
@@ -222,11 +281,11 @@ def draw_menu(stdscr):
 
         # Render status bar
         stdscr.attron(curses.color_pair(3))
-        stdscr.addstr(height-1, 0, statusbarstr)
-        stdscr.addstr(height-1, len(statusbarstr), " " * (width - len(statusbarstr) - 1))
+        stdscr.addstr(height - 1, 0, statusbarstr)
+        stdscr.addstr(height - 1, len(statusbarstr), " " * (width - len(statusbarstr) - 1))
         stdscr.attroff(curses.color_pair(3))
 
-        stdscr.addstr(start_y, center_x_str(title, width), title, curses.color_pair(2)|curses.A_BOLD)
+        stdscr.addstr(start_y, center_x_str(title, width), title, curses.color_pair(2) | curses.A_BOLD)
         stdscr.addstr(start_y + 1, center_x_str(subtitle, width), subtitle)
         stdscr.addstr(start_y + 3, (width // 2) - 2, '-' * 4)
         stdscr.addstr(start_y + 5, center_x_str(keystr, width), keystr)
@@ -237,6 +296,7 @@ def draw_menu(stdscr):
 
         # Wait for next input
         k = stdscr.getch()
+
 
 def main():
     curses.wrapper(draw_menu)

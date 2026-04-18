@@ -1,26 +1,22 @@
-from abc import ABC
+from __future__ import annotations
+
 from dataclasses import dataclass
 from enum import IntFlag, auto
-from typing import Iterator, NamedTuple, Protocol, Self, runtime_checkable
+from typing import Iterator, NamedTuple, Self
 
 
-@runtime_checkable
-class IsPosition(Protocol):
-    @property
-    def x(self) -> int: ...
+@dataclass(slots=True, frozen=True)
+class Pos:
+    x: int
+    y: int
 
-    @property
-    def y(self) -> int: ...
-
-
-class PositionOps(ABC):
-    def __add__(self: Self, other: "Vector2") -> Self:
+    def __add__(self: Pos, other: Vector2) -> Pos:
         if isinstance(other, Vector2):
-            return self.__class__(self.x + other.x, self.y + other.y)
+            return Pos(self.x + other.x, self.y + other.y)
         return NotImplemented
 
-    def __sub__(self: Self, other: IsPosition) -> "Vector2":
-        if isinstance(other, IsPosition):
+    def __sub__(self: Self, other: Pos) -> Vector2:
+        if isinstance(other, Pos):
             return Vector2(self.x - other.x, self.y - other.y)
         return NotImplemented
 
@@ -37,39 +33,22 @@ class PositionOps(ABC):
 
 
 @dataclass(slots=True, frozen=True)
-class Pos(PositionOps):
-    x: int
-    y: int
-
-
-@dataclass(slots=True)
-class MutablePos(PositionOps):
-    x: int
-    y: int
-
-    def __iadd__(self: "MutablePos", other: IsPosition) -> "MutablePos":
-        self.x += other.x
-        self.y += other.y
-        return self
-
-
-@dataclass(slots=True, frozen=True)
 class Vector2:
     x: int
     y: int
 
-    def __iter__(self: Self) -> Iterator[int]:
+    def __iter__(self) -> Iterator[int]:
         yield self.x
         yield self.y
 
-    def __getitem__(self: Self, index: int) -> int:
+    def __getitem__(self, index: int) -> int:
         if index == 0:
             return self.x
         if index == 1:
             return self.y
         raise IndexError
 
-    def __neg__(self) -> "Vector2":
+    def __neg__(self) -> Vector2:
         return Vector2(-self.x, -self.y)
 
 
