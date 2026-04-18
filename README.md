@@ -11,9 +11,28 @@ AI/ Input decides on a queue of actions that are le than `action_points` of the 
 Acceptable actions are for example: `Move(Direction)`, `Attack(Entity)`, `Use(Item)` \
 Actions share `action_cost` and `perform()`.
 
+## Turn
+
+process_turn:
+
+- render game state
+- player_actions
+- ai_actions
+- for action
+    - resolve_systems
+    - render
+
+### Populate Player Actions
+
+UI onInput -> engine process input:
+
+- add_action() {simulate action}
+- remove_action()
+- commit_turn()
+
 ## UI
 
-Made using curses and abstracted to widgets like: MapScreen, PlayerInfo, Logs, LevelInfo.
+Made using curses and abstracted to windows like: MapWindow, PlayerWindow, LogsWindow, LevelWindow.
 
 ## Generation
 
@@ -51,19 +70,6 @@ Killing the third boss is the win condition.
 
 While rendering double the width to keep the aspect ratio 1:1.
 Most likely by inserting spaces between characters.
-
-# Cycle
-
-- input
-- update:
-    - player_action
-    - enemy_update
-    - environment_update
-- render:
-    - map
-    - entities
-    - ui
-- tick_counter
 
 # File Structure:
 

@@ -1,8 +1,8 @@
 from random import Random, randint
 
 from game.core.engine import Engine
-from game.core.state import State
 from game.map.level import LevelConfig, generate_level
+from game.state import State
 
 
 def new_game(seed: int | None, level_config: LevelConfig, display_debug: bool = False, debug: bool = False) -> Engine:

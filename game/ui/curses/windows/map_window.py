@@ -1,38 +1,31 @@
 import curses
 
-from game.core.geometry import Pos
-from game.core.map_types import Tile
+from game.core.geometry import Pos, Size
 from game.ui.curses.basic import Window
 from game.ui.rect import WindowRect
+from game.ui.views.map_view import MapView
 
 
-# TODO: Complete MapWindow
 class MapWindow(Window):
-    def __init__(self, rect: WindowRect, map: dict[Pos, Tile], camera_center: Pos):
+    def __init__(self, rect: WindowRect, map_view: MapView, camera_center: Pos):
         super().__init__(rect)
-        self.map = map
+        self.map = map_view
         self.camera_center = camera_center.y, camera_center.x
 
     def draw(self) -> None:
-        print("draw")
         self.win.erase()
         h, w = self.win.getmaxyx()
         start_y = self.camera_center[0] - (h // 2)
         start_x = self.camera_center[1] - (w // 4)
-        for screen_y in range(0, h):
-            for screen_x in range(0, w, 2):
-                map_y = start_y + screen_y
-                map_x = start_x + (screen_x // 2)
 
-                tile = self.map.get(Pos(map_x, map_y))
+        view = self.map.get_view(Pos(start_x, start_y), Size(w // 2, h))
 
-                if tile is None:
-                    char = ' '
-                else:
-                    char = str(tile)
+        for y, row in enumerate(view):
+            for x, tile in enumerate(row):
+                char = str(tile)
 
                 try:
-                    self.win.addch(screen_y, screen_x, char)
+                    self.win.addch(y, x * 2, char)
                 except curses.error:
                     # print(screen_y, screen_x, h, w)
                     pass

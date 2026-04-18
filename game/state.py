@@ -3,8 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from .geometry import Pos
-from .map_types import Tile
+from game.core.geometry import Pos
+from game.core.map_types import Tile
 
 
 @dataclass(slots=True)

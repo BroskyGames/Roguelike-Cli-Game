@@ -4,7 +4,10 @@ from game.core.engine import Engine
 from game.ui.curses.border import bordered
 from game.ui.curses.manager import WindowManager
 from game.ui.curses.windows.map_window import MapWindow
-from game.ui.layout import HSplit, LayoutBuilder, SplitSpec, VSplit, WindowNode
+from game.ui.layout import LayoutBuilder
+from game.ui.layout.nodes import HSplit, VSplit, WindowNode
+from game.ui.layout.splits import ClampSplit, RatioSplit, ReverseSplit, StepSplit
+from game.ui.views.map_view import MapView
 
 GameLayout = LayoutBuilder(VSplit(
     top=HSplit(
@@ -12,12 +15,12 @@ GameLayout = LayoutBuilder(VSplit(
         right=VSplit(
             top=WindowNode("stats"),
             bottom=WindowNode("level"),
-            split=SplitSpec(ratio=0.5)
+            split=RatioSplit(1 / 2)
         ),
-        split=SplitSpec(ratio=3 / 4)
+        split=StepSplit(ReverseSplit(ClampSplit(RatioSplit(1 / 4), min_size=24, max_size=48)), step=2)
     ),
     bottom=WindowNode("log"),
-    split=SplitSpec(fixed=8, reverse=True)
+    split=ReverseSplit(ClampSplit(RatioSplit(1 / 4), min_size=8))
 ))
 
 
@@ -34,7 +37,7 @@ class UI:
         curses.start_color()
         stdscr.noutrefresh()
         self._wm = WindowManager(stdscr, GameLayout, {
-            "map": bordered(lambda r: MapWindow(r, self._engine.state.map, self._engine.state.camera_center))
+            "map": bordered(lambda r: MapWindow(r, MapView(self._engine.state.map), self._engine.state.camera_center))
         })
 
         self._wm.draw()
