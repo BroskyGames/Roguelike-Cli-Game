@@ -1,13 +1,11 @@
 from __future__ import annotations
 
-from collections import deque
 from dataclasses import dataclass, field
 from enum import StrEnum, auto
 from typing import Any, TYPE_CHECKING
 
 from game.core.geometry import Pos
 from game.core.map_types import Tile
-from game.domain.actions import Action
 
 if TYPE_CHECKING:
     from game.map.layout import Room
@@ -23,13 +21,10 @@ class State:
     seed: int
     map: dict[Pos, Tile]
     rooms: tuple[Room, ...]
+    player: int
     last_room: int = 0
 
     rng_state: Any = None
     debug: bool = False
 
     phase: Phase = field(init=False, default=Phase.PLANNING)
-    pending_actions: list[Action] = field(init=False, default_factory=list)
-    action_queue: deque[Action] = field(init=False, default_factory=deque)
-    player_ap: int = field(init=False, default=3)
-    player_ap_max: int = field(init=False, default=3)

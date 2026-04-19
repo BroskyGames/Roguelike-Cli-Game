@@ -2,12 +2,14 @@ import curses
 
 from game.core.engine import Engine
 from .curses.border import bordered
+from .curses.input import InputAdapter
 from .curses.manager import WindowManager
 from .curses.windows import MapWindow
 from .layout import LayoutBuilder
 from .layout.nodes import HSplit, VSplit, WindowNode
 from .layout.splits import ClampSplit, RatioSplit, ReverseSplit, StepSplit
 from .views.map_view import MapView
+from ..core.state import Phase
 
 GameLayout = LayoutBuilder(VSplit(
     top=HSplit(
@@ -28,6 +30,7 @@ class UI:
     def __init__(self, engine: Engine):
         self._engine = engine
         self._wm: WindowManager | None = None
+        self.input_adapter = InputAdapter(self._engine.state.player)
 
     def run(self) -> None:
         curses.wrapper(self._main)
@@ -36,6 +39,7 @@ class UI:
         curses.curs_set(0)
         curses.start_color()
         stdscr.nodelay(True)
+        stdscr.keypad(True)
         stdscr.noutrefresh()
         self._wm = WindowManager(stdscr, GameLayout, {
             "map": bordered(lambda r: MapWindow(r, MapView(self._engine.state)))
@@ -51,13 +55,14 @@ class UI:
             elif key == ord("q"):
                 raise SystemExit
 
-            if self._engine.state.phase == "RESOLUTION":
+            if self._engine.state.phase == Phase.RESOLUTION:
                 self._execute_step()
             elif key != -1:
-                self._engine.handle_input(key)
+                action = self.input_adapter.convert(key)
+                self._engine.handle_actions(action)
                 self._wm.draw()
 
     def _execute_step(self) -> None:
         self._engine.execute_step()
         self._wm.draw()
-        curses.napms(150)
+        curses.napms(250)

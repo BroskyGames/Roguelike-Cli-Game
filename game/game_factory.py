@@ -1,7 +1,11 @@
 from random import Random, randint
 
+import esper
+
 from game.core.engine import Engine
 from game.core.state import State
+from game.domain.components import ActionPoints, ActionQueue, Display, Health, InRoom, Player, Visible
+from game.map.layout import Room
 from game.map.level import LevelConfig, generate_level
 
 
@@ -11,6 +15,28 @@ def new_game(seed: int | None, level_config: LevelConfig, display_debug: bool = 
     rng = Random(seed)
 
     rooms, game_map = generate_level(rng, level_config, display_debug)
-    state = State(seed, game_map, tuple(rooms), rng_state=rng.getstate(), debug=debug)
+
+    player = spawn_player(rooms, 0)
+
+    state = State(seed, game_map, rooms, rng_state=rng.getstate(), debug=debug, player=player)
+
+    load_processors()
 
     return Engine(state)
+
+
+def spawn_player(rooms: tuple[Room, ...], room: int = 0) -> int:
+    return esper.create_entity(
+        Player(),
+        Health(20, 20),
+        rooms[room].get_center(),
+        ActionPoints(4, 4),
+        Display('@'),
+        InRoom(room),
+        ActionQueue(),
+        Visible(),
+    )
+
+
+def load_processors():
+    import game.systems.movement_processor  # noqa: F401

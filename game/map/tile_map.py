@@ -70,10 +70,10 @@ def get_corridor_shape(corridor: Corridor) -> dict[Pos, Tile]:
     return shape
 
 
-def build_map(rooms: list[Room], corridors: list[Corridor]) -> dict[Pos, Tile]:
+def build_map(rooms: list[Room], corridors: list[Corridor], debug: bool = False) -> dict[Pos, Tile]:
     game_map = {}
     for room in rooms:
-        for pos, tile in get_room_shape(room, True).items():
+        for pos, tile in get_room_shape(room, debug).items():
             game_map[pos] = merge_tile(game_map.get(pos, Tile(TileEnum.EMPTY)), tile)
     for corridor in corridors:
         for pos, tile in get_corridor_shape(corridor).items():

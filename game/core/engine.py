@@ -1,22 +1,19 @@
 from random import Random
 
-import esper
-
-from game.core.router import Router
+from game.core.router import Router, register_all_handlers
+from game.core.scheduler import ProcessorScheduler
 from game.core.state import Phase, State
-from game.domain.components import ActionPoints
-from game.systems.turn_processors import EnemyTurnProcessor, PlayerTurnProcessor, StepProcessor
+from game.domain.actions import Action, ClearQueueAction, EndTurnAction, RemoveLastAction
+from game.systems.action_queue_processor import ActionQueueProcessor
+from game.systems.ap_processor import ActionPointsProcessor
+from game.systems.turn_processors import PlayerTurnProcessor, StepProcessor
 
 
 class Engine:
     def __init__(self, state: State) -> None:
+        # RNG
         self.rng = Random(state.seed)
         self.state = state
-        self.router = Router()
-        self.turn_processors: list[StepProcessor] = [
-            PlayerTurnProcessor(self.router),
-            EnemyTurnProcessor(self.router),
-        ]
 
         if state.rng_state is not None:
             self.rng.setstate(state.rng_state)
@@ -24,25 +21,43 @@ class Engine:
         if self.state.debug:
             print(f"Seed: {state.seed}")
 
+        # Routing
+        self.router = Router()
+        register_all_handlers(self.router)
+
+        # Processors
+        self.turn_processors: list[StepProcessor] = [
+            PlayerTurnProcessor(self.router),
+            # EnemyTurnProcessor(self.router),
+        ]
+        self.ap_processor = ActionPointsProcessor()
+        self.action_queue = ActionQueueProcessor()
+        self.scheduler = ProcessorScheduler()
+
     def get_save(self):
         self.state.rng_state = self.rng.getstate()
         return self.state
 
-    def handle_input(self, key: int) -> None:
-        if self.state.phase == "PLANNING":
-            match key:
-                case ord("\n"):
+    def handle_actions(self, action: Action) -> None:
+        if self.state.phase == Phase.PLANNING:
+            match action:
+                case EndTurnAction():
                     self.state.phase = Phase.RESOLUTION
                     for processor in self.turn_processors:
-                        processor.start_processor()
+                        self.scheduler.add(processor)
+                    self.scheduler.start()
+                case RemoveLastAction():
+                    self.action_queue.remove_last()
+                case ClearQueueAction():
+                    self.action_queue.clear()
+                case Action():
+                    self.action_queue.add(action)
 
     def execute_step(self) -> bool:
-        for processor in self.turn_processors:
-            processor.process()
+        working = self.scheduler.step()
 
-        return any(processor.working for processor in self.turn_processors)
+        if not working:
+            self.state.phase = Phase.PLANNING
+            self.ap_processor.reset_all()
 
-    @staticmethod
-    def reset_ap() -> None:
-        for ent, ap in esper.get_component(ActionPoints):
-            ap.current = ap.max
+        return working

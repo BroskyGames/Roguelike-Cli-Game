@@ -28,7 +28,7 @@ def generate_level(
         rng: Random,
         config: LevelConfig,
         display_debug: bool = False
-) -> tuple[list[Room], dict[Pos, Tile]]:
+) -> tuple[tuple[Room, ...], dict[Pos, Tile]]:
     start = generate_graph(rng, config.rooms_amount, config.connection_bias)
 
     assign_tags(start, rng, config.genetic_chance, config.trap_chance)
@@ -56,9 +56,9 @@ def generate_level(
         except RuntimeError as e:
             print(f"{e}, retrying...")
 
-    game_map = build_map(rooms, corridors)
+    game_map = build_map(rooms, corridors, True)
 
     if display_debug:
         display_shape(game_map)
 
-    return rooms, game_map
+    return tuple(rooms), game_map
