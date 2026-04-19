@@ -1,25 +1,58 @@
+from abc import ABC, abstractmethod
+from typing import Generator
+
 import esper
 
-from game.core.actions import Action, AttackAction, MoveAction
-from game.core.geometry import Pos
-from game.systems.components import ActionPoints, ActionQueue, IsPlayer
+from game.domain.components import ActionPoints, ActionQueue, Player
 
 
-def execute(action: Action) -> None:
-    match action:
-        case MoveAction(ent, direction, _):
-            pos = esper.component_for_entity(ent, Pos)
-            new_pos = pos + direction.vector()
-            esper.add_component(ent, new_pos)
-        case AttackAction(ent, target, _):
-            ...
+class StepProcessor(esper.Processor, ABC):
+    def __init__(self, router) -> None:
+        self.router = router
+        self.processor = None
+        self.working: bool = False
 
+    def start_processor(self) -> None:
+        self.processor = self.make_processor()
+        self.working = True
 
-class PlayerTurnProcessor(esper.Processor):
     def process(self) -> None:
-        for ent, (queue, ap, _) in esper.get_components(ActionQueue, ActionPoints, IsPlayer):
+        try:
+            next(self.processor)
+        except StopIteration:
+            self.processor = None
+            self.working = False
+
+    @abstractmethod
+    def make_processor(self) -> Generator[None, None, None]:
+        ...
+
+
+class PlayerTurnProcessor(StepProcessor):
+    def __init__(self, router) -> None:
+        super().__init__(router)
+
+    def make_processor(self) -> Generator[None, None, None]:
+        for ent, (queue, ap, _) in esper.get_components(ActionQueue, ActionPoints, Player):
             if ap.current <= 0 or not queue.actions:
                 continue
             action = queue.actions.popleft()
-            execute(action)
+            self.router.dispatch(action)
+            yield
+
+            ap.current -= action.base_cost
+
+
+class EnemyTurnProcessor(StepProcessor):
+    def __init__(self, router) -> None:
+        super().__init__(router)
+
+    def make_processor(self) -> Generator[None, None, None]:
+        for ent, (queue, ap, _) in esper.get_components(ActionQueue, ActionPoints, Player):  # change to AI
+            if ap.current <= 0 or not queue.actions:
+                continue
+            action = queue.actions.popleft()
+            self.router.dispatch(action)
+            yield
+
             ap.current -= action.base_cost

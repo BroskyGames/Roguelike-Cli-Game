@@ -1,13 +1,13 @@
 import curses
 
-from curses.border import bordered
-from curses.manager import WindowManager
-from curses.windows import MapWindow
 from game.core.engine import Engine
-from layout import LayoutBuilder
-from layout.nodes import HSplit, VSplit, WindowNode
-from layout.splits import ClampSplit, RatioSplit, ReverseSplit, StepSplit
-from views.map_view import MapView
+from .curses.border import bordered
+from .curses.manager import WindowManager
+from .curses.windows import MapWindow
+from .layout import LayoutBuilder
+from .layout.nodes import HSplit, VSplit, WindowNode
+from .layout.splits import ClampSplit, RatioSplit, ReverseSplit, StepSplit
+from .views.map_view import MapView
 
 GameLayout = LayoutBuilder(VSplit(
     top=HSplit(

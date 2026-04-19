@@ -1,8 +1,7 @@
 from collections import deque
 from dataclasses import dataclass, field
-from typing import Final
 
-from game.core.actions import Action
+from game.domain.actions import Action
 
 
 @dataclass
@@ -22,13 +21,18 @@ class ActionPoints:
 
 
 @dataclass
+class Speed:
+    speed: int
+
+
+@dataclass
 class Health:
     health: int
 
 
-@dataclass
-class DashSpeed:
-    speed: int
+class Visible:
+    pass
 
 
-IsPlayer = Final[bool]
+class Player:
+    pass

@@ -5,9 +5,9 @@ from dataclasses import dataclass, field
 from enum import StrEnum, auto
 from typing import Any, TYPE_CHECKING
 
-from game.core.actions import Action
 from game.core.geometry import Pos
 from game.core.map_types import Tile
+from game.domain.actions import Action
 
 if TYPE_CHECKING:
     from game.map.layout import Room
