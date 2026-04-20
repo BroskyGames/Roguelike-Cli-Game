@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 from typing import ClassVar
 
 from game.core.geometry import Directions
@@ -9,13 +9,20 @@ from game.core.geometry import Directions
 
 @dataclass(frozen=True, slots=True)
 class Action(ABC):
-    entity: int
+    ent: int
     base_cost: ClassVar[float]
+
+    def __str__(self):
+        values = ", ".join(
+            f"{f.name}={getattr(self, f.name)}"
+            for f in fields(self)
+        )
+        return f"{self.__class__.__name__}({values})"
 
 
 @dataclass(frozen=True, slots=True)
 class MoveAction(Action):
-    direction: Directions
+    dir: Directions
     base_cost: ClassVar[float] = 1
 
 
@@ -26,7 +33,7 @@ class AttackAction(Action):
 
 @dataclass(frozen=True, slots=True)
 class DashAction(Action):
-    direction: Directions
+    dir: Directions
     base_cost: ClassVar[float] = 2
 
 

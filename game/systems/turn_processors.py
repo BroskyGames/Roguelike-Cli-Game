@@ -33,16 +33,16 @@ class PlayerTurnProcessor(StepProcessor):
         self.router = router
 
     def make_processor(self) -> Generator[None, None, None]:
-        print("Player turn")
         for ent, (queue, ap, _) in esper.get_components(ActionQueue, ActionPoints, Player):
-            if ap.current <= 0 or not queue.actions:
-                continue
-            action = queue.actions.popleft()
-            print(f"Dispatch {action}")
-            self.router.dispatch(action)
-            yield
+            while queue.actions:
+                if ap.current <= 0:
+                    break
 
-            ap.current -= action.base_cost
+                action = queue.actions.popleft()
+                self.router.dispatch(action)
+                ap.current -= action.base_cost
+                
+                yield
 
 
 class EnemyTurnProcessor(StepProcessor):
@@ -52,11 +52,12 @@ class EnemyTurnProcessor(StepProcessor):
 
     def make_processor(self) -> Generator[None, None, None]:
         for ent, (queue, ap, _) in esper.get_components(ActionQueue, ActionPoints, Player):  # change to AI
-            if ap.current <= 0 or not queue.actions:
-                continue
+            while queue.actions:
+                if ap.current <= 0:
+                    break
 
-            action = queue.actions.popleft()
-            self.router.dispatch(action)
-            ap.current -= action.base_cost
+                action = queue.actions.popleft()
+                self.router.dispatch(action)
+                ap.current -= action.base_cost
 
-            yield
+                yield

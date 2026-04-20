@@ -76,6 +76,12 @@ class Directions(IntFlag):
             x -= 1
         return Vector2(x, y)
 
+    def __repr__(self):
+        return f"<{self.__class__.__name__}.{self._name_}>"
+
+    def __str__(self):
+        return f"{self._name_}"
+
 
 BaseDirections: set[Directions] = set(Directions)
 DirectionsDiagonals: set[Directions] = set(Directions) | {Directions.NORTH | Directions.EAST,

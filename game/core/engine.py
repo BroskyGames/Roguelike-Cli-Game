@@ -1,11 +1,12 @@
 from random import Random
 
-from game.core.router import Router, register_all_handlers
+from game.core.router import Router
 from game.core.scheduler import ProcessorScheduler
 from game.core.state import Phase, State
-from game.domain.actions import Action, ClearQueueAction, EndTurnAction, RemoveLastAction
+from game.domain.actions import Action, ClearQueueAction, EndTurnAction, MoveAction, RemoveLastAction
 from game.systems.action_queue_processor import ActionQueueProcessor
 from game.systems.ap_processor import ActionPointsProcessor
+from game.systems.movement_processor import MovementProcessor
 from game.systems.turn_processors import PlayerTurnProcessor, StepProcessor
 
 
@@ -23,7 +24,7 @@ class Engine:
 
         # Routing
         self.router = Router()
-        register_all_handlers(self.router)
+        self.router.register(MoveAction, MovementProcessor().process)
 
         # Processors
         self.turn_processors: list[StepProcessor] = [

@@ -5,9 +5,13 @@ from .curses.border import bordered
 from .curses.input import InputAdapter
 from .curses.manager import WindowManager
 from .curses.windows import MapWindow
+from .curses.windows.action_window import ActionWindow
+from .curses.windows.data_window import DataWindow
 from .layout import LayoutBuilder
 from .layout.nodes import HSplit, VSplit, WindowNode
-from .layout.splits import ClampSplit, RatioSplit, ReverseSplit, StepSplit
+from .layout.splits import ClampSplit, FixedSplit, RatioSplit, ReverseSplit, StepSplit
+from .views.action_view import ActionQueueView
+from .views.data_view import DataView
 from .views.map_view import MapView
 from ..core.state import Phase
 
@@ -16,12 +20,16 @@ GameLayout = LayoutBuilder(VSplit(
         left=WindowNode("map"),
         right=VSplit(
             top=WindowNode("stats"),
-            bottom=WindowNode("level"),
+            bottom=WindowNode("actions"),
             split=RatioSplit(1 / 2)
         ),
         split=StepSplit(ReverseSplit(ClampSplit(RatioSplit(1 / 4), min_size=24, max_size=48)), step=2)
     ),
-    bottom=WindowNode("log"),
+    bottom=VSplit(
+        top=WindowNode("log"),
+        bottom=WindowNode("data"),
+        split=ReverseSplit(FixedSplit(1))
+    ),
     split=ReverseSplit(ClampSplit(RatioSplit(1 / 4), min_size=8))
 ))
 
@@ -42,7 +50,9 @@ class UI:
         stdscr.keypad(True)
         stdscr.noutrefresh()
         self._wm = WindowManager(stdscr, GameLayout, {
-            "map": bordered(lambda r: MapWindow(r, MapView(self._engine.state)))
+            "map": bordered(lambda r: MapWindow(r, MapView(self._engine.state))),
+            "actions": bordered(lambda r: ActionWindow(r, ActionQueueView(self._engine.state))),
+            "data": lambda r: DataWindow(r, DataView(self._engine.state)),
         })
 
         self._wm.draw()

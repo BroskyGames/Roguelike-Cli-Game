@@ -19,5 +19,12 @@ class InputAdapter:
         }
 
     def convert(self, key: int) -> Action | None:
+        key = self.normalize_key(key)
         factory = self.map.get(key)
         return factory() if factory else None
+
+    @staticmethod
+    def normalize_key(key: int) -> int:
+        if key in (127, 8):
+            return curses.KEY_BACKSPACE
+        return key

@@ -1,0 +1,17 @@
+from game.ui.curses.basic import Window
+from game.ui.rect import Rect
+from game.ui.views.data_view import DataView
+
+
+class DataWindow(Window):
+    def __init__(self, rect: Rect, data_view: DataView) -> None:
+        super().__init__(rect)
+        self.data_view = data_view
+
+    def draw(self) -> None:
+        self.win.erase()
+        _, w = self.win.getmaxyx()
+
+        self.win.addstr(0, 0, f"Phase: {self.data_view.get_phase()}")
+
+        self.win.noutrefresh()
