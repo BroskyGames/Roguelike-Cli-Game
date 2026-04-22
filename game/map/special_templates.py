@@ -2,6 +2,7 @@ from game.core.geometry import Pos, Size, Vector2
 from game.core.map_types import RoomTypes
 from game.utils import Reducer
 
+# TODO: Add more special rooms
 type ASCII = tuple[tuple[str, ...], ...]
 ROOM_TEMPLATES: dict[RoomTypes, tuple[ASCII, ...]] = {
     RoomTypes.SPAWN: ((
@@ -47,9 +48,10 @@ def ascii_traverser[T](template: ASCII, reducer: Reducer[T, tuple[Pos, str]], gl
     return reducer.acc
 
 
-def accumulate_ascii_doors(data: tuple[Pos, str], acc: tuple[Pos, ...]) -> tuple[Pos, ...]:
+def acc_ascii_doors(data: tuple[Pos, str], acc: list[Pos]) -> list[Pos]:
     pos, char = data
-    return (*acc, pos) if char == 'D' else acc
+    if char == 'D': acc.append(pos)
+    return acc
 
 
 def get_template_size(template: ASCII) -> Size:
@@ -57,4 +59,4 @@ def get_template_size(template: ASCII) -> Size:
 
 
 if __name__ == '__main__':
-    print(ascii_traverser(ROOM_TEMPLATES[RoomTypes.SPAWN][2], Reducer(accumulate_ascii_doors, ())))
+    print(ascii_traverser(ROOM_TEMPLATES[RoomTypes.SPAWN][2], Reducer(acc_ascii_doors, ())))

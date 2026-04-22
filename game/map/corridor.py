@@ -19,16 +19,35 @@ class Corridor:
 MAX_SEARCH_DIST = 100
 
 
-def door_exit(door: Door) -> Pos:
-    return door.pos + door.direction.vector()
+def build_corridors(rooms: tuple[Room, ...]) -> list[Corridor]:
+    corridors: list[Corridor] = []
+
+    for room in rooms:
+        for door in room.doors:
+            for target_door in door.connections:
+                if room.id > target_door.belongs_to:
+                    continue
+
+                allowed: set[Corridor] = {c for c in corridors if door in c.connects or target_door in c.connects}
+
+                start = _get_door_exit(door)
+                end = _get_door_exit(target_door)
+
+                path = _astar(start, end, _make_is_blocked_fn(rooms, corridors, allowed), door.direction,
+                              target_door.direction)
+
+                corridors.append(Corridor(tuple(path), (door, target_door)))
+
+    return corridors
 
 
-def manhattan(a: Pos, b: Pos) -> int:
-    return abs(a.x - b.x) + abs(a.y - b.y)
-
-
-def astar(start: Pos, goal: Pos, is_blocked_fn: Callable[[Pos], bool], start_dir: Directions, end_dir: Directions) -> \
-        list[Pos]:
+def _astar(
+        start: Pos,
+        goal: Pos,
+        is_blocked_fn: Callable[[Pos], bool],
+        start_dir: Directions,
+        end_dir: Directions
+) -> list[Pos]:
     heap = []
     counter = count()
     heappush(heap, (0, next(counter), start, None))
@@ -53,7 +72,7 @@ def astar(start: Pos, goal: Pos, is_blocked_fn: Callable[[Pos], bool], start_dir
             if is_blocked_fn(neighbor):
                 continue
 
-            if manhattan(neighbor, start) > MAX_SEARCH_DIST:
+            if _manhattan(neighbor, start) > MAX_SEARCH_DIST:
                 continue
 
             start_penalty = 0 if (prev_dir is not None) or (move_dir == start_dir) else .45
@@ -65,7 +84,7 @@ def astar(start: Pos, goal: Pos, is_blocked_fn: Callable[[Pos], bool], start_dir
             if tentative_g < g_score.get(neighbor, 1_000_000):
                 came_from[neighbor] = current
                 g_score[neighbor] = tentative_g
-                f = tentative_g + manhattan(neighbor, goal)
+                f = tentative_g + _manhattan(neighbor, goal)
 
                 heappush(heap, (
                     f,
@@ -76,8 +95,12 @@ def astar(start: Pos, goal: Pos, is_blocked_fn: Callable[[Pos], bool], start_dir
     raise RuntimeError("No path found between doors")
 
 
-def make_is_blocked_fn(rooms: tuple[Room, ...], corridors: list[Corridor], allowed: set[Corridor], padding: int = 1) -> \
-        Callable[[Pos], bool]:
+def _make_is_blocked_fn(
+        rooms: tuple[Room, ...],
+        corridors: list[Corridor],
+        allowed: set[Corridor],
+        padding: int = 1
+) -> Callable[[Pos], bool]:
     # @lru_cache(maxsize=500)
     def is_blocked(pos: Pos) -> bool:
         return any(
@@ -95,23 +118,9 @@ def make_is_blocked_fn(rooms: tuple[Room, ...], corridors: list[Corridor], allow
     return is_blocked
 
 
-def build_corridors(rooms: tuple[Room, ...]) -> list[Corridor]:
-    corridors: list[Corridor] = []
+def _get_door_exit(door: Door) -> Pos:
+    return door.pos + door.direction.vector()
 
-    for room in rooms:
-        for door in room.doors:
-            for target_door in door.connections:
-                if room.id > target_door.belongs_to:
-                    continue
 
-                allowed: set[Corridor] = {c for c in corridors if door in c.connects or target_door in c.connects}
-
-                start = door_exit(door)
-                end = door_exit(target_door)
-
-                path = astar(start, end, make_is_blocked_fn(rooms, corridors, allowed), door.direction,
-                             target_door.direction)
-
-                corridors.append(Corridor(tuple(path), (door, target_door)))
-
-    return corridors
+def _manhattan(a: Pos, b: Pos) -> int:
+    return abs(a.x - b.x) + abs(a.y - b.y)
