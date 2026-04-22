@@ -1,3 +1,3 @@
-from .reducers import combine_reducers, Reducer
+from .reducers import Reducer, combine_reducers
 
 __all__ = ["combine_reducers", "Reducer"]

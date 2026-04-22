@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from random import Random
 
-from ..core.map_types import RoomTypes
-from ..utils import Reducer, combine_reducers
+from game.core.map_types import RoomTypes
+from game.utils import Reducer, combine_reducers
 
 
 @dataclass(slots=True)

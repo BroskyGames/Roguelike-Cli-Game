@@ -6,8 +6,8 @@ from heapq import heappop, heappush
 from itertools import count
 from typing import Callable
 
+from game.core.geometry import BaseDirections, Directions, Pos
 from .layout import Door, Room
-from ..core.geometry import BaseDirections, Directions, Pos
 
 
 @dataclass(slots=True, frozen=True)

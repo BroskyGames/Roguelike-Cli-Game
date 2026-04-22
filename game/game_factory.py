@@ -5,8 +5,7 @@ import esper
 from game.core.engine import Engine
 from game.core.state import State
 from game.domain.components import ActionPoints, ActionQueue, Display, Health, InRoom, Player, Visible
-from game.map.layout import Room
-from game.map.level import LevelConfig, generate_level
+from game.map import LevelConfig, Room, generate_level
 
 
 def new_game(

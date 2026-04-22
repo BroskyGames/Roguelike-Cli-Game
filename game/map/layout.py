@@ -4,10 +4,10 @@ from dataclasses import InitVar, dataclass, field
 from typing import ClassVar, TYPE_CHECKING
 
 from game.core.geometry import BaseDirections, Directions, Pos, Size
+from game.core.map_types import RoomTypes
+from game.utils import Reducer
 from .graph import RoomNode, bfs
 from .special_templates import ROOM_TEMPLATES, acc_ascii_doors, ascii_traverser, get_template_size
-from ..core.map_types import RoomTypes
-from ..utils import Reducer
 
 if TYPE_CHECKING:
     from random import Random

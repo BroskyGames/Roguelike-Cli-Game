@@ -1,19 +1,19 @@
 import curses
 
 from game.core.engine import Engine
+from game.core.state import Phase
 from .curses.border import bordered
 from .curses.input import InputAdapter
 from .curses.manager import WindowManager
-from .curses.windows import MapWindow
 from .curses.windows.action_window import ActionWindow
 from .curses.windows.data_window import DataWindow
+from .curses.windows.map_window import MapWindow
 from .layout import LayoutBuilder
 from .layout.nodes import HSplit, VSplit, WindowNode
 from .layout.splits import ClampSplit, FixedSplit, RatioSplit, ReverseSplit, StepSplit
 from .views.action_view import ActionQueueView
 from .views.data_view import DataView
 from .views.map_view import MapView
-from ..core.state import Phase
 
 GameLayout = LayoutBuilder(VSplit(
     top=HSplit(

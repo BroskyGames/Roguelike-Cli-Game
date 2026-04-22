@@ -3,13 +3,13 @@ from dataclasses import dataclass, field
 from pprint import pprint
 from random import Random
 
+from game.core.geometry import Pos
+from game.core.map_types import Tile
+from game.ui.debug import display_shape, print_nodes
 from .corridor import build_corridors
 from .graph import assign_tags, generate_graph
 from .layout import Room, build_rooms_from_graph
 from .tile_map import build_map
-from ..core.geometry import Pos
-from ..core.map_types import Tile
-from ..ui.debug import display_shape, print_nodes
 
 
 @dataclass(frozen=True)

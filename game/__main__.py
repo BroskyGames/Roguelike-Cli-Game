@@ -1,5 +1,5 @@
 from game.game_factory import new_game
-from game.map.level import LevelConfig
+from game.map import LevelConfig
 from game.ui.ui import UI
 
 if __name__ == "__main__":

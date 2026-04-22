@@ -9,7 +9,7 @@ from game.core.geometry import Pos
 from game.core.map_types import Tile
 
 if TYPE_CHECKING:
-    from game.map.layout import Room
+    from game.map import Room
 
 
 class Phase(StrEnum):

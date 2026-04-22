@@ -41,7 +41,7 @@ class PlayerTurnProcessor(StepProcessor):
                 action = queue.actions.popleft()
                 self.router.dispatch(action)
                 ap.current -= action.base_cost
-                
+
                 yield
 
 
