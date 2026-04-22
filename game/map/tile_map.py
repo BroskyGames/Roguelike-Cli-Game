@@ -3,12 +3,12 @@ from collections import defaultdict
 from .corridor import Corridor
 from .layout import Room
 from .special_templates import ROOM_TEMPLATES, ascii_traverser
-from ..core.geometry import BaseDirections, Pos
+from ..core.geometry import BaseDirections, Directions, Pos
 from ..core.map_types import RoomTypes, Tile, TileType
 from ..utils import Reducer
 
 
-def merge_tile(base: Tile, new: Tile) -> Tile:
+def _merge_tile(base: Tile, new: Tile) -> Tile:
     priority = {
         TileType.DOOR: 3,
         TileType.FLOOR: 2,
@@ -18,7 +18,7 @@ def merge_tile(base: Tile, new: Tile) -> Tile:
     return new if priority[new.type] >= priority[base.type] else base
 
 
-def get_room_shape(room: Room, overlay: bool = False) -> dict[Pos, Tile]:
+def _get_room_shape(room: Room, overlay: bool = False) -> dict[Pos, Tile]:
     def accumulate_ascii_shape(data: tuple[Pos, str], acc: dict[Pos, Tile]) -> dict[Pos, Tile]:
         pos, char = data
         match char:
@@ -30,7 +30,16 @@ def get_room_shape(room: Room, overlay: bool = False) -> dict[Pos, Tile]:
                 acc[pos] = Tile(TileType.DOOR, room.id)
         return acc
 
-    shape: dict[Pos, Tile] = {}
+    def add_overlay():
+        center = room.get_center()
+
+        shape[center + Directions.WEST.vector()].debug = room.type.value
+        shape[center].debug = str(room.id // 10)
+        shape[center + Directions.EAST.vector()].debug = str(room.id % 10)
+
+        shape[Pos(0, 0)].debug = '+'
+
+    shape: defaultdict[Pos, Tile] = defaultdict(lambda: Tile(TileType.EMPTY))
 
     for x in range(room.x - 1, room.x + room.width + 1):
         for y in range(room.y - 1, room.y + room.height + 1):
@@ -45,18 +54,12 @@ def get_room_shape(room: Room, overlay: bool = False) -> dict[Pos, Tile]:
                         Tile(TileType.WALL, room.id)
 
     if overlay:
-        shape[Pos(room.x + room.width // 2 - 1, room.y + room.height // 2)] = Tile(TileType.FLOOR,
-                                                                                   debug=room.type.value)
-        shape[Pos(room.x + room.width // 2, room.y + room.height // 2)] = Tile(TileType.FLOOR, debug=str(room.id // 10))
-        shape[Pos(room.x + room.width // 2 + 1, room.y + room.height // 2)] = Tile(TileType.FLOOR,
-                                                                                   debug=str(room.id % 10))
-        shape[Pos(0, 0)] = Tile(shape[Pos(0, 0)].type if shape.get(Pos(0, 0)) is not None else TileType.EMPTY,
-                                debug='+')
+        add_overlay()
 
     return shape
 
 
-def get_corridor_shape(corridor: Corridor) -> dict[Pos, Tile]:
+def _get_corridor_shape(corridor: Corridor) -> dict[Pos, Tile]:
     shape = {pos: Tile(TileType.FLOOR) for pos in corridor.path}
     doors = {d.pos for d in corridor.connects}
 
@@ -75,9 +78,9 @@ def get_corridor_shape(corridor: Corridor) -> dict[Pos, Tile]:
 def build_map(rooms: tuple[Room, ...], corridors: list[Corridor], overlay: bool = False) -> defaultdict[Pos, Tile]:
     game_map = defaultdict(lambda: Tile(TileType.EMPTY))
     for room in rooms:
-        for pos, tile in get_room_shape(room, overlay).items():
-            game_map[pos] = merge_tile(game_map[pos], tile)
+        for pos, tile in _get_room_shape(room, overlay).items():
+            game_map[pos] = _merge_tile(game_map[pos], tile)
     for corridor in corridors:
-        for pos, tile in get_corridor_shape(corridor).items():
-            game_map[pos] = merge_tile(game_map[pos], tile)
+        for pos, tile in _get_corridor_shape(corridor).items():
+            game_map[pos] = _merge_tile(game_map[pos], tile)
     return game_map
