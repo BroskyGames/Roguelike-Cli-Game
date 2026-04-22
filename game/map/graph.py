@@ -25,16 +25,6 @@ class RoomNode:
         child.parent = self
 
 
-def bfs[T](start: RoomNode, reducer: Reducer[T, RoomNode]) -> T:
-    queue = deque([start])
-    while queue:
-        node = queue.popleft()
-        reducer(node)
-        for child in node.children:
-            queue.append(child)
-    return reducer.acc
-
-
 def generate_graph(rng: Random, rooms_amount=20, bias_weight=None) -> RoomNode:
     rooms = [RoomNode(0, 0, RoomTypes.SPAWN)]
 
@@ -83,3 +73,13 @@ def assign_tags(spawn: RoomNode, rng: Random, genetic_chance: float, trap_chance
     while last.parent is not None:
         last.type = RoomTypes.MAIN
         last = last.parent
+
+
+def bfs[T](start: RoomNode, reducer: Reducer[T, RoomNode]) -> T:
+    queue = deque([start])
+    while queue:
+        node = queue.popleft()
+        reducer(node)
+        for child in node.children:
+            queue.append(child)
+    return reducer.acc
