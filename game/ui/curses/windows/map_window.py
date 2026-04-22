@@ -26,6 +26,5 @@ class MapWindow(Window):
                 try:
                     self.win.addch(y, x * 2, char)
                 except curses.error:
-                    # print(screen_y, screen_x, h, w)
                     pass
         self.win.noutrefresh()

@@ -1,3 +1,5 @@
+import curses
+
 from game.ui.curses.basic import Window
 from game.ui.rect import Rect
 from game.ui.views.action_view import ActionQueueView
@@ -11,8 +13,11 @@ class ActionWindow(Window):
 
     def draw(self) -> None:
         self.win.erase()
-        _, w = self.win.getmaxyx()
+        h, w = self.win.getmaxyx()
         self.win.addstr(0, 0, "Action Queue".center(w))
-        for i, action in enumerate(self.action_view.get_action_queue()):
-            self.win.addstr(i + 2, 0, line(f"{i + 1}. {action.repr}", f"-{action.cost}", w))
+        for i, action in enumerate(self.action_view.get_action_queue()[:h]):
+            try:
+                self.win.addstr(i + 2, 0, line(f"{i + 1}. {action.repr}", f"-{action.cost}", w))
+            except curses.error:
+                pass
         self.win.noutrefresh()
