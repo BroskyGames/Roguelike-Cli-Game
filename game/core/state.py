@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import StrEnum, auto
 from typing import Any, TYPE_CHECKING
@@ -19,7 +20,7 @@ class Phase(StrEnum):
 @dataclass(slots=True)
 class State:
     seed: int
-    map: dict[Pos, Tile]
+    map: defaultdict[Pos, Tile]
     rooms: tuple[Room, ...]
     player: int
     last_room: int = 0

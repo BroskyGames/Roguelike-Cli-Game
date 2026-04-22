@@ -76,7 +76,7 @@ def astar(start: Pos, goal: Pos, is_blocked_fn: Callable[[Pos], bool], start_dir
     raise RuntimeError("No path found between doors")
 
 
-def make_is_blocked_fn(rooms: list[Room], corridors: list[Corridor], allowed: set[Corridor], padding: int = 1) -> \
+def make_is_blocked_fn(rooms: tuple[Room, ...], corridors: list[Corridor], allowed: set[Corridor], padding: int = 1) -> \
         Callable[[Pos], bool]:
     # @lru_cache(maxsize=500)
     def is_blocked(pos: Pos) -> bool:
@@ -95,7 +95,7 @@ def make_is_blocked_fn(rooms: list[Room], corridors: list[Corridor], allowed: se
     return is_blocked
 
 
-def build_corridors(rooms: list[Room]) -> list[Corridor]:
+def build_corridors(rooms: tuple[Room, ...]) -> list[Corridor]:
     corridors: list[Corridor] = []
 
     for room in rooms:

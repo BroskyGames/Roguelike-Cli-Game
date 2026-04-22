@@ -239,7 +239,7 @@ def build_rooms_from_graph(
         start: RoomNode, rng: Random,
         size_range: tuple[int, int] = (6, 12), main_diff: int = 2,
         padding_range: tuple[int, int] = (2, 4), max_attempts: int = 5, search_radius: int = 15
-) -> list[Room]:
+) -> tuple[Room, ...]:
     def place_room(node: RoomNode, rooms: list[Room]) -> list[Room]:
         parent = next(room for room in rooms if node.parent.id == room.graph_id) if node.parent is not None else None
 
@@ -274,4 +274,4 @@ def build_rooms_from_graph(
 
         return rooms
 
-    return bfs(start, Reducer(place_room, []))
+    return tuple(bfs(start, Reducer(place_room, [])))

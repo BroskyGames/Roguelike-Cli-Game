@@ -1,7 +1,7 @@
 import esper
 
 from game.core.geometry import Pos
-from game.core.map_types import Tile, TileEnum
+from game.core.map_types import Tile, TileType
 from game.core.state import State
 from game.domain.components import Display, InRoom, Visible
 from game.ui.rect import Rect
@@ -21,7 +21,7 @@ class MapView:
             for _, (ent, pos, _) in esper.get_components(Display, Pos, Visible)
         }
 
-        return entities.get(Pos(x, y)) or str(self._state.map.get(Pos(x, y), Tile(TileEnum.EMPTY)))
+        return entities.get(Pos(x, y)) or str(self._state.map.get(Pos(x, y), Tile(TileType.EMPTY)))
 
     def get_view(self, rect: Rect) -> tuple[tuple[str, ...], ...]:
         return tuple(

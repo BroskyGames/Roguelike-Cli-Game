@@ -1,9 +1,11 @@
+from collections import defaultdict
+
 from game.core.geometry import Pos
 from game.core.map_types import Tile
 from game.map.graph import RoomNode
 
 
-def display_shape(shape: dict[Pos, Tile]):
+def display_shape(shape: defaultdict[Pos, Tile]):
     min_x = min(pos.x for pos in shape)
     min_y = min(pos.y for pos in shape)
     max_x = max(pos.x for pos in shape)
@@ -12,7 +14,7 @@ def display_shape(shape: dict[Pos, Tile]):
     for y in range(min_y, max_y + 1):
         row = ""
         for x in range(min_x, max_x + 1):
-            tile = shape.get(Pos(x, y), ' ')
+            tile = shape[Pos(x, y)]
             row += str(tile) + ' '
         print(row)
 

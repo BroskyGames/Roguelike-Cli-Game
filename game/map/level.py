@@ -1,3 +1,4 @@
+from collections import defaultdict
 from dataclasses import dataclass, field
 from pprint import pprint
 from random import Random
@@ -27,13 +28,14 @@ class LevelConfig:
 def generate_level(
         rng: Random,
         config: LevelConfig,
-        display_debug: bool = False
-) -> tuple[tuple[Room, ...], dict[Pos, Tile]]:
+        debug: bool = False,
+        display_overlay: bool = False,
+) -> tuple[tuple[Room, ...], defaultdict[Pos, Tile]]:
     start = generate_graph(rng, config.rooms_amount, config.connection_bias)
 
     assign_tags(start, rng, config.genetic_chance, config.trap_chance)
 
-    if display_debug:
+    if debug:
         print_nodes(start)
 
     while True:
@@ -48,17 +50,18 @@ def generate_level(
                 config.search_radius
             )
 
-            if display_debug:
+            if debug:
                 pprint(rooms)
 
             corridors = build_corridors(rooms)
             break
         except RuntimeError as e:
-            print(f"{e}, retrying...")
+            if debug:
+                print(f"{e}, retrying...")
 
-    game_map = build_map(rooms, corridors, True)
+    game_map = build_map(rooms, corridors, display_overlay)
 
-    if display_debug:
+    if debug:
         display_shape(game_map)
 
     return tuple(rooms), game_map

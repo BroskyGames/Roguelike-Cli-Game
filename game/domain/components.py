@@ -49,3 +49,8 @@ class InRoom:
 @dataclass(frozen=True, slots=True)
 class Display:
     char: str
+
+
+@dataclass(frozen=True, slots=True)
+class Obstacle:
+    pass

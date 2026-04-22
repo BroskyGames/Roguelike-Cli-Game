@@ -1,22 +1,34 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import StrEnum
 
 
-class TileEnum(StrEnum):
+class TileType(StrEnum):
     EMPTY = ' '
     FLOOR = '.'
-    WALL = '#'
     DOOR = 'D'
+    WALL = '#'
+
+
+WALKABLE_TYPES = {
+    TileType.EMPTY: True,
+    TileType.FLOOR: True,
+    TileType.DOOR: True,
+    TileType.WALL: False,
+}
 
 
 @dataclass(slots=True)
 class Tile:
-    kind: TileEnum
+    type: TileType
     room_id: int = -1
     debug: str = ''
+    walkable: bool = field(init=False)
+
+    def __post_init__(self):
+        self.walkable = WALKABLE_TYPES[self.type]
 
     def __str__(self):
-        return self.debug if self.debug else str(self.kind)
+        return self.debug if self.debug else str(self.type)
 
 
 class RoomTypes(StrEnum):

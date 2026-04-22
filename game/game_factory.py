@@ -9,18 +9,22 @@ from game.map.layout import Room
 from game.map.level import LevelConfig, generate_level
 
 
-def new_game(seed: int | None, level_config: LevelConfig, display_debug: bool = False, debug: bool = False) -> Engine:
+def new_game(
+        seed: int | None,
+        level_config: LevelConfig,
+        display_debug: bool = False,
+        display_overlay: bool = False,
+        debug: bool = False
+) -> Engine:
     if seed is None:
         seed = randint(0, 2 ** 32 - 1)
     rng = Random(seed)
 
-    rooms, game_map = generate_level(rng, level_config, display_debug)
+    rooms, game_map = generate_level(rng, level_config, display_debug, display_overlay)
 
     player = spawn_player(rooms, 0)
 
     state = State(seed, game_map, rooms, rng_state=rng.getstate(), debug=debug, player=player)
-
-    load_processors()
 
     return Engine(state)
 
@@ -36,7 +40,3 @@ def spawn_player(rooms: tuple[Room, ...], room: int = 0) -> int:
         ActionQueue(),
         Visible(),
     )
-
-
-def load_processors():
-    import game.systems.movement_processor  # noqa: F401
