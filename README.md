@@ -80,17 +80,23 @@ game/
   core/
     state.py
     engine.py
+    scheduler.py
+    router.py
     geometry.py
     map_types.py
-  map/
-    graph.py
-    layout.py
-    corridor.py
-    tile_map.py
-    level.py
-    room_tags.py
-    special_templates.py
+  domain/
+    actions.py
+    components/
+      data.py
+      tags.py
+      stats.py
+  systems/
+    action_queue_processor.py
+    ap_procesor.py
+    movement_processor.py
+    turn_processor.py
   ui/
+    ui.py
     debug.py
     rect.py
     layout/
@@ -99,12 +105,25 @@ game/
       splits.py
     views/
       map_view.py
+      data_view.py
+      action_view.py
     curses/
       basic.py
       manager.py
+      input.py
       border.py
       windows/
         map_window.py
+        data_window.py
+        action_window.py
+  map/
+    graph.py
+    room.py
+    corridor.py
+    tile_map.py
+    level.py
+    special_templates.py
   utils/
     reducers.py   
+    string.py
 ```
