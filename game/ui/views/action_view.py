@@ -23,4 +23,4 @@ class ActionQueueView:
 
     @staticmethod
     def _convert_action(action: Action) -> ActionView:
-        return ActionView(str(action), action.base_cost)
+        return ActionView(action.str(True), action.base_cost)

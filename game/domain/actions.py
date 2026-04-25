@@ -12,10 +12,11 @@ class Action(ABC):
     ent: int
     base_cost: ClassVar[float]
 
-    def __str__(self):
+    def str(self, only_player: bool = False):
         values = ", ".join(
             f"{f.name}={getattr(self, f.name)}"
             for f in fields(self)
+            if not (only_player and f.name == "ent")
         )
         return f"{self.__class__.__name__}({values})"
 
