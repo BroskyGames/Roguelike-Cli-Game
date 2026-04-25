@@ -24,7 +24,7 @@ class Engine:
 
         # Routing
         self.router = Router()
-        self.router.register(MoveAction, MovementProcessor(self.state).process)
+        self.router.register(MoveAction, MovementProcessor(self.state.context).process)
 
         # Processors
         self.turn_processors: list[StepProcessor] = [

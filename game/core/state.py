@@ -1,15 +1,13 @@
 from __future__ import annotations
 
-from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import StrEnum, auto
 from typing import Any, TYPE_CHECKING
 
-from game.core.geometry import Pos
-from game.core.map_types import Tile
+from game.core.context import Context
 
 if TYPE_CHECKING:
-    from game.map import Room
+    pass
 
 
 class Phase(StrEnum):
@@ -19,12 +17,9 @@ class Phase(StrEnum):
 
 @dataclass(slots=True)
 class State:
-    seed: int
-    map: defaultdict[Pos, Tile]
-    rooms: tuple[Room, ...]
-    player: int
-    last_room: int = 0
+    context: Context
 
+    seed: int
     rng_state: Any = None
     debug: bool = False
 

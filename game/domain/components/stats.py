@@ -16,3 +16,8 @@ class Speed:
 class ActionPoints:
     current: int
     max: int
+
+
+@dataclass(frozen=True, slots=True)
+class VisibilityRange:
+    range: int

@@ -7,10 +7,15 @@ class Player:
 
 
 @dataclass(frozen=True, slots=True)
-class Obstacle:
+class Collision:
     pass
 
 
 @dataclass(frozen=True, slots=True)
 class Visible:
+    pass
+
+
+@dataclass(frozen=True, slots=True)
+class Moved:
     pass

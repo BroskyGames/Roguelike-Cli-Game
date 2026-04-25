@@ -38,7 +38,7 @@ class UI:
     def __init__(self, engine: Engine):
         self._engine = engine
         self._wm: WindowManager | None = None
-        self.input_adapter = InputAdapter(self._engine.state.player)
+        self.input_adapter = InputAdapter(self._engine.state.context.player)
 
     def run(self) -> None:
         curses.wrapper(self._main)
@@ -50,8 +50,8 @@ class UI:
         stdscr.keypad(True)
         stdscr.noutrefresh()
         self._wm = WindowManager(stdscr, GameLayout, {
-            "map": bordered(lambda r: MapWindow(r, MapView(self._engine.state))),
-            "actions": bordered(lambda r: ActionWindow(r, ActionQueueView(self._engine.state))),
+            "map": bordered(lambda r: MapWindow(r, MapView(self._engine.state.context))),
+            "actions": bordered(lambda r: ActionWindow(r, ActionQueueView(self._engine.state.context))),
             "data": lambda r: DataWindow(r, DataView(self._engine.state)),
         })
 

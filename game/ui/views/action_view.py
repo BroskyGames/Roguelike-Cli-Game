@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 import esper
 
-from game.core.state import State
+from game.core.context import Context
 from game.domain.actions import Action
 from game.domain.components.data import ActionQueue
 
@@ -14,11 +14,11 @@ class ActionView:
 
 
 class ActionQueueView:
-    def __init__(self, state: State):
-        self._state = state
+    def __init__(self, context: Context):
+        self._context = context
 
     def get_action_queue(self) -> tuple[ActionView, ...]:
-        queue = esper.component_for_entity(self._state.player, ActionQueue)
+        queue = esper.component_for_entity(self._context.player, ActionQueue)
         return tuple(self._convert_action(action) for action in queue.actions)
 
     @staticmethod

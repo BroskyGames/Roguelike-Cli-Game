@@ -59,4 +59,4 @@ def get_template_size(template: ASCII) -> Size:
 
 
 if __name__ == '__main__':
-    print(ascii_traverser(ROOM_TEMPLATES[RoomTypes.SPAWN][2], Reducer(acc_ascii_doors, ())))
+    print(ascii_traverser(ROOM_TEMPLATES[RoomTypes.SPAWN][2], Reducer(acc_ascii_doors, [])))

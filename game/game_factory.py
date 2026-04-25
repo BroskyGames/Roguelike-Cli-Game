@@ -2,6 +2,7 @@ from random import Random, randint
 
 import esper
 
+from game.core.context import Context
 from game.core.engine import Engine
 from game.core.state import State
 from game.domain.components.data import ActionQueue, Display, InRoom
@@ -25,7 +26,9 @@ def new_game(
 
     player = spawn_player(rooms, 0)
 
-    state = State(seed, game_map, rooms, rng_state=rng.getstate(), debug=debug, player=player)
+    context = Context(game_map, rooms, player)
+
+    state = State(context, seed, rng.getstate(), debug)
 
     return Engine(state)
 
