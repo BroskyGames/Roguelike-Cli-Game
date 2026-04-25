@@ -4,10 +4,11 @@ import esper
 
 from game.core.context import Context
 from game.core.engine import Engine
+from game.core.geometry import Pos
 from game.core.state import State
 from game.domain.components.data import ActionQueue, Display, InRoom
 from game.domain.components.stats import ActionPoints, Health
-from game.domain.components.tags import Player, Visible
+from game.domain.components.tags import Collision, Player, Visible
 from game.map import LevelConfig, Room, generate_level
 
 
@@ -24,23 +25,46 @@ def new_game(
 
     rooms, game_map = generate_level(rng, level_config, display_debug, display_overlay)
 
-    player = spawn_player(rooms, 0)
-
-    context = Context(game_map, rooms, player)
+    context = Context(game_map, rooms)
+    spawn_player(context, rooms, 0)
+    spawn_enemies(context)
 
     state = State(context, seed, rng.getstate(), debug)
 
     return Engine(state)
 
 
-def spawn_player(rooms: tuple[Room, ...], room: int = 0) -> int:
-    return esper.create_entity(
-        Player(),
-        Health(20, 20),
+def spawn_player(context: Context, rooms: tuple[Room, ...], room: int = 0):
+    player = spawn_entity(
+        context,
         rooms[room].get_center(),
+        Player(),
+        Display('@', 5),
+        Health(20, 20),
         ActionPoints(4, 4),
-        Display('@'),
         InRoom(room),
         ActionQueue(),
         Visible(),
+        Collision(),
+    )
+
+    context.player = player
+    context.last_room = 0
+
+
+def spawn_entity(context: Context, pos: Pos, *components) -> int:
+    ent = esper.create_entity(pos, *components)
+    context.entities_index[pos].add(ent)
+    return ent
+
+
+def spawn_enemies(context: Context):
+    spawn_entity(
+        context,
+        Pos(4, 4),
+        Display('8'),
+        Health(20, 20),
+        ActionPoints(4, 4),
+        Visible(),
+        Collision(),
     )

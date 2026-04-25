@@ -8,20 +8,21 @@ from game.domain.components.tags import Collision, Moved
 
 class MovementProcessor(esper.Processor):
     def __init__(self, context: Context):
-        self.map = context.map
+        self._context = context
 
     def process(self, action: MoveAction) -> None:
         pos = esper.component_for_entity(action.ent, Pos)
         new_pos = pos + action.dir.vector()
 
-        for ent, (ent_pos, _) in esper.get_components(Pos, Collision):
-            if ent == action.ent:
-                continue
-            if ent_pos == new_pos:
-                return
+        if esper.has_component(action.ent, Collision):
+            for ent in self._context.entities_index[new_pos]:
+                if esper.has_component(ent, Collision):
+                    return
 
-        if not self.map[new_pos].walkable:
-            return
+            if not self._context.map[new_pos].walkable:
+                return
 
         esper.add_component(action.ent, new_pos)
         esper.add_component(action.ent, Moved())
+        self._context.entities_index[new_pos].add(action.ent)
+        self._context.entities_index[pos].remove(action.ent)

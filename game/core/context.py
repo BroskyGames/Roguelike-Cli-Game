@@ -11,7 +11,8 @@ class Context:
     map: defaultdict[Pos, Tile]
     rooms: tuple[Room, ...]
 
-    player: int
-    last_room: int = 0
+    player: int = field(init=False)
+    last_room: int = field(init=False, default=0)
+    entities_index: defaultdict[Pos, set[int]] = field(init=False, default_factory=lambda: defaultdict(set))
 
     explored: set[Pos] = field(init=False, default_factory=set)

@@ -4,7 +4,6 @@ from game.core.context import Context
 from game.core.geometry import Pos
 from game.core.map_types import Tile, TileType
 from game.domain.components.data import Display, InRoom
-from game.domain.components.tags import Visible
 from game.ui.rect import Rect
 
 
@@ -17,12 +16,19 @@ class MapView:
         self._cam = self._context.rooms[room].get_center()
 
     def get_tile(self, y: int, x: int) -> str:
-        entities = {
-            pos: ent.char
-            for _, (ent, pos, _) in esper.get_components(Display, Pos, Visible)
-        }
+        pos = Pos(x, y)
 
-        return entities.get(Pos(x, y)) or str(self._context.map.get(Pos(x, y), Tile(TileType.EMPTY)))
+        best = None
+
+        for ent in self._context.entities_index.get(pos, ()):
+            disp = esper.try_component(ent, Display)
+            if disp and (not best or disp.priority > best.priority):
+                best = disp
+
+        if best:
+            return best.char
+
+        return str(self._context.map.get(pos, Tile(TileType.EMPTY)))
 
     def get_view(self, rect: Rect) -> tuple[tuple[str, ...], ...]:
         return tuple(
