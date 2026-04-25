@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 import esper
 
 from game.core.context import Context
@@ -5,6 +7,12 @@ from game.core.geometry import Pos
 from game.core.map_types import Tile, TileType
 from game.domain.components.data import Display, FieldOfView, InRoom
 from game.ui.rect import Rect
+
+
+@dataclass
+class VisualTile:
+    char: str
+    dim: bool = False
 
 
 class MapView:
@@ -15,11 +23,13 @@ class MapView:
         assert room is not None, "Player not in room on spawn"
         self._cam = self._context.rooms[room].get_center()
 
-    def get_tile(self, y: int, x: int, fov: set[Pos]) -> str:
+    def get_tile(self, y: int, x: int, fov: set[Pos]) -> VisualTile:
         pos = Pos(x, y)
 
         if not pos in fov:
-            return ' '
+            if pos in self._context.explored:
+                return VisualTile(str(self._context.map.get(pos, Tile(TileType.EMPTY))), True)
+            return VisualTile(" ", False)
 
         best = None
 
@@ -29,11 +39,11 @@ class MapView:
                 best = disp
 
         if best:
-            return best.char
+            return VisualTile(best.char)
 
-        return str(self._context.map.get(pos, Tile(TileType.EMPTY)))
+        return VisualTile(str(self._context.map.get(pos, Tile(TileType.EMPTY))))
 
-    def get_view(self, rect: Rect) -> tuple[tuple[str, ...], ...]:
+    def get_view(self, rect: Rect) -> tuple[tuple[VisualTile, ...], ...]:
         fov = self._get_fov()
         return tuple(
             tuple(

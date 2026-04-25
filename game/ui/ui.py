@@ -46,6 +46,7 @@ class UI:
     def _main(self, stdscr: curses.window) -> None:
         curses.curs_set(0)
         curses.start_color()
+        curses.init_pair(1, 244, curses.COLOR_BLACK)
         stdscr.nodelay(True)
         stdscr.keypad(True)
         stdscr.noutrefresh()

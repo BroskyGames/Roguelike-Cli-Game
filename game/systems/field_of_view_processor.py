@@ -46,7 +46,7 @@ class FieldOfViewProcessor(esper.Processor):
 
         def reveal(row: int, col: int):
             pos = transform(row, col)
-            if pos in self.context.map:
+            if pos in self.context.map and (row ** 2 + col ** 2) <= radius ** 2:
                 visible.add(pos)
                 if self.context.player == ent:
                     self.context.explored.add(pos)
