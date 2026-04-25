@@ -19,5 +19,5 @@ class ActionPoints:
 
 
 @dataclass(frozen=True, slots=True)
-class VisibilityRange:
-    range: int
+class FovRange:
+    radius: int

@@ -12,10 +12,5 @@ class Collision:
 
 
 @dataclass(frozen=True, slots=True)
-class Visible:
-    pass
-
-
-@dataclass(frozen=True, slots=True)
 class Moved:
     pass

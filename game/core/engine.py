@@ -6,6 +6,7 @@ from game.core.state import Phase, State
 from game.domain.actions import Action, ClearQueueAction, EndTurnAction, MoveAction, RemoveLastAction
 from game.systems.action_queue_processor import ActionQueueProcessor
 from game.systems.ap_processor import ActionPointsProcessor
+from game.systems.field_of_view_processor import FieldOfViewProcessor
 from game.systems.movement_processor import MovementProcessor
 from game.systems.turn_processors import PlayerTurnProcessor, StepProcessor
 
@@ -33,7 +34,10 @@ class Engine:
         ]
         self.ap_processor = ActionPointsProcessor()
         self.action_queue = ActionQueueProcessor()
+        self.fov_processor = FieldOfViewProcessor(self.state.context)
         self.scheduler = ProcessorScheduler()
+
+        self.fov_processor.process()
 
     def get_save(self):
         self.state.rng_state = self.rng.getstate()
@@ -56,6 +60,7 @@ class Engine:
 
     def execute_step(self) -> bool:
         working = self.scheduler.step()
+        self.fov_processor.process()
 
         if not working:
             self.state.phase = Phase.PLANNING

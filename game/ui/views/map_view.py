@@ -3,7 +3,7 @@ import esper
 from game.core.context import Context
 from game.core.geometry import Pos
 from game.core.map_types import Tile, TileType
-from game.domain.components.data import Display, InRoom
+from game.domain.components.data import Display, FieldOfView, InRoom
 from game.ui.rect import Rect
 
 
@@ -15,8 +15,11 @@ class MapView:
         assert room is not None, "Player not in room on spawn"
         self._cam = self._context.rooms[room].get_center()
 
-    def get_tile(self, y: int, x: int) -> str:
+    def get_tile(self, y: int, x: int, fov: set[Pos]) -> str:
         pos = Pos(x, y)
+
+        if not pos in fov:
+            return ' '
 
         best = None
 
@@ -31,9 +34,10 @@ class MapView:
         return str(self._context.map.get(pos, Tile(TileType.EMPTY)))
 
     def get_view(self, rect: Rect) -> tuple[tuple[str, ...], ...]:
+        fov = self._get_fov()
         return tuple(
             tuple(
-                self.get_tile(map_y, map_x)
+                self.get_tile(map_y, map_x, fov)
                 for map_x in range(rect.x, rect.w + rect.x)
             )
             for map_y in range(rect.y, rect.h + rect.y)
@@ -45,3 +49,8 @@ class MapView:
             self._cam = self._context.rooms[room].get_center()
 
         return self._cam[1], self._cam[0]
+
+    def _get_fov(self) -> set[Pos]:
+        fov = esper.component_for_entity(self._context.player, FieldOfView).visible
+        # print(fov)
+        return fov

@@ -12,7 +12,7 @@ class ActionQueue:
 
 @dataclass(slots=True)
 class FieldOfView:
-    tiles: set[Pos]
+    visible: set[Pos] = field(default_factory=set)
 
 
 @dataclass(slots=True)
