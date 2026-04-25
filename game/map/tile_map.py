@@ -5,7 +5,7 @@ from game.core.geometry import BaseDirections, Directions, Pos
 from game.core.map_types import RoomTypes, Tile, TileType
 from game.utils import Reducer, combine_reducers
 from .corridor import Corridor
-from .layout import Room
+from .room import Room
 from .special_templates import ROOM_TEMPLATES, acc_ascii_doors, ascii_traverser
 
 
