@@ -1,7 +1,7 @@
 from collections import defaultdict
 from functools import partial
 
-from game.core.geometry import BaseDirections, Directions, Pos
+from game.core.geometry import Directions, DirectionsDiagonals, Pos
 from game.core.map_types import RoomTypes, Tile, TileType
 from game.utils import Reducer, combine_reducers
 from .corridor import Corridor
@@ -77,7 +77,7 @@ def _get_corridor_shape(corridor: Corridor) -> dict[Pos, Tile]:
     doors = {d.pos for d in corridor.connects}
 
     for pos in corridor.path:
-        for direction in BaseDirections:
+        for direction in DirectionsDiagonals:
             neighbor = pos + direction.vector()
             if neighbor in doors:
                 continue

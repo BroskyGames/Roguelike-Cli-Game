@@ -11,7 +11,7 @@ class DataWindow(Window):
     def draw(self) -> None:
         self.win.erase()
         _, w = self.win.getmaxyx()
-
-        self.win.addstr(0, 0, f"Phase: {self.data_view.get_phase()}")
+        x, y = self.data_view.get_player_pos()
+        self.win.addstr(0, 0, f"Phase: {self.data_view.get_phase()}  Cords: {x}, {y}")
 
         self.win.noutrefresh()

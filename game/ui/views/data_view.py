@@ -1,3 +1,6 @@
+import esper
+
+from game.core.geometry import Pos
 from game.core.state import State
 
 
@@ -7,3 +10,7 @@ class DataView:
 
     def get_phase(self) -> str:
         return str(self._state.phase)
+
+    def get_player_pos(self) -> tuple[int, int]:
+        pos = esper.component_for_entity(self._state.context.player, Pos)
+        return pos.x, pos.y
