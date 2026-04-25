@@ -3,7 +3,7 @@ import esper
 from game.core.geometry import Pos
 from game.core.state import State
 from game.domain.actions import MoveAction
-from game.domain.components import Obstacle
+from game.domain.components.tags import Obstacle
 
 
 class MovementProcessor(esper.Processor):

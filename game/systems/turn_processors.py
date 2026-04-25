@@ -3,7 +3,9 @@ from typing import Generator
 
 import esper
 
-from game.domain.components import ActionPoints, ActionQueue, Player
+from game.domain.components.data import ActionQueue
+from game.domain.components.stats import ActionPoints
+from game.domain.components.tags import Player
 
 
 class StepProcessor(esper.Processor, ABC):

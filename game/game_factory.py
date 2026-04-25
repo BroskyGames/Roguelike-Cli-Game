@@ -4,7 +4,9 @@ import esper
 
 from game.core.engine import Engine
 from game.core.state import State
-from game.domain.components import ActionPoints, ActionQueue, Display, Health, InRoom, Player, Visible
+from game.domain.components.data import ActionQueue, Display, InRoom
+from game.domain.components.stats import ActionPoints, Health
+from game.domain.components.tags import Player, Visible
 from game.map import LevelConfig, Room, generate_level
 
 

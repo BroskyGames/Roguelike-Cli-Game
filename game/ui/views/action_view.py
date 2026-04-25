@@ -4,7 +4,7 @@ import esper
 
 from game.core.state import State
 from game.domain.actions import Action
-from game.domain.components import ActionQueue
+from game.domain.components.data import ActionQueue
 
 
 @dataclass(frozen=True, slots=True)

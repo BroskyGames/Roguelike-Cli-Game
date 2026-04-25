@@ -1,6 +1,7 @@
 import esper
 
-from game.domain.components import ActionQueue, Player
+from game.domain.components.data import ActionQueue
+from game.domain.components.tags import Player
 
 
 class ActionQueueProcessor(esper.Processor):

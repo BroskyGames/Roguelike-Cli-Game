@@ -1,6 +1,6 @@
 import esper
 
-from game.domain.components import ActionPoints
+from game.domain.components.stats import ActionPoints
 
 
 class ActionPointsProcessor(esper.Processor):

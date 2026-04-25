@@ -3,7 +3,8 @@ import esper
 from game.core.geometry import Pos
 from game.core.map_types import Tile, TileType
 from game.core.state import State
-from game.domain.components import Display, InRoom, Visible
+from game.domain.components.data import Display, InRoom
+from game.domain.components.tags import Visible
 from game.ui.rect import Rect
 
 
