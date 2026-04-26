@@ -30,11 +30,18 @@ def build_corridors(rooms: tuple[Room, ...]) -> list[Corridor]:
 
                 allowed: set[Corridor] = {c for c in corridors if door in c.connects or target_door in c.connects}
 
+                blocked = _make_blocked_set(rooms, corridors, allowed)
+
                 start = _get_door_exit(door)
                 end = _get_door_exit(target_door)
 
-                path = _astar(start, end, _make_is_blocked_fn(rooms, corridors, allowed), door.direction,
-                              target_door.direction)
+                path = _astar(
+                    start,
+                    end,
+                    blocked.__contains__,
+                    door.direction,
+                    target_door.direction
+                )
 
                 corridors.append(Corridor(tuple(path), (door, target_door)))
 
@@ -95,27 +102,31 @@ def _astar(
     raise RuntimeError("No path found between doors")
 
 
-def _make_is_blocked_fn(
+def _make_blocked_set(
         rooms: tuple[Room, ...],
         corridors: list[Corridor],
         allowed: set[Corridor],
         padding: int = 1
-) -> Callable[[Pos], bool]:
-    # @lru_cache(maxsize=500)
-    def is_blocked(pos: Pos) -> bool:
-        return any(
-            room.x - padding <= pos.x <= room.x + room.width - 1 + padding and
-            room.y - padding <= pos.y <= room.y + room.height - 1 + padding
-            for room in rooms
-        ) or any(
-            abs(tile.x - pos.x) <= padding and
-            abs(tile.y - pos.y) <= padding
-            for corridor in corridors
-            if corridor not in allowed
-            for tile in corridor.path
-        )
+) -> set[Pos]:
+    blocked: set[Pos] = set()
 
-    return is_blocked
+    for room in rooms:
+        for x in range(room.x - padding, room.x + room.width + padding):
+            blocked.add(Pos(x, room.y - padding))
+            blocked.add(Pos(x, room.y + room.height - 1 + padding))
+        for y in range(room.y - padding, room.y + room.height + padding):
+            blocked.add(Pos(room.x - padding, y))
+            blocked.add(Pos(room.x + room.width - 1 + padding, y))
+
+    for corridor in corridors:
+        if corridor in allowed:
+            continue
+        for tile in corridor.path:
+            for dx in range(-padding, padding + 1):
+                for dy in range(-padding, padding + 1):
+                    blocked.add(Pos(tile.x + dx, tile.y + dy))
+
+    return blocked
 
 
 def _get_door_exit(door: Door) -> Pos:

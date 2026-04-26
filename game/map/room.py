@@ -182,25 +182,26 @@ def _find_room_placement(
                 raise TypeError(direction)
 
         position = Pos(x, y)
-        if not any([_rooms_overlap(Room(-1, position, size), r, pad) for r in rooms]):
+        if not any([_rooms_overlap(position, size, r, pad) for r in rooms]):
             return position
 
         return None
 
     def search_nearby(padding_check: int) -> Pos | None:
         parent_center = parent.get_center()
+        min_side = min(parent.size.width + size.width, parent.size.height + size.height) // 2
 
-        for dist in range(search_radius + 1):
+        for dist in range(min_side, search_radius + 1):
             for dx in range(-dist, dist + 1):
                 dy = dist - abs(dx)
 
                 for sign in (-1, 1) if dy != 0 else (1,):
-                    x = parent_center.x + dx
-                    y = parent_center.y + sign * dy
+                    cx = parent_center.x + dx
+                    cy = parent_center.y + sign * dy
 
-                    position = Pos(x, y)
+                    position = Pos(cx - size.width // 2, cy - size.height // 2)
 
-                    if not any(_rooms_overlap(Room(-1, position, size), r, padding_check) for r in rooms):
+                    if not any(_rooms_overlap(position, size, r, padding_check) for r in rooms):
                         return position
         return None
 
@@ -267,10 +268,10 @@ def _connect_rooms(a: Room, b: Room):
     door_b.add_connection(door_a)
 
 
-def _rooms_overlap(a: Room, b: Room, padding: int = 1) -> bool:
+def _rooms_overlap(pos: Pos, size: Size, r: Room, padding: int = 1) -> bool:
     return (
-            a.x + a.width + padding > b.x and
-            a.x < b.x + b.width + padding and
-            a.y + a.height + padding > b.y and
-            a.y < b.y + b.height + padding
+            pos.x + size.width + padding > r.x and
+            pos.x < r.x + r.width + padding and
+            pos.y + size.height + padding > r.y and
+            pos.y < r.y + r.height + padding
     )
