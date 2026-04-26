@@ -1,7 +1,7 @@
 from collections import defaultdict
 from functools import partial
 
-from game.core.geometry import Directions, DirectionsDiagonals, Pos
+from game.core.geometry import DIRECTION_VECTORS, Directions, DirectionsDiagonals, Pos
 from game.core.map_types import RoomTypes, Tile, TileType
 from game.utils import Reducer, combine_reducers
 from .corridor import Corridor
@@ -63,9 +63,9 @@ def _get_room_shape(room: Room, overlay: bool = False) -> dict[Pos, Tile]:
     if overlay:
         center = room.get_center()
 
-        shape[center + Directions.WEST.vector()].debug = room.type.value
+        shape[center + DIRECTION_VECTORS[Directions.WEST]].debug = room.type.value
         shape[center].debug = str(room.id // 10)
-        shape[center + Directions.EAST.vector()].debug = str(room.id % 10)
+        shape[center + DIRECTION_VECTORS[Directions.EAST]].debug = str(room.id % 10)
 
         shape[Pos(0, 0)].debug = '+'
 
@@ -78,7 +78,7 @@ def _get_corridor_shape(corridor: Corridor) -> dict[Pos, Tile]:
 
     for pos in corridor.path:
         for direction in DirectionsDiagonals:
-            neighbor = pos + direction.vector()
+            neighbor = pos + DIRECTION_VECTORS[direction]
             if neighbor in doors:
                 continue
             if neighbor in shape:

@@ -6,7 +6,7 @@ from heapq import heappop, heappush
 from itertools import count
 from typing import Callable
 
-from game.core.geometry import BaseDirections, Directions, Pos
+from game.core.geometry import BaseDirections, DIRECTION_VECTORS, Directions, Pos
 from .room import Door, Room
 
 
@@ -21,6 +21,7 @@ MAX_SEARCH_DIST = 100
 
 def build_corridors(rooms: tuple[Room, ...]) -> list[Corridor]:
     corridors: list[Corridor] = []
+    blocked = _make_blocked_set(rooms)
 
     for room in rooms:
         for door in room.doors:
@@ -28,9 +29,16 @@ def build_corridors(rooms: tuple[Room, ...]) -> list[Corridor]:
                 if room.id > target_door.belongs_to:
                     continue
 
-                allowed: set[Corridor] = {c for c in corridors if door in c.connects or target_door in c.connects}
+                allowed: set[Pos] = {
+                    Pos(tile.x + dx, tile.y + dy)
+                    for c in corridors
+                    if door in c.connects or target_door in c.connects
+                    for tile in c.path
+                    for dx in range(-1, 2)
+                    for dy in range(-1, 2)
+                }
 
-                blocked = _make_blocked_set(rooms, corridors, allowed)
+                is_blocked = _make_is_blocked_fn(blocked, allowed)
 
                 start = _get_door_exit(door)
                 end = _get_door_exit(target_door)
@@ -38,12 +46,14 @@ def build_corridors(rooms: tuple[Room, ...]) -> list[Corridor]:
                 path = _astar(
                     start,
                     end,
-                    blocked.__contains__,
+                    is_blocked,
                     door.direction,
                     target_door.direction
                 )
 
-                corridors.append(Corridor(tuple(path), (door, target_door)))
+                corridor = Corridor(tuple(path), (door, target_door))
+                corridors.append(corridor)
+                _add_corridor_to_blocked(blocked, corridor)
 
     return corridors
 
@@ -74,7 +84,7 @@ def _astar(
             return path
 
         for move_dir in BaseDirections:
-            neighbor = current + move_dir.vector()
+            neighbor = current + DIRECTION_VECTORS[move_dir]
 
             if is_blocked_fn(neighbor):
                 continue
@@ -83,7 +93,8 @@ def _astar(
                 continue
 
             start_penalty = 0 if (prev_dir is not None) or (move_dir == start_dir) else .45
-            end_penalty = 0 if (neighbor != goal) or (move_dir.vector() == -end_dir.vector()) else .45
+            end_penalty = 0 if (neighbor != goal) or (
+                    DIRECTION_VECTORS[move_dir] == -DIRECTION_VECTORS[end_dir]) else .45
             change_dir_penalty = 0 if prev_dir == move_dir else .1
 
             tentative_g = g_score[current] + 1 + start_penalty + end_penalty + change_dir_penalty
@@ -102,10 +113,15 @@ def _astar(
     raise RuntimeError("No path found between doors")
 
 
+def _make_is_blocked_fn(blocked: set[Pos], allowed: set[Pos]) -> Callable[[Pos], bool]:
+    def is_blocked(pos: Pos) -> bool:
+        return pos not in allowed and pos in blocked
+
+    return is_blocked
+
+
 def _make_blocked_set(
         rooms: tuple[Room, ...],
-        corridors: list[Corridor],
-        allowed: set[Corridor],
         padding: int = 1
 ) -> set[Pos]:
     blocked: set[Pos] = set()
@@ -118,19 +134,18 @@ def _make_blocked_set(
             blocked.add(Pos(room.x - padding, y))
             blocked.add(Pos(room.x + room.width - 1 + padding, y))
 
-    for corridor in corridors:
-        if corridor in allowed:
-            continue
-        for tile in corridor.path:
-            for dx in range(-padding, padding + 1):
-                for dy in range(-padding, padding + 1):
-                    blocked.add(Pos(tile.x + dx, tile.y + dy))
-
     return blocked
 
 
+def _add_corridor_to_blocked(blocked: set[Pos], corridor: Corridor, padding: int = 1):
+    for tile in corridor.path:
+        for dx in range(-padding, padding + 1):
+            for dy in range(-padding, padding + 1):
+                blocked.add(Pos(tile.x + dx, tile.y + dy))
+
+
 def _get_door_exit(door: Door) -> Pos:
-    return door.pos + door.direction.vector()
+    return door.pos + DIRECTION_VECTORS[door.direction]
 
 
 def _manhattan(a: Pos, b: Pos) -> int:

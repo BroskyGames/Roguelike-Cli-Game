@@ -1,7 +1,7 @@
 import esper
 
 from game.core.context import Context
-from game.core.geometry import Pos
+from game.core.geometry import DIRECTION_VECTORS, Pos
 from game.domain.actions import MoveAction
 from game.domain.components.tags import Collision, Moved
 
@@ -12,7 +12,7 @@ class MovementProcessor(esper.Processor):
 
     def process(self, action: MoveAction) -> None:
         pos = esper.component_for_entity(action.ent, Pos)
-        new_pos = pos + action.dir.vector()
+        new_pos = pos + DIRECTION_VECTORS[action.dir]
 
         if esper.has_component(action.ent, Collision):
             for ent in self._context.entities_index[new_pos]:

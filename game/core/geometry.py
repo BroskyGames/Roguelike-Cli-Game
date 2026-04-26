@@ -62,6 +62,13 @@ class Size(NamedTuple):
     width: int
     height: int
 
+    def __iter__(self) -> Iterator[int]:
+        yield self.width
+        yield self.height
+
+    def __hash__(self) -> int:
+        return (self.width << 5) | self.height
+
 
 class Directions(IntFlag):
     NORTH = auto()
@@ -94,6 +101,8 @@ DirectionsDiagonals: set[Directions] = set(Directions) | {Directions.NORTH | Dir
                                                           Directions.EAST | Directions.SOUTH,
                                                           Directions.SOUTH | Directions.WEST,
                                                           Directions.WEST | Directions.NORTH}
+
+DIRECTION_VECTORS: dict[Directions, Vector2] = {d: d.vector() for d in DirectionsDiagonals}
 
 if __name__ == "__main__":
     # print(Pos(3, 2) - Pos(3, 2))

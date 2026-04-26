@@ -181,28 +181,26 @@ def _find_room_placement(
             case _:
                 raise TypeError(direction)
 
-        position = Pos(x, y)
-        if not any([_rooms_overlap(position, size, r, pad) for r in rooms]):
-            return position
+        if not any([_rooms_overlap(x, y, size, r, pad) for r in rooms]):
+            return Pos(x, y)
 
         return None
 
     def search_nearby(padding_check: int) -> Pos | None:
-        parent_center = parent.get_center()
-        min_side = min(parent.size.width + size.width, parent.size.height + size.height) // 2
+        pcx, pcy = parent.get_center()
+        w, h = size
+        min_side = min(parent.size.width + w, parent.size.height + h) // 2 + padding_check
 
         for dist in range(min_side, search_radius + 1):
             for dx in range(-dist, dist + 1):
                 dy = dist - abs(dx)
 
                 for sign in (-1, 1) if dy != 0 else (1,):
-                    cx = parent_center.x + dx
-                    cy = parent_center.y + sign * dy
+                    x = pcx + dx - w // 2
+                    y = pcy + sign * dy - h // 2
 
-                    position = Pos(cx - size.width // 2, cy - size.height // 2)
-
-                    if not any(_rooms_overlap(position, size, r, padding_check) for r in rooms):
-                        return position
+                    if not any(_rooms_overlap(x, y, size, r, padding_check) for r in rooms):
+                        return Pos(x, y)
         return None
 
     pad = rng.randint(*padding_range)
@@ -268,10 +266,10 @@ def _connect_rooms(a: Room, b: Room):
     door_b.add_connection(door_a)
 
 
-def _rooms_overlap(pos: Pos, size: Size, r: Room, padding: int = 1) -> bool:
+def _rooms_overlap(x: int, y: int, size: Size, r: Room, padding: int = 1) -> bool:
     return (
-            pos.x + size.width + padding > r.x and
-            pos.x < r.x + r.width + padding and
-            pos.y + size.height + padding > r.y and
-            pos.y < r.y + r.height + padding
+            x + size.width + padding > r.x and
+            x < r.x + r.width + padding and
+            y + size.height + padding > r.y and
+            y < r.y + r.height + padding
     )
