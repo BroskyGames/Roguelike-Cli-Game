@@ -5,6 +5,7 @@ import esper
 
 from game.core.context import Context
 from game.core.geometry import Pos
+from game.core.map_types import Tile
 from game.domain.components.data import FieldOfView
 from game.domain.components.stats import FovRange
 from game.domain.components.tags import Moved
@@ -41,8 +42,8 @@ class FieldOfViewProcessor(esper.Processor):
 
         def is_blocking(row: int, col: int) -> bool:
             pos = transform(row, col)
-            tile = self.context.map.get(pos)
-            return tile is None or not tile.transparent
+            tile = self.context.map.get(pos, Tile())
+            return not tile.transparent
 
         def reveal(row: int, col: int):
             pos = transform(row, col)
@@ -79,10 +80,6 @@ class FieldOfViewProcessor(esper.Processor):
                 scan(depth + 1, start_slope, end_slope)
 
         scan(1, Fraction(-1), Fraction(1))
-
-    @staticmethod
-    def _is_blocking_check():
-        pass
 
 
 def _slope(depth: int, col: int) -> Fraction:

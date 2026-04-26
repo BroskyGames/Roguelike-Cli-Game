@@ -42,7 +42,7 @@ def spawn_player(context: Context, rooms: tuple[Room, ...], room: int = 0):
         Display('@', 5),
         Health(20, 20),
         ActionPoints(4, 4),
-        FovRange(5),
+        FovRange(4),
         InRoom(room),
         ActionQueue(),
         FieldOfView(),

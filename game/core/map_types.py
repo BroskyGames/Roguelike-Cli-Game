@@ -19,7 +19,7 @@ WALKABLE_TYPES = {
 
 @dataclass(slots=True)
 class Tile:
-    type: TileType
+    type: TileType = TileType.EMPTY
     room_id: int = -1
     debug: str = ''
     walkable: bool = field(init=False)

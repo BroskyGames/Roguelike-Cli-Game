@@ -31,6 +31,9 @@ class Pos:
             return self.y
         raise IndexError
 
+    def __hash__(self) -> int:
+        return (self.x << 9) | self.y
+
 
 @dataclass(slots=True, frozen=True)
 class Vector2:
@@ -50,6 +53,9 @@ class Vector2:
 
     def __neg__(self) -> Vector2:
         return Vector2(-self.x, -self.y)
+
+    def __hash__(self) -> int:
+        return (self.x << 9) | self.y
 
 
 class Size(NamedTuple):

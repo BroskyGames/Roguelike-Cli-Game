@@ -10,7 +10,7 @@ from .special_templates import ROOM_TEMPLATES, acc_ascii_doors, ascii_traverser
 
 
 def build_map(rooms: tuple[Room, ...], corridors: list[Corridor], overlay: bool = False) -> defaultdict[Pos, Tile]:
-    game_map = defaultdict(lambda: Tile(TileType.EMPTY))
+    game_map = defaultdict(lambda: Tile())
     for room in rooms:
         for pos, tile in _get_room_shape(room, overlay).items():
             game_map[pos] = _merge_tile(game_map[pos], tile)
@@ -21,7 +21,7 @@ def build_map(rooms: tuple[Room, ...], corridors: list[Corridor], overlay: bool 
 
 
 def _get_room_shape(room: Room, overlay: bool = False) -> dict[Pos, Tile]:
-    shape: defaultdict[Pos, Tile] = defaultdict(lambda: Tile(TileType.EMPTY))
+    shape: defaultdict[Pos, Tile] = defaultdict(lambda: Tile())
 
     if room.type == RoomTypes.SPAWN:  # or room.type == RoomTags.BOSS
         write_room_shape = partial(_acc_ascii_shape, room_id=room.id)
