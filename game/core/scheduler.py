@@ -6,7 +6,7 @@ import esper
 Task = esper.Processor | Callable
 
 
-class ProcessorScheduler:
+class TaskScheduler:
     def __init__(self):
         self.queue: deque[tuple[Task, bool]] = deque()
         self.current: tuple[Task, bool] | None = None

@@ -3,7 +3,7 @@ from random import Random
 
 from game.core.geometry import Pos
 from game.core.router import Router
-from game.core.scheduler import ProcessorScheduler
+from game.core.scheduler import TaskScheduler
 from game.core.state import Phase, State
 from game.domain.actions import Action, ClearQueueAction, EndTurnAction, MoveAction, RemoveLastAction
 from game.ecs.managers.action_queue_manager import ActionQueueManager
@@ -28,7 +28,7 @@ class Engine:
         # Processing
         self._router = Router()
 
-        self._scheduler = ProcessorScheduler()
+        self._scheduler = TaskScheduler()
         self._turn_queue: list[StepProcessor] = [
             PlayerTurnManager(self._router),
             # EnemyTurnProcessor(self.router),
