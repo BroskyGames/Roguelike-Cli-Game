@@ -9,8 +9,3 @@ class Player:
 @dataclass(frozen=True, slots=True)
 class Collision:
     pass
-
-
-@dataclass(frozen=True, slots=True)
-class Moved:
-    pass

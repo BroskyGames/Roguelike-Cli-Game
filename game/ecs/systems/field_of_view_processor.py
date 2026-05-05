@@ -6,18 +6,26 @@ import esper
 from game.core.context import Context
 from game.core.geometry import Pos
 from game.core.map_types import Tile
-from game.domain.components.data import FieldOfView
-from game.domain.components.stats import FovRange
-from game.domain.components.tags import Moved
+from game.domain.actions import MoveAction
+from game.ecs.components.data import FieldOfView
+from game.ecs.components.stats import FovRange
 
 
 class FieldOfViewProcessor(esper.Processor):
     def __init__(self, context: Context):
         self.context = context
 
-    def process(self):
-        for ent, (fov, fov_range, pos, _) in esper.get_components(FieldOfView, FovRange, Pos, Moved):
+    def process_all(self):
+        for ent, (fov, fov_range, pos) in esper.get_components(FieldOfView, FovRange, Pos):
             fov.visible = self._compute_fov(pos, fov_range.radius, ent)
+
+    def process(self, move_action: MoveAction):
+        ent = move_action.ent
+        fov = esper.component_for_entity(ent, FieldOfView)
+        fov_range = esper.component_for_entity(ent, FovRange)
+        pos = esper.component_for_entity(ent, Pos)
+
+        fov.visible = self._compute_fov(pos, fov_range.radius, ent)
 
     def _compute_fov(self, origin: Pos, radius: int, ent: int) -> set[Pos]:
         visible: set[Pos] = {origin}

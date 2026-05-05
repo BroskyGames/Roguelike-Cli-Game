@@ -3,7 +3,7 @@ import esper
 from game.core.context import Context
 from game.core.geometry import DIRECTION_VECTORS, Pos
 from game.domain.actions import MoveAction
-from game.domain.components.tags import Collision, Moved
+from game.ecs.components.tags import Collision
 
 
 class MovementProcessor(esper.Processor):
@@ -23,6 +23,5 @@ class MovementProcessor(esper.Processor):
                 return
 
         esper.add_component(action.ent, new_pos)
-        esper.add_component(action.ent, Moved())
         self._context.entities_index[new_pos].add(action.ent)
         self._context.entities_index[pos].remove(action.ent)

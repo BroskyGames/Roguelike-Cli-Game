@@ -3,9 +3,9 @@ from typing import Generator
 
 import esper
 
-from game.domain.components.data import ActionQueue
-from game.domain.components.stats import ActionPoints
-from game.domain.components.tags import Player
+from game.ecs.components.data import ActionQueue
+from game.ecs.components.stats import ActionPoints
+from game.ecs.components.tags import Player
 
 
 class StepProcessor(esper.Processor, ABC):
@@ -29,7 +29,7 @@ class StepProcessor(esper.Processor, ABC):
         ...
 
 
-class PlayerTurnProcessor(StepProcessor):
+class PlayerTurnManager(StepProcessor):
     def __init__(self, router) -> None:
         super().__init__()
         self.router = router
@@ -46,8 +46,10 @@ class PlayerTurnProcessor(StepProcessor):
 
                 yield
 
+            ap.current = ap.max
 
-class EnemyTurnProcessor(StepProcessor):
+
+class EnemyTurnManager(StepProcessor):
     def __init__(self, router) -> None:
         super().__init__()
         self.router = router
@@ -63,3 +65,5 @@ class EnemyTurnProcessor(StepProcessor):
                 ap.current -= action.base_cost
 
                 yield
+
+            ap.current = ap.max

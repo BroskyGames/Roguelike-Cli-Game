@@ -5,7 +5,7 @@ import esper
 from game.core.context import Context
 from game.core.geometry import Pos
 from game.core.map_types import Tile
-from game.domain.components.data import Display, FieldOfView, InRoom
+from game.ecs.components.data import Display, FieldOfView, InRoom
 from game.ui.rect import Rect
 
 

@@ -1,10 +1,10 @@
 import esper
 
-from game.domain.components.data import ActionQueue
-from game.domain.components.tags import Player
+from game.ecs.components.data import ActionQueue
+from game.ecs.components.tags import Player
 
 
-class ActionQueueProcessor(esper.Processor):
+class ActionQueueManager:
     @staticmethod
     def add(action):
         for ent, (queue, _) in esper.get_components(ActionQueue, Player):
