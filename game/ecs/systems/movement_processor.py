@@ -8,20 +8,20 @@ from game.ecs.components.tags import Collision
 
 class MovementProcessor(esper.Processor):
     def __init__(self, context: Context):
-        self._context = context
+        self.context = context
 
     def process(self, action: MoveAction) -> None:
         pos = esper.component_for_entity(action.ent, Pos)
         new_pos = pos + DIRECTION_VECTORS[action.dir]
 
         if esper.has_component(action.ent, Collision):
-            for ent in self._context.entities_index[new_pos]:
+            for ent in self.context.entities_index[new_pos]:
                 if esper.has_component(ent, Collision):
                     return
 
-            if not self._context.map[new_pos].walkable:
+            if not self.context.map[new_pos].walkable:
                 return
 
         esper.add_component(action.ent, new_pos)
-        self._context.entities_index[new_pos].add(action.ent)
-        self._context.entities_index[pos].remove(action.ent)
+        self.context.entities_index[new_pos].add(action.ent)
+        self.context.entities_index[pos].remove(action.ent)

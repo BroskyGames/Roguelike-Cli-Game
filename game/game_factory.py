@@ -1,7 +1,5 @@
 from random import Random, randint
 
-import esper
-
 from game.core.context import Context
 from game.core.engine import Engine
 from game.core.geometry import Pos
@@ -26,17 +24,19 @@ def new_game(
     rooms, game_map = generate_level(rng, level_config, display_debug, display_overlay)
 
     context = Context(game_map, rooms)
-    spawn_player(context, rooms, 0)
-    spawn_enemies(context)
 
     state = State(context, seed, rng.getstate(), debug)
 
-    return Engine(state)
+    engine = Engine(state)
+
+    spawn_player(engine, context, rooms, 0)
+    spawn_enemies(engine)
+
+    return engine
 
 
-def spawn_player(context: Context, rooms: tuple[Room, ...], room: int = 0):
-    player = spawn_entity(
-        context,
+def spawn_player(engine: Engine, context: Context, rooms: tuple[Room, ...], room: int = 0):
+    player = engine.spawn(
         rooms[room].get_center(),
         Player(),
         Display('@', 5),
@@ -53,15 +53,8 @@ def spawn_player(context: Context, rooms: tuple[Room, ...], room: int = 0):
     context.last_room = 0
 
 
-def spawn_entity(context: Context, pos: Pos, *components) -> int:
-    ent = esper.create_entity(pos, *components)
-    context.entities_index[pos].add(ent)
-    return ent
-
-
-def spawn_enemies(context: Context):
-    spawn_entity(
-        context,
+def spawn_enemies(engine: Engine):
+    engine.spawn(
         Pos(4, 4),
         Display('8'),
         Health(20, 20),

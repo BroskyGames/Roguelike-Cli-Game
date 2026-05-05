@@ -87,15 +87,19 @@ game/
     map_types.py
   domain/
     actions.py
+  ecs/
     components/
-      data.py
-      tags.py
-      stats.py
-  systems/
-    action_queue_processor.py
-    ap_procesor.py
-    movement_processor.py
-    turn_processor.py
+        data.py
+        tags.py
+        stats.py
+    systems/
+      ap_procesor.py
+      movement_processor.py
+      field_of_view_processor.py
+    managers/
+      action_queue_manager.py
+      turn_managers.py
+      entity_lifecycle_manager.py
   ui/
     ui.py
     debug.py

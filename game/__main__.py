@@ -31,7 +31,7 @@ def time_all():
 
 def main():
     game = new_game(2515622030, LevelConfig(30), False, False, True)
-
+    game.start()
     UI(game).run()
 
 
