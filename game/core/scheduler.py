@@ -1,40 +1,63 @@
 from collections import deque
+from typing import Callable
 
 import esper
+
+Task = esper.Processor | Callable
 
 
 class ProcessorScheduler:
     def __init__(self):
-        self.queue: deque[esper.Processor] = deque()
-        self.current: esper.Processor | None = None
+        self.queue: deque[tuple[Task, bool]] = deque()
+        self.current: tuple[Task, bool] | None = None
 
-    def add(self, processor: esper.Processor) -> None:
-        self.queue.append(processor)
+    def add(self, processor: Task, instant: bool = False) -> None:
+        self.queue.append((processor, instant))
 
     def start(self) -> None:
         self._next()
 
     def step(self) -> bool:
-        if self.current is None:
-            return False
+        while True:
+            if self.current is None:
+                return False
 
-        self.current.process()
+            task, instant = self.current
 
-        if self._is_done(self.current):
-            self._next()
+            if instant:
+                while True:
+                    self._run(task)
+                    if self._is_done(task):
+                        break
+                self._next()
+                continue
 
-        return self.current is not None
+            self._run(task)
 
-    def _next(self):
+            if self._is_done(task):
+                self._next()
+
+            return self.current is not None
+        return False
+
+    def _next(self) -> None:
         if not self.queue:
             self.current = None
             return
 
         self.current = self.queue.popleft()
+        task, _ = self.current
 
-        if hasattr(self.current, "start"):
-            self.current.start()
+        if hasattr(task, "start"):
+            task.start()
 
     @staticmethod
-    def _is_done(processor: esper.Processor) -> bool:
+    def _run(item) -> None:
+        if hasattr(item, "process"):
+            item.process()
+        else:
+            item()
+
+    @staticmethod
+    def _is_done(processor: Task) -> bool:
         return not getattr(processor, "working", False)

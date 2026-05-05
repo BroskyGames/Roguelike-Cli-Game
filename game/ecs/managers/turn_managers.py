@@ -36,16 +36,15 @@ class PlayerTurnManager(StepProcessor):
 
     def make_processor(self) -> Generator[None, None, None]:
         for ent, (queue, ap, _) in esper.get_components(ActionQueue, ActionPoints, Player):
-            while queue.actions:
-                if ap.current <= 0:
-                    break
-
+            while queue.actions and ap.current > 0:
                 action = queue.actions.popleft()
                 self.router.dispatch(action)
                 ap.current -= action.base_cost
 
-                yield
+                if not (queue.actions and ap.current > 0):
+                    break
 
+                yield
             ap.current = ap.max
 
 
