@@ -2,13 +2,15 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import IntFlag, auto
-from typing import Iterator, NamedTuple, Self
+from typing import ClassVar, Iterator, NamedTuple, Self
 
 
 @dataclass(slots=True, frozen=True)
 class Pos:
+    # x, y must be in [-511, 511]
     x: int
     y: int
+    MASK: ClassVar[int] = (1 << 10) - 1
 
     def __add__(self: Pos, other: Vector2) -> Pos:
         if isinstance(other, Vector2):
@@ -32,13 +34,20 @@ class Pos:
         raise IndexError
 
     def __hash__(self) -> int:
-        return (self.x << 9) | self.y
+        return ((self.x & self.MASK) << 10) | (self.y & self.MASK)
 
 
 @dataclass(slots=True, frozen=True)
 class Vector2:
+    # x, y must be in [-511, 511]
     x: int
     y: int
+    MASK: ClassVar[int] = (1 << 10) - 1
+
+    def __add__(self: Vector2, other: Vector2) -> Vector2:
+        if isinstance(other, Vector2):
+            return Vector2(self.x + other.x, self.y + other.y)
+        return NotImplemented
 
     def __iter__(self) -> Iterator[int]:
         yield self.x
@@ -55,19 +64,21 @@ class Vector2:
         return Vector2(-self.x, -self.y)
 
     def __hash__(self) -> int:
-        return (self.x << 9) | self.y
+        return ((self.x & self.MASK) << 10) | (self.y & self.MASK)
 
 
 class Size(NamedTuple):
+    # w, h must be in [1, 32]
     width: int
     height: int
+    MASK: ClassVar[int] = (1 << 5) - 1
 
     def __iter__(self) -> Iterator[int]:
         yield self.width
         yield self.height
 
     def __hash__(self) -> int:
-        return (self.width << 5) | self.height
+        return ((self.width & self.MASK) << 5) | (self.height & self.MASK)
 
 
 class Directions(IntFlag):

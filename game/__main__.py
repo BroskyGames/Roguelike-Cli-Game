@@ -1,7 +1,9 @@
 import random
+import sys
 
 from game.game_factory import new_game
 from game.map import LevelConfig
+from game.ui.ui import UI
 
 
 def time_all():
@@ -27,8 +29,16 @@ def time_all():
     stats.print_stats(20)
 
 
+def main():
+    game = new_game(2515622030, LevelConfig(30), False, False, True)
+
+    UI(game).run()
+
+
 if __name__ == "__main__":
-    # game = new_game(2515622030, LevelConfig(30), False, False, True)
-    #
-    # UI(game).run()
-    time_all()
+    args = sys.argv[1:]
+    time_test = "--time" in args
+    if time_test:
+        time_all()
+    else:
+        main()
