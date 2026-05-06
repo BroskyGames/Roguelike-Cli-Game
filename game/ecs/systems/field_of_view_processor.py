@@ -36,16 +36,18 @@ class FieldOfViewProcessor(esper.Processor):
         return visible
 
     def _scan_quadrant(self, visible: set[Pos], origin: Pos, radius: int, quadrant: int, ent: int):
+        origin_x, origin_y = origin
+
         def transform(row: int, col: int) -> Pos:
             match quadrant:
                 case 0:
-                    return Pos(origin.x + col, origin.y - row)
+                    return Pos(origin_x + col, origin_y - row)
                 case 1:
-                    return Pos(origin.x + row, origin.y + col)
+                    return Pos(origin_x + row, origin_y + col)
                 case 2:
-                    return Pos(origin.x + col, origin.y + row)
+                    return Pos(origin_x + col, origin_y + row)
                 case 3:
-                    return Pos(origin.x - row, origin.y + col)
+                    return Pos(origin_x - row, origin_y + col)
             raise ValueError
 
         def is_blocking(row: int, col: int) -> bool:

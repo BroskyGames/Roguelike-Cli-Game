@@ -7,7 +7,7 @@ from game.core.geometry import BaseDirections, Directions, Pos, Size
 from game.core.map_types import RoomTypes
 from game.utils import Reducer
 from .graph import RoomNode, bfs
-from .special_templates import ROOM_TEMPLATES, acc_ascii_doors, ascii_traverser, get_template_size
+from .special_templates import ROOM_TEMPLATES, acc_ascii_doors, ascii_border_traverser, get_template_size
 
 if TYPE_CHECKING:
     from random import Random
@@ -80,8 +80,6 @@ class Door:
         elif self.x == room.x - 1:
             direction = Directions.WEST
         else:
-            print(self)
-            print(room)
             raise AssertionError("Not a valid door position")
 
         object.__setattr__(self, 'direction', direction)
@@ -162,25 +160,32 @@ def _find_room_placement(
         size: Size, parent: Room, rooms: list[Room], rng: Random,
         padding_range: tuple[int, int], max_attempts: int, search_radius: int
 ) -> Pos:
+    pad = rng.randint(*padding_range)
+    if parent is None:
+        return Pos(0, 0)
+
+    px = parent.pos.x
+    py = parent.pos.y
+
     # noinspection PyShadowingNames
     def try_place_in_direction(direction: Directions) -> Pos | None:
         match direction:
             case Directions.NORTH:
-                x = parent.pos.x + rng.randint(-size.width, parent.size.width)
-                y = parent.pos.y - size.height - pad
+                x = px + rng.randint(-size.width, parent.size.width)
+                y = py - size.height - pad
             case Directions.EAST:
-                x = parent.pos.x + parent.size.width + pad
-                y = parent.pos.y + rng.randint(-size.height, parent.size.height)
+                x = px + parent.size.width + pad
+                y = py + rng.randint(-size.height, parent.size.height)
             case Directions.SOUTH:
-                x = parent.pos.x + rng.randint(-size.width, parent.size.width)
-                y = parent.pos.y + parent.size.height + pad
+                x = px + rng.randint(-size.width, parent.size.width)
+                y = py + parent.size.height + pad
             case Directions.WEST:
-                x = parent.pos.x - size.width - pad
-                y = parent.pos.y + rng.randint(-size.height, parent.size.height)
+                x = px - size.width - pad
+                y = py + rng.randint(-size.height, parent.size.height)
             case _:
                 raise TypeError(direction)
 
-        if not any([_rooms_overlap(x, y, size, r, pad) for r in rooms]):
+        if not _rooms_overlap(x, y, size, rooms, pad):
             return Pos(x, y)
 
         return None
@@ -198,13 +203,9 @@ def _find_room_placement(
                     x = pcx + dx - w // 2
                     y = pcy + sign * dy - h // 2
 
-                    if not any(_rooms_overlap(x, y, size, r, padding_check) for r in rooms):
+                    if not _rooms_overlap(x, y, size, rooms, padding_check):
                         return Pos(x, y)
         return None
-
-    pad = rng.randint(*padding_range)
-    if parent is None:
-        return Pos(0, 0)
 
     for _ in range(max_attempts):
         direction = rng.choice(sorted(BaseDirections - parent.connected_directions()))
@@ -222,9 +223,18 @@ def _find_room_placement(
 
 def _compute_door_pos(room: Room) -> tuple[Pos, ...]:
     if room.type == RoomTypes.SPAWN:  # or room.type == RoomTypes.BOSS
-        return tuple(ascii_traverser(ROOM_TEMPLATES[room.type][room.template], Reducer(acc_ascii_doors, []), room.pos))
-    cx, cy = room.center
-    return Pos(cx, room.y - 1), Pos(room.x + room.width, cy), Pos(cx, room.y + room.height), Pos(room.x - 1, cy)
+        return tuple(ascii_border_traverser(
+            ROOM_TEMPLATES[room.type][room.template],
+            Reducer(acc_ascii_doors, []),
+            room.pos
+        ))
+
+    return (
+        Pos(room.center.x, room.y - 1),
+        Pos(room.x + room.width, room.center.y),
+        Pos(room.center.x, room.y + room.height),
+        Pos(room.x - 1, room.center.y)
+    )
 
 
 def _get_available_door_pos(room: Room) -> tuple[Pos, ...]:
@@ -265,10 +275,15 @@ def _connect_rooms(a: Room, b: Room):
     door_b.add_connection(door_a)
 
 
-def _rooms_overlap(x: int, y: int, size: Size, r: Room, padding: int = 1) -> bool:
-    return (
-            x + size.width + padding > r.x and
-            x < r.x + r.width + padding and
-            y + size.height + padding > r.y and
-            y < r.y + r.height + padding
-    )
+def _rooms_overlap(x: int, y: int, size: Size, rooms: list[Room], padding: int = 1) -> bool:
+    w, h = size
+    for r in rooms:
+        if (
+                x + w + padding > r.x and
+                x < r.x + r.width + padding and
+                y + h + padding > r.y and
+                y < r.y + r.height + padding
+        ):
+            return True
+    else:
+        return False

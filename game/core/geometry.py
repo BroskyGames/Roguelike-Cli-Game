@@ -10,6 +10,7 @@ class Pos:
     # x, y must be in [-511, 511]
     x: int
     y: int
+
     MASK: ClassVar[int] = (1 << 10) - 1
 
     def __add__(self: Pos, other: Vector2) -> Pos:
@@ -34,7 +35,7 @@ class Pos:
         raise IndexError
 
     def __hash__(self) -> int:
-        return ((self.x & self.MASK) << 10) | (self.y & self.MASK)
+        return (self.x << 10) | (self.y & self.MASK)
 
 
 @dataclass(slots=True, frozen=True)
@@ -64,7 +65,7 @@ class Vector2:
         return Vector2(-self.x, -self.y)
 
     def __hash__(self) -> int:
-        return ((self.x & self.MASK) << 10) | (self.y & self.MASK)
+        return (self.x << 10) | (self.y & self.MASK)
 
 
 class Size(NamedTuple):
@@ -78,7 +79,7 @@ class Size(NamedTuple):
         yield self.height
 
     def __hash__(self) -> int:
-        return ((self.width & self.MASK) << 5) | (self.height & self.MASK)
+        return (self.width << 5) | (self.height & self.MASK)
 
 
 class Directions(IntFlag):

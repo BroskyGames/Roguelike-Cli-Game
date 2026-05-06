@@ -8,7 +8,7 @@ from game.map import Room
 
 @dataclass
 class Context:
-    map: defaultdict[Pos, Tile]
+    map: dict[Pos, Tile]
     rooms: tuple[Room, ...]
 
     player: int = field(init=False)

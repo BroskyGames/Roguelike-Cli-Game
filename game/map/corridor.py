@@ -30,10 +30,10 @@ def build_corridors(rooms: tuple[Room, ...]) -> list[Corridor]:
                     continue
 
                 allowed: set[Pos] = {
-                    Pos(tile.x + dx, tile.y + dy)
+                    Pos(tile_x + dx, tile_y + dy)
                     for c in corridors
                     if door in c.connects or target_door in c.connects
-                    for tile in c.path
+                    for tile_x, tile_y in c.path
                     for dx in range(-1, 2)
                     for dy in range(-1, 2)
                 }
@@ -127,21 +127,25 @@ def _make_blocked_set(
     blocked: set[Pos] = set()
 
     for room in rooms:
-        for x in range(room.x - padding, room.x + room.width + padding):
-            blocked.add(Pos(x, room.y - padding))
-            blocked.add(Pos(x, room.y + room.height - 1 + padding))
-        for y in range(room.y - padding, room.y + room.height + padding):
-            blocked.add(Pos(room.x - padding, y))
-            blocked.add(Pos(room.x + room.width - 1 + padding, y))
+        room_x, room_y = room.pos
+        room_w, room_h = room.size
+        for x in range(room_x - padding, room_x + room_w + padding):
+            blocked.add(Pos(x, room_y - padding))
+            blocked.add(Pos(x, room_y + room_h - 1 + padding))
+        for y in range(room_y - padding, room_y + room_h + padding):
+            blocked.add(Pos(room_x - padding, y))
+            blocked.add(Pos(room_x + room_w - 1 + padding, y))
 
     return blocked
 
 
 def _add_corridor_to_blocked(blocked: set[Pos], corridor: Corridor, padding: int = 1):
     for tile in corridor.path:
+        x = tile.x
+        y = tile.y
         for dx in range(-padding, padding + 1):
             for dy in range(-padding, padding + 1):
-                blocked.add(Pos(tile.x + dx, tile.y + dy))
+                blocked.add(Pos(x + dx, y + dy))
 
 
 def _get_door_exit(door: Door) -> Pos:

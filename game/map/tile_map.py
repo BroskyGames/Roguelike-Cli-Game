@@ -9,7 +9,7 @@ from .room import Room
 from .special_templates import ROOM_TEMPLATES, acc_ascii_doors, ascii_traverser
 
 
-def build_map(rooms: tuple[Room, ...], corridors: list[Corridor], overlay: bool = False) -> defaultdict[Pos, Tile]:
+def build_map(rooms: tuple[Room, ...], corridors: list[Corridor], overlay: bool = False) -> dict[Pos, Tile]:
     game_map = defaultdict(lambda: Tile())
     for room in rooms:
         for pos, tile in _get_room_shape(room, overlay).items():
@@ -39,15 +39,17 @@ def _get_room_shape(room: Room, overlay: bool = False) -> dict[Pos, Tile]:
             if not any(ascii_door == door.pos for door in room.doors):
                 shape[ascii_door] = Tile(TileType.WALL, room.id)
     else:
-        for x in range(room.x - 1, room.x + room.width + 1):
-            for y in range(room.y - 1, room.y + room.height + 1):
+        room_x, room_y = room.pos
+        room_w, room_h = room.size
+        for x in range(room_x - 1, room_x + room_w + 1):
+            for y in range(room_y - 1, room_y + room_h + 1):
                 pos = Pos(x, y)
 
                 is_border = (
-                        (x == room.x - 1) or
-                        (y == room.y - 1) or
-                        (x == room.x + room.width) or
-                        (y == room.y + room.height)
+                        (x == room_x - 1) or
+                        (y == room_y - 1) or
+                        (x == room_x + room_w) or
+                        (y == room_y + room_h)
                 )
 
                 if not is_border:

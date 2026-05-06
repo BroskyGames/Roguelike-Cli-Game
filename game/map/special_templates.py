@@ -42,9 +42,23 @@ ROOM_TEMPLATES: dict[RoomTypes, tuple[ASCII, ...]] = {
 
 
 def ascii_traverser[T](template: ASCII, reducer: Reducer[T, tuple[Pos, str]], global_pos: Pos = Pos(0, 0)):
-    for y in range(len(template)):
-        for x in range(len(template[y])):
-            reducer((global_pos + Vector2(x, y) + Vector2(-1, -1), template[y][x]))
+    width = len(template[0])
+    height = len(template)
+    for y in range(height):
+        for x in range(width):
+            reducer((global_pos + Vector2(x - 1, y - 1), template[y][x]))
+    return reducer.acc
+
+
+def ascii_border_traverser[T](template: ASCII, reducer: Reducer[T, tuple[Pos, str]], global_pos: Pos = Pos(0, 0)):
+    width = len(template[0])
+    height = len(template)
+    for y in range(height):
+        reducer((global_pos + Vector2(-1, y - 1), template[y][0]))
+        reducer((global_pos + Vector2(width - 2, y - 1), template[y][width - 1]))
+    for x in range(width):
+        reducer((global_pos + Vector2(x - 1, -1), template[0][x]))
+        reducer((global_pos + Vector2(x - 1, height - 2), template[height - 1][x]))
     return reducer.acc
 
 

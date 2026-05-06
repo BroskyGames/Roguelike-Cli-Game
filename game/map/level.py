@@ -1,4 +1,3 @@
-from collections import defaultdict
 from dataclasses import dataclass, field
 from pprint import pprint
 from random import Random
@@ -21,21 +20,21 @@ class LevelConfig:
     size_range: tuple[int, int] = field(default_factory=lambda: (5, 10))
     main_size_increment: int = 2
     padding_range: tuple[int, int] = field(default_factory=lambda: (5, 8))
-    max_attempts: int = 5
+    max_place_attempts: int = 5
     search_radius: int = 25
 
 
 def generate_level(
         rng: Random,
         config: LevelConfig,
-        debug: bool = False,
+        display_debug: bool = False,
         display_overlay: bool = False,
-) -> tuple[tuple[Room, ...], defaultdict[Pos, Tile]]:
+) -> tuple[tuple[Room, ...], dict[Pos, Tile]]:
     start = generate_graph(rng, config.rooms_amount, config.connection_bias)
 
     assign_tags(start, rng, config.genetic_chance, config.trap_chance)
 
-    if debug:
+    if display_debug:
         print_nodes(start)
 
     while True:
@@ -46,22 +45,22 @@ def generate_level(
                 config.size_range,
                 config.main_size_increment,
                 config.padding_range,
-                config.max_attempts,
+                config.max_place_attempts,
                 config.search_radius
             )
 
-            if debug:
+            if display_debug:
                 pprint(rooms)
 
             corridors = build_corridors(rooms)
             break
         except RuntimeError as e:
-            if debug:
+            if display_debug:
                 print(f"{e}, retrying...")
 
     game_map = build_map(rooms, corridors, display_overlay)
 
-    if debug:
+    if display_debug:
         display_shape(game_map)
 
     return tuple(rooms), game_map

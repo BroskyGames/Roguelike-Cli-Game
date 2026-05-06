@@ -16,9 +16,9 @@ def time_all():
     rng = random.Random(2515622030321)
 
     try:
-        for _ in range(20):
+        for _ in range(50):
             seed = rng.randint(0, 2 ** 32 - 1)
-            new_game(seed, LevelConfig(30), False, False, True)
+            new_game(seed, LevelConfig(30, padding_range=(5, 13)), False, False, True)
     except SystemExit:
         pass
 
