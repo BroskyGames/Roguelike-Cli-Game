@@ -24,8 +24,13 @@ class Room:
     size: Size
     type: RoomTypes = RoomTypes.NORMAL
     doors: list[Door] = field(default_factory=list)
+    center: Pos = field(init=False)
+
     graph_id: int = -1
     template: int | None = None
+
+    def __post_init__(self):
+        self.center = Pos(self.x + self.width // 2, self.y + self.height // 2)
 
     def __repr__(self):
         return f"Room(id={self.id}, pos=({self.x}, {self.y}), size=({self.width}, {self.height}), tag='{str(self.type)}', doors={self.doors})"
@@ -45,9 +50,6 @@ class Room:
     @property
     def height(self) -> int:
         return self.size.height
-
-    def get_center(self) -> Pos:
-        return Pos(self.x + self.width // 2, self.y + self.height // 2)
 
     def connected_directions(self) -> set[Directions]:
         connected = set()
@@ -116,26 +118,23 @@ def build_rooms_from_graph(
         size = _sample_room_size(node, size_range, rng, main_diff)
         pos = _find_room_placement(size, parent, rooms, rng, padding_range, max_attempts, search_radius)
 
+        template = None
+
         if node.type == RoomTypes.SPAWN:  # or node.type == RoomTypes.BOSS
             template = rng.choice(tuple(
-                ROOM_TEMPLATES[node.type].index(t) for t in ROOM_TEMPLATES[node.type] if get_template_size(t) == size))
+                ROOM_TEMPLATES[node.type].index(t)
+                for t in ROOM_TEMPLATES[node.type]
+                if get_template_size(t) == size
+            ))
 
-            room = Room(
-                id=len(rooms),
-                type=node.type,
-                pos=pos,
-                size=size,
-                graph_id=node.id,
-                template=template
-            )
-        else:
-            room = Room(
-                id=len(rooms),
-                type=node.type,
-                pos=pos,
-                size=size,
-                graph_id=node.id
-            )
+        room = Room(
+            id=len(rooms),
+            type=node.type,
+            pos=pos,
+            size=size,
+            graph_id=node.id,
+            template=template
+        )
 
         rooms.append(room)
 
@@ -187,7 +186,7 @@ def _find_room_placement(
         return None
 
     def search_nearby(padding_check: int) -> Pos | None:
-        pcx, pcy = parent.get_center()
+        pcx, pcy = parent.center
         w, h = size
         min_side = min(parent.size.width + w, parent.size.height + h) // 2 + padding_check
 
@@ -224,7 +223,7 @@ def _find_room_placement(
 def _compute_door_pos(room: Room) -> tuple[Pos, ...]:
     if room.type == RoomTypes.SPAWN:  # or room.type == RoomTypes.BOSS
         return tuple(ascii_traverser(ROOM_TEMPLATES[room.type][room.template], Reducer(acc_ascii_doors, []), room.pos))
-    cx, cy = room.get_center()
+    cx, cy = room.center
     return Pos(cx, room.y - 1), Pos(room.x + room.width, cy), Pos(cx, room.y + room.height), Pos(room.x - 1, cy)
 
 

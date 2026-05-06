@@ -61,7 +61,7 @@ def _get_room_shape(room: Room, overlay: bool = False) -> dict[Pos, Tile]:
                 shape[pos] = Tile(TileType.WALL, room.id)
 
     if overlay:
-        center = room.get_center()
+        center = room.center
 
         shape[center + DIRECTION_VECTORS[Directions.WEST]].debug = room.type.value
         shape[center].debug = str(room.id // 10)

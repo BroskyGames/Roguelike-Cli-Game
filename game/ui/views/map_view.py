@@ -21,7 +21,7 @@ class MapView:
 
         room = esper.component_for_entity(self._context.player, InRoom).room
         assert room is not None, "Player not in room on spawn"
-        self._cam = self._context.rooms[room].get_center()
+        self._cam = self._context.rooms[room].center
         # self._cam = esper.component_for_entity(self._context.player, Pos)
 
     def get_tile(self, y: int, x: int, fov: set[Pos]) -> VisualTile:
@@ -57,7 +57,7 @@ class MapView:
     def get_camera(self) -> tuple[int, int]:
         room = esper.component_for_entity(self._context.player, InRoom).room
         if room is not None:
-            self._cam = self._context.rooms[room].get_center()
+            self._cam = self._context.rooms[room].center
 
         # self._cam = esper.component_for_entity(self._context.player, Pos)
 

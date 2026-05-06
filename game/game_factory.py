@@ -37,7 +37,7 @@ def new_game(
 
 def spawn_player(engine: Engine, context: Context, rooms: tuple[Room, ...], room: int = 0):
     player = engine.spawn(
-        rooms[room].get_center(),
+        rooms[room].center,
         Player(),
         Display('@', 5),
         Health(20, 20),
