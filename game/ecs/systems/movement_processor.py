@@ -3,6 +3,7 @@ import esper
 from game.core.context import Context
 from game.core.geometry import DIRECTION_VECTORS, Pos
 from game.domain.actions import MoveAction
+from game.ecs.components.data import InRoom
 from game.ecs.components.tags import Collision
 
 
@@ -25,3 +26,7 @@ class MovementProcessor(esper.Processor):
         esper.add_component(action.ent, new_pos)
         self.context.entities_index[new_pos].add(action.ent)
         self.context.entities_index[pos].remove(action.ent)
+
+        room_id = self.context.map[new_pos].room_id
+        room_id = room_id if room_id != -1 else None
+        esper.add_component(action.ent, InRoom(room_id))

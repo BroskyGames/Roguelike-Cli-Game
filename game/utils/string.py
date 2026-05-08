@@ -3,4 +3,4 @@ def line(left: str, right: str, width: int) -> str:
 
 
 if __name__ == '__main__':
-    print(f"|{line('1234567890', 'ab', 5)}|")
+    print(f"|{line('1234567890', '', 5)}|")
