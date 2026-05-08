@@ -35,7 +35,9 @@ class ReverseSplit:
 
 
 class ClampSplit:
-    def __init__(self, split: SplitSpec, min_size: int | None = None, max_size: int | None = None):
+    def __init__(
+        self, split: SplitSpec, min_size: int | None = None, max_size: int | None = None
+    ):
         self.split = split
         self.min_size = min_size
         self.max_size = max_size

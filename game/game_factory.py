@@ -11,14 +11,14 @@ from game.map import LevelConfig, Room, generate_level
 
 
 def new_game(
-        seed: int | None,
-        level_config: LevelConfig,
-        display_debug: bool = False,
-        display_overlay: bool = False,
-        debug: bool = False
+    seed: int | None,
+    level_config: LevelConfig,
+    display_debug: bool = False,
+    display_overlay: bool = False,
+    debug: bool = False,
 ) -> Engine:
     if seed is None:
-        seed = randint(0, 2 ** 32 - 1)
+        seed = randint(0, 2**32 - 1)
     rng = Random(seed)
 
     rooms, game_map = generate_level(rng, level_config, display_debug, display_overlay)
@@ -35,11 +35,13 @@ def new_game(
     return engine
 
 
-def spawn_player(engine: Engine, context: Context, rooms: tuple[Room, ...], room: int = 0):
+def spawn_player(
+    engine: Engine, context: Context, rooms: tuple[Room, ...], room: int = 0
+):
     player = engine.spawn(
         rooms[room].center,
         Player(),
-        Display('@', 5),
+        Display("@", 5),
         Health(20, 20),
         ActionPoints(4, 4),
         FovRange(4),
@@ -56,7 +58,7 @@ def spawn_player(engine: Engine, context: Context, rooms: tuple[Room, ...], room
 def spawn_enemies(engine: Engine):
     engine.spawn(
         Pos(4, 4),
-        Display('8'),
+        Display("8"),
         Health(20, 20),
         ActionPoints(4, 4),
         # FovRange(5),

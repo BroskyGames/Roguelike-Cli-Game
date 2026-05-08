@@ -3,10 +3,10 @@ from enum import StrEnum
 
 
 class TileType(StrEnum):
-    EMPTY = ' '
-    FLOOR = '.'
-    DOOR = 'D'
-    WALL = '#'
+    EMPTY = " "
+    FLOOR = "."
+    DOOR = "D"
+    WALL = "#"
 
 
 WALKABLE_TYPES = {
@@ -21,7 +21,7 @@ WALKABLE_TYPES = {
 class Tile:
     type: TileType = TileType.EMPTY
     room_id: int = -1
-    debug: str = ''
+    debug: str = ""
     walkable: bool = field(init=False)
     transparent: bool = field(init=False)
 
@@ -34,10 +34,10 @@ class Tile:
 
 
 class RoomTypes(StrEnum):
-    NORMAL = 'N'
-    SPAWN = 'S'
-    MAIN = 'M'
-    BOSS = 'B'
-    GENETIC = 'G'
-    TRAP = 'T'
+    NORMAL = "N"
+    SPAWN = "S"
+    MAIN = "M"
+    BOSS = "B"
+    GENETIC = "G"
+    TRAP = "T"
     # SHOP

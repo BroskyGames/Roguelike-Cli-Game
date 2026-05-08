@@ -7,8 +7,9 @@ from game.ui.rect import Rect
 
 
 class LayoutNode(Protocol):
-    def compute(self, h: int, w: int, y: int, x: int, rects: dict[str, Rect]) -> None:
-        ...
+    def compute(
+        self, h: int, w: int, y: int, x: int, rects: dict[str, Rect]
+    ) -> None: ...
 
 
 class WindowNode(LayoutNode):

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import IntFlag, auto
-from typing import ClassVar, Iterator, NamedTuple, Self
+from typing import ClassVar, Iterator, Self
 
 
 @dataclass(slots=True, frozen=True)
@@ -68,7 +68,8 @@ class Vector2:
         return (self.x << 10) | (self.y & self.MASK)
 
 
-class Size(NamedTuple):
+@dataclass(slots=True, frozen=True)
+class Size:
     # w, h must be in [1, 32]
     width: int
     height: int
@@ -109,12 +110,16 @@ class Directions(IntFlag):
 
 
 BaseDirections: set[Directions] = set(Directions)
-DirectionsDiagonals: set[Directions] = set(Directions) | {Directions.NORTH | Directions.EAST,
-                                                          Directions.EAST | Directions.SOUTH,
-                                                          Directions.SOUTH | Directions.WEST,
-                                                          Directions.WEST | Directions.NORTH}
+DirectionsDiagonals: set[Directions] = set(Directions) | {
+    Directions.NORTH | Directions.EAST,
+    Directions.EAST | Directions.SOUTH,
+    Directions.SOUTH | Directions.WEST,
+    Directions.WEST | Directions.NORTH,
+}
 
-DIRECTION_VECTORS: dict[Directions, Vector2] = {d: d.vector() for d in DirectionsDiagonals}
+DIRECTION_VECTORS: dict[Directions, Vector2] = {
+    d: d.vector() for d in DirectionsDiagonals
+}
 
 if __name__ == "__main__":
     # print(Pos(3, 2) - Pos(3, 2))

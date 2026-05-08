@@ -7,7 +7,7 @@ from game.map import LevelConfig
 
 def test_save_load():
     rng = random.Random(43)
-    seed = rng.randint(0, 2 ** 32 - 1)
+    seed = rng.randint(0, 2**32 - 1)
 
     game = new_game(seed, LevelConfig(10), False, False, False)
     save = Engine(game.get_save())

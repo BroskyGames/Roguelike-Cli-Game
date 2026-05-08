@@ -14,6 +14,7 @@ from game.utils import Reducer, combine_reducers
 @dataclass(slots=True)
 class RoomNode:
     """Node that represents abstract form of room to be used as a base for graph structure"""
+
     id: int
     depth: int
     children: list[RoomNode] = field(default_factory=list, init=False)
@@ -29,11 +30,15 @@ def generate_graph(rng: Random, rooms_amount=20, bias_weight=None) -> RoomNode:
     rooms = [RoomNode(0, 0, RoomTypes.SPAWN)]
 
     if bias_weight is None:
-        bias_weight = {0: 1.25, 1: 1, 2: .75}
+        bias_weight = {0: 1.25, 1: 1, 2: 0.75}
 
     for i in range(1, rooms_amount):
-        candidates = [r for r in rooms if len(r.children) < 3 or
-                      (r.type == RoomTypes.SPAWN and len(r.children) > 4)]
+        candidates = [
+            r
+            for r in rooms
+            if len(r.children) < 3
+            or (r.type == RoomTypes.SPAWN and len(r.children) > 4)
+        ]
         if not candidates:
             break
 
@@ -50,7 +55,9 @@ def generate_graph(rng: Random, rooms_amount=20, bias_weight=None) -> RoomNode:
     return rooms[0]
 
 
-def assign_tags(spawn: RoomNode, rng: Random, genetic_chance: float, trap_chances: float) -> None:
+def assign_tags(
+    spawn: RoomNode, rng: Random, genetic_chance: float, trap_chances: float
+) -> None:
     def return_room(r: RoomNode, _: None) -> RoomNode:
         return r
 
@@ -62,10 +69,14 @@ def assign_tags(spawn: RoomNode, rng: Random, genetic_chance: float, trap_chance
         if r.type == RoomTypes.NORMAL and rng.random() < trap_chances:
             r.type = RoomTypes.TRAP
 
-    last = bfs(spawn, combine_reducers(
-        Reducer(return_room, None),
-        Reducer(assign_genetic_labs, None),
-        Reducer(assign_trap_rooms, None)))[0]
+    last = bfs(
+        spawn,
+        combine_reducers(
+            Reducer(return_room, None),
+            Reducer(assign_genetic_labs, None),
+            Reducer(assign_trap_rooms, None),
+        ),
+    )[0]
 
     last.type = RoomTypes.BOSS
     last = last.parent

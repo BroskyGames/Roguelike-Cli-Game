@@ -25,7 +25,7 @@ def display_shape(shape: dict[Pos, Tile]):
         row = ""
         for x in range(min_x, max_x + 1):
             tile = shape.get(Pos(x, y), Tile())
-            row += str(tile) + ' '
+            row += str(tile) + " "
         print(row)
 
 

@@ -16,7 +16,9 @@ class FieldOfViewProcessor(esper.Processor):
         self.context = context
 
     def process_all(self):
-        for ent, (fov, fov_range, pos) in esper.get_components(FieldOfView, FovRange, Pos):
+        for ent, (fov, fov_range, pos) in esper.get_components(
+            FieldOfView, FovRange, Pos
+        ):
             fov.visible = self._compute_fov(pos, fov_range.radius, ent)
 
     def process(self, move_action: MoveAction):
@@ -35,7 +37,9 @@ class FieldOfViewProcessor(esper.Processor):
 
         return visible
 
-    def _scan_quadrant(self, visible: set[Pos], origin: Pos, radius: int, quadrant: int, ent: int):
+    def _scan_quadrant(
+        self, visible: set[Pos], origin: Pos, radius: int, quadrant: int, ent: int
+    ):
         origin_x, origin_y = origin
 
         def transform(row: int, col: int) -> Pos:
@@ -57,7 +61,7 @@ class FieldOfViewProcessor(esper.Processor):
 
         def reveal(row: int, col: int):
             pos = transform(row, col)
-            if pos in self.context.map and (row ** 2 + col ** 2) <= radius ** 2:
+            if pos in self.context.map and (row**2 + col**2) <= radius**2:
                 visible.add(pos)
                 if self.context.player == ent:
                     self.context.explored.add(pos)
@@ -96,7 +100,9 @@ def _slope(depth: int, col: int) -> Fraction:
     return Fraction(2 * col - 1, 2 * depth)
 
 
-def _is_symmetric(depth: int, col: int, start_slope: Fraction, end_slope: Fraction) -> bool:
+def _is_symmetric(
+    depth: int, col: int, start_slope: Fraction, end_slope: Fraction
+) -> bool:
     return (col >= depth * start_slope) and (col <= depth * end_slope)
 
 

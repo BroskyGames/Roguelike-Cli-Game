@@ -13,6 +13,8 @@ class Context:
 
     player: int = field(init=False)
     last_room: int = field(init=False, default=0)
-    entities_index: defaultdict[Pos, set[int]] = field(init=False, default_factory=lambda: defaultdict(set))
+    entities_index: defaultdict[Pos, set[int]] = field(
+        init=False, default_factory=lambda: defaultdict(set)
+    )
 
     explored: set[Pos] = field(init=False, default_factory=set)

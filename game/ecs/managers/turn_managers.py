@@ -25,8 +25,7 @@ class StepProcessor(esper.Processor, ABC):
             self.working = False
 
     @abstractmethod
-    def make_processor(self) -> Generator[None, None, None]:
-        ...
+    def make_processor(self) -> Generator[None, None, None]: ...
 
 
 class PlayerTurnManager(StepProcessor):
@@ -35,7 +34,9 @@ class PlayerTurnManager(StepProcessor):
         self.router = router
 
     def make_processor(self) -> Generator[None, None, None]:
-        for ent, (queue, ap, _) in esper.get_components(ActionQueue, ActionPoints, Player):
+        for _, (queue, ap, _) in esper.get_components(
+            ActionQueue, ActionPoints, Player
+        ):
             while queue.actions and ap.current > 0:
                 action = queue.actions.popleft()
                 self.router.dispatch(action)
@@ -54,7 +55,9 @@ class EnemyTurnManager(StepProcessor):
         self.router = router
 
     def make_processor(self) -> Generator[None, None, None]:
-        for ent, (queue, ap, _) in esper.get_components(ActionQueue, ActionPoints, Player):  # change to AI
+        for _, (queue, ap, _) in esper.get_components(
+            ActionQueue, ActionPoints, Player
+        ):  # change to AI
             while queue.actions:
                 if ap.current <= 0:
                     break

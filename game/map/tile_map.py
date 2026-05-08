@@ -9,7 +9,9 @@ from .room import Room
 from .special_templates import ROOM_TEMPLATES, acc_ascii_doors, ascii_traverser
 
 
-def build_map(rooms: tuple[Room, ...], corridors: list[Corridor], overlay: bool = False) -> dict[Pos, Tile]:
+def build_map(
+    rooms: tuple[Room, ...], corridors: list[Corridor], overlay: bool = False
+) -> dict[Pos, Tile]:
     game_map = defaultdict(lambda: Tile())
     for room in rooms:
         for pos, tile in _get_room_shape(room, overlay).items():
@@ -32,7 +34,7 @@ def _get_room_shape(room: Room, overlay: bool = False) -> dict[Pos, Tile]:
             combine_reducers(
                 Reducer(write_room_shape, shape),
                 Reducer(acc_ascii_doors, []),
-            )
+            ),
         )
 
         for ascii_door in doors:
@@ -46,10 +48,10 @@ def _get_room_shape(room: Room, overlay: bool = False) -> dict[Pos, Tile]:
                 pos = Pos(x, y)
 
                 is_border = (
-                        (x == room_x - 1) or
-                        (y == room_y - 1) or
-                        (x == room_x + room_w) or
-                        (y == room_y + room_h)
+                    (x == room_x - 1)
+                    or (y == room_y - 1)
+                    or (x == room_x + room_w)
+                    or (y == room_y + room_h)
                 )
 
                 if not is_border:
@@ -69,7 +71,7 @@ def _get_room_shape(room: Room, overlay: bool = False) -> dict[Pos, Tile]:
         shape[center].debug = str(room.id // 10)
         shape[center + DIRECTION_VECTORS[Directions.EAST]].debug = str(room.id % 10)
 
-        shape[Pos(0, 0)].debug = '+'
+        shape[Pos(0, 0)].debug = "+"
 
     return shape
 
@@ -95,18 +97,20 @@ def _merge_tile(base: Tile, new: Tile) -> Tile:
         TileType.DOOR: 3,
         TileType.FLOOR: 2,
         TileType.WALL: 1,
-        TileType.EMPTY: 0
+        TileType.EMPTY: 0,
     }
     return new if priority[new.type] >= priority[base.type] else base
 
 
-def _acc_ascii_shape(data: tuple[Pos, str], acc: dict[Pos, Tile], room_id: int) -> dict[Pos, Tile]:
+def _acc_ascii_shape(
+    data: tuple[Pos, str], acc: dict[Pos, Tile], room_id: int
+) -> dict[Pos, Tile]:
     pos, char = data
     match char:
-        case '.':
+        case ".":
             acc[pos] = Tile(TileType.FLOOR, room_id)
-        case '#':
+        case "#":
             acc[pos] = Tile(TileType.WALL, room_id)
-        case 'D':
+        case "D":
             acc[pos] = Tile(TileType.DOOR, room_id)
     return acc

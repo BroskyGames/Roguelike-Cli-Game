@@ -14,9 +14,11 @@ from .tile_map import build_map
 @dataclass(frozen=True)
 class LevelConfig:
     rooms_amount: int
-    connection_bias: dict[int, float] = field(default_factory=lambda: {0: 1.2, 1: 1.1, 2: 1})
-    genetic_chance: float = .33
-    trap_chance: float = .15
+    connection_bias: dict[int, float] = field(
+        default_factory=lambda: {0: 1.2, 1: 1.1, 2: 1}
+    )
+    genetic_chance: float = 0.33
+    trap_chance: float = 0.15
     size_range: tuple[int, int] = field(default_factory=lambda: (5, 10))
     main_size_increment: int = 2
     padding_range: tuple[int, int] = field(default_factory=lambda: (5, 8))
@@ -25,10 +27,10 @@ class LevelConfig:
 
 
 def generate_level(
-        rng: Random,
-        config: LevelConfig,
-        display_debug: bool = False,
-        display_overlay: bool = False,
+    rng: Random,
+    config: LevelConfig,
+    display_debug: bool = False,
+    display_overlay: bool = False,
 ) -> tuple[tuple[Room, ...], dict[Pos, Tile]]:
     start = generate_graph(rng, config.rooms_amount, config.connection_bias)
 
@@ -46,7 +48,7 @@ def generate_level(
                 config.main_size_increment,
                 config.padding_range,
                 config.max_place_attempts,
-                config.search_radius
+                config.search_radius,
             )
 
             if display_debug:

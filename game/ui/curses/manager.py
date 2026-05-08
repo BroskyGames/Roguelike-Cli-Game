@@ -11,7 +11,12 @@ WindowFactory = dict[str, Callable[[Rect], Window]]
 
 
 class WindowManager:
-    def __init__(self, stdscr: curses.window, layout_builder: LayoutBuilder, windows_factory: WindowFactory):
+    def __init__(
+        self,
+        stdscr: curses.window,
+        layout_builder: LayoutBuilder,
+        windows_factory: WindowFactory,
+    ):
         self.stdscr = stdscr
         self.layout_builder = layout_builder
         layout = self.layout_builder.build(*self.stdscr.getmaxyx())

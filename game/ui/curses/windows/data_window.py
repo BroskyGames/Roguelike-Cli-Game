@@ -14,8 +14,13 @@ class DataWindow(Window):
         _, w = self.win.getmaxyx()
         x, y = self.data_view.get_player_pos()
         self.win.addstr(
-            0, 0,
-            line(f"Phase: {self.data_view.get_phase()}  Cords: {x}, {y}  {self.data_view.debug_print()}", '', w - 1)
+            0,
+            0,
+            line(
+                f"Phase: {self.data_view.get_phase()}  Cords: {x}, {y}  {self.data_view.debug_print()}",
+                "",
+                w - 1,
+            ),
         )
 
         self.win.noutrefresh()

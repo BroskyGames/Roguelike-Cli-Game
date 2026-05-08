@@ -24,7 +24,12 @@ class MapWindow(Window):
                 char = tile.char
 
                 try:
-                    self.win.addch(y, x * 2, char, curses.A_NORMAL if not tile.dim else curses.color_pair(1))
+                    self.win.addch(
+                        y,
+                        x * 2,
+                        char,
+                        curses.A_NORMAL if not tile.dim else curses.color_pair(1),
+                    )
                 except curses.error:
                     pass
         self.win.noutrefresh()

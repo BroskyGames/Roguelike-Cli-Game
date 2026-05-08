@@ -7,7 +7,12 @@ from game.core.geometry import BaseDirections, Directions, Pos, Size
 from game.core.map_types import RoomTypes
 from game.utils import Reducer
 from .graph import RoomNode, bfs
-from .special_templates import ROOM_TEMPLATES, acc_ascii_doors, ascii_border_traverser, get_template_size
+from .special_templates import (
+    ROOM_TEMPLATES,
+    acc_ascii_doors,
+    ascii_border_traverser,
+    get_template_size,
+)
 
 if TYPE_CHECKING:
     from random import Random
@@ -19,6 +24,7 @@ class Room:
     [id] = -1 is temporary room used for methods and type safety
     [graph_id] maps to id of RoomNode corresponding to this Room
     [template] is index of ROOM_TEMPLATES[self.type][i]"""
+
     id: int
     pos: Pos
     size: Size
@@ -63,14 +69,16 @@ class Door:
     pos: Pos
     belongs_to: int = field(init=False)
     direction: Directions = field(init=False)
-    connections: list[Door] = field(default_factory=list, init=False, compare=False, hash=False)
+    connections: list[Door] = field(
+        default_factory=list, init=False, compare=False, hash=False
+    )
 
     room: InitVar[Room]
 
     MAX_CONNECTIONS: ClassVar[int] = 2
 
     def __post_init__(self, room: Room):
-        object.__setattr__(self, 'belongs_to', room.id)
+        object.__setattr__(self, "belongs_to", room.id)
         if self.y == room.y - 1:
             direction = Directions.NORTH
         elif self.x == room.x + room.width:
@@ -82,7 +90,7 @@ class Door:
         else:
             raise AssertionError("Not a valid door position")
 
-        object.__setattr__(self, 'direction', direction)
+        object.__setattr__(self, "direction", direction)
 
     def __repr__(self):
         return f"Door(x={self.x}, y={self.y}, room_id={self.belongs_to}, "  # direction={int(self.direction)})
@@ -106,24 +114,36 @@ class Door:
 
 
 def build_rooms_from_graph(
-        start: RoomNode, rng: Random,
-        size_range: tuple[int, int] = (6, 12), main_diff: int = 2,
-        padding_range: tuple[int, int] = (2, 4), max_attempts: int = 5, search_radius: int = 15
+    start: RoomNode,
+    rng: Random,
+    size_range: tuple[int, int] = (6, 12),
+    main_diff: int = 2,
+    padding_range: tuple[int, int] = (2, 4),
+    max_attempts: int = 5,
+    search_radius: int = 15,
 ) -> tuple[Room, ...]:
     def place_room(node: RoomNode, rooms: list[Room]) -> list[Room]:
-        parent = next(room for room in rooms if node.parent.id == room.graph_id) if node.parent is not None else None
+        parent = (
+            next(room for room in rooms if node.parent.id == room.graph_id)
+            if node.parent is not None
+            else None
+        )
 
         size = _sample_room_size(node, size_range, rng, main_diff)
-        pos = _find_room_placement(size, parent, rooms, rng, padding_range, max_attempts, search_radius)
+        pos = _find_room_placement(
+            size, parent, rooms, rng, padding_range, max_attempts, search_radius
+        )
 
         template = None
 
         if node.type == RoomTypes.SPAWN:  # or node.type == RoomTypes.BOSS
-            template = rng.choice(tuple(
-                ROOM_TEMPLATES[node.type].index(t)
-                for t in ROOM_TEMPLATES[node.type]
-                if get_template_size(t) == size
-            ))
+            template = rng.choice(
+                tuple(
+                    ROOM_TEMPLATES[node.type].index(t)
+                    for t in ROOM_TEMPLATES[node.type]
+                    if get_template_size(t) == size
+                )
+            )
 
         room = Room(
             id=len(rooms),
@@ -131,7 +151,7 @@ def build_rooms_from_graph(
             pos=pos,
             size=size,
             graph_id=node.id,
-            template=template
+            template=template,
         )
 
         rooms.append(room)
@@ -144,9 +164,13 @@ def build_rooms_from_graph(
     return tuple(bfs(start, Reducer(place_room, [])))
 
 
-def _sample_room_size(node: RoomNode, size_range: tuple[int, int], rng: Random, main_diff: int = 0) -> Size:
+def _sample_room_size(
+    node: RoomNode, size_range: tuple[int, int], rng: Random, main_diff: int = 0
+) -> Size:
     if node.type == RoomTypes.SPAWN:  # or node.type == RoomTypes.BOSS
-        return rng.choice(tuple(get_template_size(t) for t in ROOM_TEMPLATES[node.type]))
+        return rng.choice(
+            tuple(get_template_size(t) for t in ROOM_TEMPLATES[node.type])
+        )
 
     w = rng.randint(*size_range)
     h = rng.randint(*size_range)
@@ -157,8 +181,13 @@ def _sample_room_size(node: RoomNode, size_range: tuple[int, int], rng: Random, 
 
 
 def _find_room_placement(
-        size: Size, parent: Room, rooms: list[Room], rng: Random,
-        padding_range: tuple[int, int], max_attempts: int, search_radius: int
+    size: Size,
+    parent: Room,
+    rooms: list[Room],
+    rng: Random,
+    padding_range: tuple[int, int],
+    max_attempts: int,
+    search_radius: int,
 ) -> Pos:
     pad = rng.randint(*padding_range)
     if parent is None:
@@ -193,7 +222,9 @@ def _find_room_placement(
     def search_nearby(padding_check: int) -> Pos | None:
         pcx, pcy = parent.center
         w, h = size
-        min_side = min(parent.size.width + w, parent.size.height + h) // 2 + padding_check
+        min_side = (
+            min(parent.size.width + w, parent.size.height + h) // 2 + padding_check
+        )
 
         for dist in range(min_side, search_radius + 1):
             for dx in range(-dist, dist + 1):
@@ -223,17 +254,19 @@ def _find_room_placement(
 
 def _compute_door_pos(room: Room) -> tuple[Pos, ...]:
     if room.type == RoomTypes.SPAWN:  # or room.type == RoomTypes.BOSS
-        return tuple(ascii_border_traverser(
-            ROOM_TEMPLATES[room.type][room.template],
-            Reducer(acc_ascii_doors, []),
-            room.pos
-        ))
+        return tuple(
+            ascii_border_traverser(
+                ROOM_TEMPLATES[room.type][room.template],
+                Reducer(acc_ascii_doors, []),
+                room.pos,
+            )
+        )
 
     return (
         Pos(room.center.x, room.y - 1),
         Pos(room.x + room.width, room.center.y),
         Pos(room.center.x, room.y + room.height),
-        Pos(room.x - 1, room.center.y)
+        Pos(room.x - 1, room.center.y),
     )
 
 
@@ -243,7 +276,7 @@ def _get_available_door_pos(room: Room) -> tuple[Pos, ...]:
 
 
 def _find_connection_for(a: Room, b: Room) -> tuple[Pos, Pos]:
-    min_d = float('inf')
+    min_d = float("inf")
     best_pair = (None, None)
 
     for x1, y1 in _get_available_door_pos(a):
@@ -275,14 +308,16 @@ def _connect_rooms(a: Room, b: Room):
     door_b.add_connection(door_a)
 
 
-def _rooms_overlap(x: int, y: int, size: Size, rooms: list[Room], padding: int = 1) -> bool:
+def _rooms_overlap(
+    x: int, y: int, size: Size, rooms: list[Room], padding: int = 1
+) -> bool:
     w, h = size
     for r in rooms:
         if (
-                x + w + padding > r.x and
-                x < r.x + r.width + padding and
-                y + h + padding > r.y and
-                y < r.y + r.height + padding
+            x + w + padding > r.x
+            and x < r.x + r.width + padding
+            and y + h + padding > r.y
+            and y < r.y + r.height + padding
         ):
             return True
     else:

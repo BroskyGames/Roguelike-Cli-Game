@@ -40,7 +40,7 @@ class DashAction(Action):
 
 @dataclass(frozen=True, slots=True)
 class WaitAction(Action):
-    base_cost: ClassVar[float] = .5
+    base_cost: ClassVar[float] = 0.5
 
 
 @dataclass(frozen=True, slots=True)

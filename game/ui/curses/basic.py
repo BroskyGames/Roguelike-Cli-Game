@@ -7,7 +7,6 @@ from game.ui.rect import Rect
 
 
 class Window(ABC):
-
     def __init__(self, rect: Rect):
         self.win = curses.newwin(*rect)
 

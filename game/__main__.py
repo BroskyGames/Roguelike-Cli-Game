@@ -17,7 +17,7 @@ def time_all():
 
     try:
         for _ in range(50):
-            seed = rng.randint(0, 2 ** 32 - 1)
+            seed = rng.randint(0, 2**32 - 1)
             new_game(seed, LevelConfig(30, padding_range=(5, 13)), False, False, True)
     except SystemExit:
         pass

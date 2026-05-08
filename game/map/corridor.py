@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+
 # from functools import lru_cache
 from heapq import heappop, heappush
 from itertools import count
@@ -44,11 +45,7 @@ def build_corridors(rooms: tuple[Room, ...]) -> list[Corridor]:
                 end = _get_door_exit(target_door)
 
                 path = _astar(
-                    start,
-                    end,
-                    is_blocked,
-                    door.direction,
-                    target_door.direction
+                    start, end, is_blocked, door.direction, target_door.direction
                 )
 
                 corridor = Corridor(tuple(path), (door, target_door))
@@ -59,11 +56,11 @@ def build_corridors(rooms: tuple[Room, ...]) -> list[Corridor]:
 
 
 def _astar(
-        start: Pos,
-        goal: Pos,
-        is_blocked_fn: Callable[[Pos], bool],
-        start_dir: Directions,
-        end_dir: Directions
+    start: Pos,
+    goal: Pos,
+    is_blocked_fn: Callable[[Pos], bool],
+    start_dir: Directions,
+    end_dir: Directions,
 ) -> list[Pos]:
     heap = []
     counter = count()
@@ -92,24 +89,27 @@ def _astar(
             if _manhattan(neighbor, start) > MAX_SEARCH_DIST:
                 continue
 
-            start_penalty = 0 if (prev_dir is not None) or (move_dir == start_dir) else .45
-            end_penalty = 0 if (neighbor != goal) or (
-                    DIRECTION_VECTORS[move_dir] == -DIRECTION_VECTORS[end_dir]) else .45
-            change_dir_penalty = 0 if prev_dir == move_dir else .1
+            start_penalty = (
+                0 if (prev_dir is not None) or (move_dir == start_dir) else 0.45
+            )
+            end_penalty = (
+                0
+                if (neighbor != goal)
+                or (DIRECTION_VECTORS[move_dir] == -DIRECTION_VECTORS[end_dir])
+                else 0.45
+            )
+            change_dir_penalty = 0 if prev_dir == move_dir else 0.1
 
-            tentative_g = g_score[current] + 1 + start_penalty + end_penalty + change_dir_penalty
+            tentative_g = (
+                g_score[current] + 1 + start_penalty + end_penalty + change_dir_penalty
+            )
 
             if tentative_g < g_score.get(neighbor, 1_000_000):
                 came_from[neighbor] = current
                 g_score[neighbor] = tentative_g
                 f = tentative_g + _manhattan(neighbor, goal)
 
-                heappush(heap, (
-                    f,
-                    next(counter),
-                    neighbor,
-                    move_dir
-                ))
+                heappush(heap, (f, next(counter), neighbor, move_dir))
     raise RuntimeError("No path found between doors")
 
 
@@ -120,10 +120,7 @@ def _make_is_blocked_fn(blocked: set[Pos], allowed: set[Pos]) -> Callable[[Pos],
     return is_blocked
 
 
-def _make_blocked_set(
-        rooms: tuple[Room, ...],
-        padding: int = 1
-) -> set[Pos]:
+def _make_blocked_set(rooms: tuple[Room, ...], padding: int = 1) -> set[Pos]:
     blocked: set[Pos] = set()
 
     for room in rooms:
