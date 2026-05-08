@@ -1,2 +1,8 @@
 @echo off
-start "" powershell.exe -NoExit -ExecutionPolicy Bypass -Command ". .\.venv\Scripts\Activate.ps1"
+
+where pwsh >nul 2>nul
+if %ERRORLEVEL%==0 (
+    start "" pwsh -NoExit
+) else (
+    start "" powershell -NoExit
+)
