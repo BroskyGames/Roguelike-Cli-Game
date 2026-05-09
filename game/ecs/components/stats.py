@@ -14,7 +14,7 @@ class Speed:
 
 @dataclass(slots=True)
 class ActionPoints:
-    current: int
+    current: float
     max: int
 
 

@@ -1,9 +1,11 @@
 from collections import defaultdict
 from functools import partial
+from typing import cast
 
 from game.core.geometry import DIRECTION_VECTORS, Directions, DirectionsDiagonals, Pos
 from game.core.map_types import RoomTypes, Tile, TileType
 from game.utils import Reducer, combine_reducers
+
 from .corridor import Corridor
 from .room import Room
 from .special_templates import ROOM_TEMPLATES, acc_ascii_doors, ascii_traverser
@@ -27,7 +29,7 @@ def _get_room_shape(room: Room, overlay: bool = False) -> dict[Pos, Tile]:
 
     if room.type == RoomTypes.SPAWN:  # or room.type == RoomTags.BOSS
         write_room_shape = partial(_acc_ascii_shape, room_id=room.id)
-        template = ROOM_TEMPLATES[room.type][room.template]
+        template = ROOM_TEMPLATES[room.type][cast(int, room.template)]
 
         _, doors = ascii_traverser(
             template,

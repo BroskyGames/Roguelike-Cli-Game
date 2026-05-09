@@ -18,6 +18,9 @@ class StepProcessor(esper.Processor, ABC):
         self.working = True
 
     def process(self) -> None:
+        assert self.processor is not None, (
+            "Processor not started. Call start() before processing."
+        )
         try:
             next(self.processor)
         except StopIteration:
@@ -57,7 +60,7 @@ class EnemyTurnManager(StepProcessor):
     def make_processor(self) -> Generator[None, None, None]:
         for _, (queue, ap, _) in esper.get_components(
             ActionQueue, ActionPoints, Player
-        ):  # change to AI
+        ):  # TODO: change to AI
             while queue.actions:
                 if ap.current <= 0:
                     break

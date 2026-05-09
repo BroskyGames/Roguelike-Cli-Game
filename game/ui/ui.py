@@ -2,6 +2,7 @@ import curses
 
 from game.core.engine import Engine
 from game.core.state import Phase
+
 from .curses.border import bordered
 from .curses.input import InputAdapter
 from .curses.manager import WindowManager
@@ -85,10 +86,13 @@ class UI:
                 self._execute_step()
             elif key != -1:
                 action = self.input_adapter.convert(key)
-                self._engine.handle_actions(action)
-                self._wm.draw()
+                if action is not None:
+                    self._engine.handle_actions(action)
+                    self._wm.draw()
 
     def _execute_step(self) -> None:
+        assert self._wm is not None, "WindowManager is not initialized"
+
         self._engine.execute_step()
         self._wm.draw()
         curses.napms(250)

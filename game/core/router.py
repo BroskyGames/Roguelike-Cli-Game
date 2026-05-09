@@ -4,7 +4,7 @@ from typing import Any, Callable
 
 class Router:
     def __init__(self):
-        self._handlers: dict[type, list[Callable[[Any], None]]] = defaultdict(list)
+        self._handlers: dict[type, list[Callable]] = defaultdict(list)
 
     def register[T](self, msg_type: type[T], handler: Callable[[T], None]):
         self._handlers[msg_type].append(handler)

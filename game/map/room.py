@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import InitVar, dataclass, field
-from typing import ClassVar, TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar, cast
 
 from game.core.geometry import BaseDirections, Directions, Pos, Size
 from game.core.map_types import RoomTypes
 from game.utils import Reducer
+
 from .graph import RoomNode, bfs
 from .special_templates import (
     ROOM_TEMPLATES,
@@ -182,7 +183,7 @@ def _sample_room_size(
 
 def _find_room_placement(
     size: Size,
-    parent: Room,
+    parent: Room | None,
     rooms: list[Room],
     rng: Random,
     padding_range: tuple[int, int],
@@ -256,7 +257,7 @@ def _compute_door_pos(room: Room) -> tuple[Pos, ...]:
     if room.type == RoomTypes.SPAWN:  # or room.type == RoomTypes.BOSS
         return tuple(
             ascii_border_traverser(
-                ROOM_TEMPLATES[room.type][room.template],
+                ROOM_TEMPLATES[room.type][cast(int, room.template)],
                 Reducer(acc_ascii_doors, []),
                 room.pos,
             )
@@ -285,6 +286,10 @@ def _find_connection_for(a: Room, b: Room) -> tuple[Pos, Pos]:
             if d < min_d:
                 min_d = d
                 best_pair = (Pos(x1, y1), Pos(x2, y2))
+
+    assert best_pair[0] is not None and best_pair[1] is not None, (
+        "No available door positions"
+    )
 
     return best_pair
 

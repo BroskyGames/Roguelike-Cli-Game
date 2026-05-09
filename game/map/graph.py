@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import deque
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from random import Random
@@ -18,7 +18,7 @@ class RoomNode:
     id: int
     depth: int
     children: list[RoomNode] = field(default_factory=list, init=False)
-    parent: RoomNode = field(init=False, default=None)
+    parent: RoomNode | None = field(init=False, default=None)
     type: RoomTypes = RoomTypes.NORMAL
 
     def append(self, child: RoomNode):
@@ -58,7 +58,7 @@ def generate_graph(rng: Random, rooms_amount=20, bias_weight=None) -> RoomNode:
 def assign_tags(
     spawn: RoomNode, rng: Random, genetic_chance: float, trap_chances: float
 ) -> None:
-    def return_room(r: RoomNode, _: None) -> RoomNode:
+    def return_room(r: RoomNode, _: Any) -> RoomNode:
         return r
 
     def assign_genetic_labs(r: RoomNode, _: None) -> None:
@@ -79,11 +79,11 @@ def assign_tags(
     )[0]
 
     last.type = RoomTypes.BOSS
-    last = last.parent
+    curr = last.parent
 
-    while last.parent is not None:
-        last.type = RoomTypes.MAIN
-        last = last.parent
+    while curr is not None and curr.parent is not None:
+        curr.type = RoomTypes.MAIN
+        curr = curr.parent
 
 
 def bfs[T](start: RoomNode, reducer: Reducer[T, RoomNode]) -> T:
@@ -93,4 +93,4 @@ def bfs[T](start: RoomNode, reducer: Reducer[T, RoomNode]) -> T:
         reducer(node)
         for child in node.children:
             queue.append(child)
-    return reducer.acc
+    return reducer.get_acc()

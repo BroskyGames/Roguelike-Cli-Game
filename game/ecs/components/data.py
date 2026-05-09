@@ -26,10 +26,13 @@ class Display:
     priority: int = 0
 
 
+type TriggerCallback = Callable[[int, int], None]
+
+
 @dataclass(slots=True)
 class Trigger:
     shape: Shape
-    on_enter: list[Callable] = field(default_factory=list)
-    on_stay: list[Callable] = field(default_factory=list)
-    on_exit: list[Callable] = field(default_factory=list)
-    occupants: set[int] = field(default_factory=set)
+    on_enter: list[TriggerCallback] = field(init=False, default_factory=list)
+    inside: list[TriggerCallback] = field(init=False, default_factory=list)
+    on_exit: list[TriggerCallback] = field(init=False, default_factory=list)
+    occupants: set[int] = field(init=False, default_factory=set)

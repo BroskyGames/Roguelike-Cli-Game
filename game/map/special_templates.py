@@ -53,7 +53,7 @@ def ascii_traverser[T](
     for y in range(height):
         for x in range(width):
             reducer((global_pos + Vector2(x - 1, y - 1), template[y][x]))
-    return reducer.acc
+    return reducer.get_acc()
 
 
 def ascii_border_traverser[T](
@@ -67,7 +67,7 @@ def ascii_border_traverser[T](
     for x in range(width):
         reducer((global_pos + Vector2(x - 1, -1), template[0][x]))
         reducer((global_pos + Vector2(x - 1, height - 2), template[height - 1][x]))
-    return reducer.acc
+    return reducer.get_acc()
 
 
 def acc_ascii_doors(data: tuple[Pos, str], acc: list[Pos]) -> list[Pos]:

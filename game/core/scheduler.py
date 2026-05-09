@@ -1,7 +1,9 @@
 from collections import deque
-from typing import Callable
+from typing import Callable, cast
 
 import esper
+
+from game.ecs.managers.turn_managers import StepProcessor
 
 Task = esper.Processor | Callable
 
@@ -49,7 +51,7 @@ class TaskScheduler:
         task, _ = self.current
 
         if hasattr(task, "start"):
-            task.start()
+            cast(StepProcessor, task).start()
 
     @staticmethod
     def _run(item) -> None:
