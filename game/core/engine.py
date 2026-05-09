@@ -94,6 +94,6 @@ class Engine:
         return working
 
     # --- Engine API ---
-    def spawn(self, pos: Pos, *components) -> int:
+    def create_entity(self, pos: Pos, *components) -> int:
         ent = self._entity_lifecycle.create(pos, *components)
         return ent
