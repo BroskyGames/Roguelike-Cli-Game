@@ -13,7 +13,6 @@ from game.domain.actions import (
     MoveAction,
     RemoveLastAction,
 )
-from game.ecs.components.data import Trigger
 from game.ecs.managers.action_queue_manager import ActionQueueManager
 from game.ecs.managers.entity_lifecycle_manager import EntityLifecycleManager
 from game.ecs.managers.room_manager import RoomManager
@@ -47,7 +46,9 @@ class Engine:
         self._action_queue = ActionQueueManager()
         self._entity_lifecycle = EntityLifecycleManager(self.state.context)
         self._trigger_manager = TriggerManager()
-        self._room_manager = RoomManager(self._router)
+        self._room_manager = RoomManager(
+            self.state.context, self._trigger_manager, self._entity_lifecycle
+        )
 
         self._processors: dict[str, Any] = {
             "fov_processor": FieldOfViewProcessor(self.state.context),
@@ -57,7 +58,6 @@ class Engine:
 
         self._router.register(MoveAction, self._processors["move_processor"].process)
         self._router.register(MoveAction, self._processors["fov_processor"].process)
-        self._router.register(Trigger, self._trigger_manager.add_trigger)
 
     def __eq__(self, other):
         if not isinstance(other, Engine):
@@ -75,7 +75,7 @@ class Engine:
     # --- Engine Logic ---
     def start(self):
         self._processors["fov_processor"].process_all()
-        self._room_manager.make_room_triggers(self.state.context.rooms[0])
+        self._room_manager.init_rooms()
 
     def handle_actions(self, action: Action) -> None:
         if self.state.phase == Phase.PLANNING:

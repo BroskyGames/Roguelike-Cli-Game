@@ -5,7 +5,7 @@ from enum import StrEnum
 class TileType(StrEnum):
     EMPTY = " "
     FLOOR = "."
-    DOOR = "D"
+    DOOR = "+"
     WALL = "#"
 
 

@@ -1,5 +1,5 @@
 from enum import Enum, auto
-from typing import Callable
+from typing import Any, Callable
 
 import esper
 
@@ -42,3 +42,21 @@ class TriggerManager:
     def add_trigger(self, trigger: Trigger):
         ent = esper.create_entity(trigger)
         self.triggers[trigger.shape] = ent
+
+    def add_component(self, shape: Shape, component):
+        if shape not in self.triggers:
+            raise ValueError("Shape is not registered as a trigger")
+        ent = self.triggers[shape]
+        esper.add_component(ent, component)
+
+    def get_component[T](self, shape: Shape, component_type: type[T]) -> T:
+        if shape not in self.triggers:
+            raise ValueError("Shape is not registered as a trigger")
+        ent = self.triggers[shape]
+        return esper.component_for_entity(ent, component_type)
+
+    def has_component(self, shape: Shape, component_type: type[Any]) -> bool:
+        if shape not in self.triggers:
+            raise ValueError("Shape is not registered as a trigger")
+        ent = self.triggers[shape]
+        return esper.has_component(ent, component_type)

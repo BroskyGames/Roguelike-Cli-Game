@@ -5,7 +5,15 @@ import esper
 from game.core.context import Context
 from game.core.geometry import Pos
 from game.core.map_types import Tile
-from game.ecs.components.data import Display, FieldOfView, InRoom
+from game.ecs.components.data import (
+    Display,
+    Door,
+    DoorState,
+    FieldOfView,
+    InRoom,
+    Memory,
+)
+from game.ecs.components.tags import Memorable
 from game.ui.rect import Rect
 
 
@@ -13,6 +21,12 @@ from game.ui.rect import Rect
 class VisualTile:
     char: str
     dim: bool = False
+
+
+DOOR_DISPLAY = {
+    DoorState.OPEN: Display(char="+"),
+    DoorState.LOCKED: Display(char="X"),
+}
 
 
 class MapView:
@@ -48,20 +62,32 @@ class MapView:
 
         if pos not in fov:
             if pos in self._context.explored:
+                for ent, mem in esper.get_component(Memory):
+                    if mem.pos == pos:
+                        return VisualTile(mem.display.char, True)
                 return VisualTile(str(self._context.map.get(pos, Tile())), True)
             return VisualTile(" ", False)
 
         best = None
 
         for ent in self._context.entities_index.get(pos, ()):
-            disp = esper.try_component(ent, Display)
-            if disp and (not best or disp.priority > best.priority):
-                best = disp
+            disp = self._get_display(ent)
+            if disp:
+                if not best or disp.priority > best[1].priority:
+                    best = ent, disp
 
         if best:
-            return VisualTile(best.char)
+            if esper.has_component(best[0], Memorable):
+                esper.add_component(best[0], Memory(pos, best[1]))
+            return VisualTile(best[1].char)
 
         return VisualTile(str(self._context.map.get(pos, Tile())))
+
+    def _get_display(self, ent: int) -> Display | None:
+        if door := esper.try_component(ent, Door):
+            return DOOR_DISPLAY[door.state]
+
+        return esper.try_component(ent, Display)
 
     def _get_fov(self) -> frozenset[Pos]:
         return esper.component_for_entity(self._context.player, FieldOfView).shape
