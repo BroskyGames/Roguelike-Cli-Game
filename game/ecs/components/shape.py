@@ -32,15 +32,16 @@ class CircleShape:
     r: InitVar[int]
 
     def __post_init__(self, r: int):
-        self.r2 = r * r
+        object.__setattr__(self, "r2", r * r)
 
+    @classmethod
     def from_pos_radius(cls, pos: Pos, radius: int) -> Self:
         return cls(pos.x, pos.y, radius)
 
     def contains(self, pos: Pos) -> bool:
         dx = pos.x - self.x
         dy = pos.y - self.y
-        return dx * dx + dy * dy < self.r2
+        return dx * dx + dy * dy <= self.r2
 
 
 @dataclass(slots=True, frozen=True)
@@ -49,3 +50,16 @@ class SetShape:
 
     def contains(self, pos: Pos) -> bool:
         return pos in self.shape
+
+
+@dataclass(slots=True, frozen=True)
+class PointShape:
+    x: int
+    y: int
+
+    @classmethod
+    def from_pos(cls, pos: Pos) -> Self:
+        return cls(pos.x, pos.y)
+
+    def contains(self, pos: Pos) -> bool:
+        return self.x == pos.x and self.y == pos.y

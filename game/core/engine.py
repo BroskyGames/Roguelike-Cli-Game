@@ -1,5 +1,6 @@
 from copy import deepcopy
 from random import Random
+from typing import Any
 
 from game.core.geometry import Pos
 from game.core.router import Router
@@ -12,11 +13,15 @@ from game.domain.actions import (
     MoveAction,
     RemoveLastAction,
 )
+from game.ecs.components.data import Trigger
 from game.ecs.managers.action_queue_manager import ActionQueueManager
 from game.ecs.managers.entity_lifecycle_manager import EntityLifecycleManager
+from game.ecs.managers.room_manager import RoomManager
+from game.ecs.managers.trigger_manager import TriggerManager
 from game.ecs.managers.turn_managers import PlayerTurnManager, StepProcessor
 from game.ecs.systems.field_of_view_processor import FieldOfViewProcessor
 from game.ecs.systems.movement_processor import MovementProcessor
+from game.ecs.systems.trigger_processor import TriggerProcessor
 
 
 class Engine:
@@ -41,14 +46,18 @@ class Engine:
         ]
         self._action_queue = ActionQueueManager()
         self._entity_lifecycle = EntityLifecycleManager(self.state.context)
+        self._trigger_manager = TriggerManager()
+        self._room_manager = RoomManager(self._router)
 
-        self._processors = {
+        self._processors: dict[str, Any] = {
             "fov_processor": FieldOfViewProcessor(self.state.context),
             "move_processor": MovementProcessor(self.state.context),
+            "trigger_processor": TriggerProcessor(),
         }
 
         self._router.register(MoveAction, self._processors["move_processor"].process)
         self._router.register(MoveAction, self._processors["fov_processor"].process)
+        self._router.register(Trigger, self._trigger_manager.add_trigger)
 
     def __eq__(self, other):
         if not isinstance(other, Engine):
@@ -66,6 +75,7 @@ class Engine:
     # --- Engine Logic ---
     def start(self):
         self._processors["fov_processor"].process_all()
+        self._room_manager.make_room_triggers(self.state.context.rooms[0])
 
     def handle_actions(self, action: Action) -> None:
         if self.state.phase == Phase.PLANNING:
@@ -87,6 +97,7 @@ class Engine:
 
     def execute_step(self) -> bool:
         working = self._scheduler.step()
+        self._processors["trigger_processor"].process()
 
         if not working:
             self.state.phase = Phase.PLANNING
