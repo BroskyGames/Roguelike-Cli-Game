@@ -16,18 +16,23 @@ class FieldOfViewProcessor(esper.Processor):
         self.context = context
 
     def process_all(self):
-        for ent, (fov, fov_range, pos) in esper.get_components(
+        for ent, (_, fov_range, pos) in esper.get_components(
             FieldOfView, FovRange, Pos
         ):
-            fov.visible = self._compute_fov(pos, fov_range.radius, ent)
+            esper.add_component(
+                ent,
+                FieldOfView(frozenset(self._compute_fov(pos, fov_range.radius, ent))),
+            )
 
     def process(self, move_action: MoveAction):
         ent = move_action.ent
-        fov = esper.component_for_entity(ent, FieldOfView)
-        fov_range = esper.component_for_entity(ent, FovRange)
-        pos = esper.component_for_entity(ent, Pos)
+        if components := esper.try_components(ent, FieldOfView, FovRange, Pos):
+            _, fov_range, pos = components
 
-        fov.visible = self._compute_fov(pos, fov_range.radius, ent)
+            esper.add_component(
+                ent,
+                FieldOfView(frozenset(self._compute_fov(pos, fov_range.radius, ent))),
+            )
 
     def _compute_fov(self, origin: Pos, radius: int, ent: int) -> set[Pos]:
         visible: set[Pos] = {origin}
@@ -61,7 +66,7 @@ class FieldOfViewProcessor(esper.Processor):
 
         def reveal(row: int, col: int):
             pos = transform(row, col)
-            if pos in self.context.map and (row**2 + col**2) <= radius**2:
+            if pos in self.context.map and (row * row + col * col) <= radius * radius:
                 visible.add(pos)
                 if self.context.player == ent:
                     self.context.explored.add(pos)

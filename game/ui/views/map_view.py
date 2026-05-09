@@ -64,5 +64,5 @@ class MapView:
         return self._cam[1], self._cam[0]
 
     def _get_fov(self) -> set[Pos]:
-        fov = esper.component_for_entity(self._context.player, FieldOfView).visible
+        fov = esper.component_for_entity(self._context.player, FieldOfView).shape
         return fov
