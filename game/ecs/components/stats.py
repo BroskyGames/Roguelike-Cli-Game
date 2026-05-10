@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass(slots=True)
@@ -14,8 +14,11 @@ class Speed:
 
 @dataclass(slots=True)
 class ActionPoints:
-    current: float
-    max: int
+    current: float = field(init=False)
+    max: float
+
+    def __post_init__(self):
+        self.current = self.max
 
 
 @dataclass(frozen=True, slots=True)

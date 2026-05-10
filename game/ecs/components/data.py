@@ -19,6 +19,15 @@ class FieldOfView(SetShape):
     pass
 
 
+class AIType(Enum):
+    BASIC = auto()
+
+
+@dataclass(frozen=True, slots=True)
+class AI:
+    type: AIType = AIType.BASIC
+
+
 @dataclass(slots=True)
 class InRoom:
     room: int | None
@@ -39,11 +48,6 @@ class Memory:
 class DoorState(Enum):
     OPEN = auto()
     LOCKED = auto()
-
-
-@dataclass(slots=True)
-class Door:
-    state: DoorState = DoorState.OPEN
 
 
 # --- Places ---

@@ -9,16 +9,18 @@ from game.core.scheduler import Task, TaskScheduler
 from game.core.state import Phase, State
 from game.domain.actions import (
     Action,
+    AttackAction,
     ClearQueueAction,
     EndTurnAction,
     MoveAction,
     RemoveLastAction,
+    WaitAction,
 )
 from game.ecs.managers.action_queue_manager import ActionQueueManager
 from game.ecs.managers.entity_lifecycle_manager import EntityLifecycleManager
 from game.ecs.managers.room_manager import RoomManager
 from game.ecs.managers.trigger_manager import TriggerManager
-from game.ecs.managers.turn_managers import PlayerTurnManager
+from game.ecs.managers.turn_managers import AITurnManager, PlayerTurnManager
 from game.ecs.systems.compute_processor import ComputeProcessor
 from game.ecs.systems.field_of_view_processor import FieldOfViewProcessor
 from game.ecs.systems.movement_processor import MovementProcessor
@@ -37,17 +39,31 @@ class Engine:
         if self.state.debug:
             print(f"Seed: {state.seed}")
 
-        self.logger = Logger()
+        self.logger = Logger(100)
 
         # Processing
         self._router = Router()
+
+        self._processors: dict[str, Any] = {
+            "fov_processor": FieldOfViewProcessor(self.state.context),
+            "move_processor": MovementProcessor(self.state.context),
+            "trigger_processor": TriggerProcessor(self.state.context),
+        }
 
         self._scheduler = TaskScheduler()
         self._turn_queue: list[tuple[Task, bool]] = [
             (PlayerTurnManager(self._router), False),
             (ComputeProcessor(self.state.context), True),
-            (lambda: self.logger.add("Enemy Turn"), False),
-            # EnemyTurnProcessor(self.router),
+            (
+                AITurnManager(
+                    self._router,
+                    self.state.context,
+                    self.rng,
+                    self._processors["move_processor"],
+                    self.logger,
+                ),
+                False,
+            ),
         ]
         self._action_queue = ActionQueueManager()
         self._entity_lifecycle = EntityLifecycleManager(self.state.context)
@@ -56,14 +72,12 @@ class Engine:
             self.state.context, self._trigger_manager, self._entity_lifecycle
         )
 
-        self._processors: dict[str, Any] = {
-            "fov_processor": FieldOfViewProcessor(self.state.context),
-            "move_processor": MovementProcessor(self.state.context),
-            "trigger_processor": TriggerProcessor(self.state.context),
-        }
-
         self._router.register(MoveAction, self._processors["move_processor"].process)
         self._router.register(MoveAction, self._processors["fov_processor"].process)
+        self._router.register(
+            AttackAction, lambda a: self.logger.add(f"Entity {a.ent} attacked")
+        )
+        self._router.register(WaitAction, lambda _: None)
 
     def __eq__(self, other):
         if not isinstance(other, Engine):

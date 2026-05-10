@@ -4,7 +4,7 @@ from game.core.context import Context
 from game.core.engine import Engine
 from game.core.geometry import Pos
 from game.core.state import State
-from game.ecs.components.data import ActionQueue, Display, FieldOfView, InRoom
+from game.ecs.components.data import AI, ActionQueue, Display, FieldOfView, InRoom
 from game.ecs.components.stats import ActionPoints, FovRange, Health
 from game.ecs.components.tags import Collision, Player
 from game.map import LevelConfig, Room, generate_level
@@ -42,7 +42,7 @@ def spawn_player(
         rooms[room].center,
         Player(),
         Health(20, 20),
-        ActionPoints(4, 4),
+        ActionPoints(4),
         FovRange(4),
         InRoom(room),
         ActionQueue(),
@@ -59,8 +59,9 @@ def spawn_enemies(engine: Engine):
         Pos(4, 4),
         Display("8"),
         Health(20, 20),
-        ActionPoints(4, 4),
-        # FovRange(5),
-        # FieldOfView(),
+        ActionPoints(3),
+        FovRange(3),
+        FieldOfView(),
         Collision(),
+        AI(),
     )

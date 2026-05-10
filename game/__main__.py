@@ -1,5 +1,6 @@
 import random
 import sys
+from pprint import pprint
 
 from game.game_factory import new_game
 from game.map import LevelConfig
@@ -32,7 +33,12 @@ def time_all():
 def main():
     game = new_game(2515622030, LevelConfig(30), False, False, True)
     game.start()
-    UI(game).run()
+    try:
+        UI(game).run()
+    except SystemExit:
+        pprint(game.logger.read(100))
+
+        raise SystemExit
 
 
 if __name__ == "__main__":

@@ -1,11 +1,18 @@
 from abc import ABC, abstractmethod
+from random import Random
 from typing import Generator
 
 import esper
 
-from game.ecs.components.data import ActionQueue
+from game.core.context import Context
+from game.core.logger import Logger
+from game.core.router import Router
+from game.domain.actions import Action
+from game.ecs.components.data import AI, ActionQueue
 from game.ecs.components.stats import ActionPoints
-from game.ecs.components.tags import Player
+from game.ecs.components.tags import Compute, Player
+from game.ecs.managers.ai_manager import AIManager
+from game.ecs.systems.movement_processor import MovementProcessor
 
 
 class StepProcessor(esper.Processor, ABC):
@@ -53,23 +60,33 @@ class PlayerTurnManager(StepProcessor):
         return action_points >= action.base_cost
 
 
-class EnemyTurnManager(StepProcessor):
-    def __init__(self, router) -> None:
+class AITurnManager(StepProcessor):
+    def __init__(
+        self,
+        router: Router,
+        context: Context,
+        rng: Random,
+        movement_processor: MovementProcessor,
+        logger: Logger,
+    ) -> None:
         super().__init__()
         self.router = router
+        self.ai_manager = AIManager(context, rng, movement_processor, logger)
 
     def make_processor(self) -> Generator[None, None, None]:
-        for _, (queue, ap, _) in esper.get_components(
-            ActionQueue, ActionPoints, Player
-        ):  # TODO: change to AI
-            while queue.actions:
-                if ap.current <= 0:
+        for ent, (ap, _, _) in esper.get_components(ActionPoints, AI, Compute):
+            while True:
+                action = self.ai_manager.process(ent, ap.current)
+
+                if not self.validate(ap.current, action):
                     break
 
-                action = queue.actions.popleft()
                 self.router.dispatch(action)
                 ap.current -= action.base_cost
 
                 yield
 
             ap.current = ap.max
+
+    def validate(self, action_points: float, action: Action) -> bool:
+        return action_points >= action.base_cost
