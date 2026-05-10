@@ -3,6 +3,7 @@ from random import Random
 from typing import Any
 
 from game.core.geometry import Pos
+from game.core.logger import Logger
 from game.core.router import Router
 from game.core.scheduler import Task, TaskScheduler
 from game.core.state import Phase, State
@@ -36,6 +37,8 @@ class Engine:
         if self.state.debug:
             print(f"Seed: {state.seed}")
 
+        self.logger = Logger()
+
         # Processing
         self._router = Router()
 
@@ -43,7 +46,7 @@ class Engine:
         self._turn_queue: list[tuple[Task, bool]] = [
             (PlayerTurnManager(self._router), False),
             (ComputeProcessor(self.state.context), True),
-            (lambda: print("Enemy Turn"), False),
+            (lambda: self.logger.add("Enemy Turn"), False),
             # EnemyTurnProcessor(self.router),
         ]
         self._action_queue = ActionQueueManager()

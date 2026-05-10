@@ -2,6 +2,7 @@ import curses
 
 from game.core.engine import Engine
 from game.core.state import Phase
+from game.ui.curses.windows.log_window import LogWindow
 
 from .curses.border import bordered
 from .curses.input import InputAdapter
@@ -61,12 +62,17 @@ class UI:
             GameLayout,
             {
                 "map": bordered(
-                    lambda r: MapWindow(r, MapView(self._engine.state.context))
+                    lambda r: MapWindow(r, MapView(self._engine.state.context)),
+                    " - Map - ",
                 ),
                 "actions": bordered(
                     lambda r: ActionWindow(
                         r, ActionQueueView(self._engine.state.context)
-                    )
+                    ),
+                    " - Action Queue - ",
+                ),
+                "log": bordered(
+                    lambda r: LogWindow(r, self._engine.logger), " - Logs - "
                 ),
                 "data": lambda r: DataWindow(r, DataView(self._engine.state)),
             },
