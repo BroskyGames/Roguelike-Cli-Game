@@ -23,7 +23,8 @@ class ComputeProcessor(esper.Processor):
         for dist in range(COMPUTING_RANGE + 1):
             for dx in range(-dist, dist + 1):
                 dy = dist - abs(dx)
-                pos = Pos(player_pos.x + dx, player_pos.y + dy)
-                for ent in self._context.entities_index.get(pos, ()):
-                    if not esper.has_component(ent, Compute):
-                        esper.add_component(ent, Compute())
+                for sign in (-1, 1) if dy != 0 else (1,):
+                    pos = Pos(player_pos.x + dx, player_pos.y + dy * sign)
+                    for ent in self._context.entities_index.get(pos, ()):
+                        if not esper.has_component(ent, Compute):
+                            esper.add_component(ent, Compute())
