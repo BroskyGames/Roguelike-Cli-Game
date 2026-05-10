@@ -5,7 +5,7 @@ import esper
 from game.core.context import Context
 from game.core.geometry import Pos
 from game.core.map_types import RoomTypes
-from game.ecs.components.data import Door, Doors, DoorState, InRoom
+from game.ecs.components.data import Doors, DoorState, InRoom
 from game.ecs.components.shape import RectShape, Shape
 from game.ecs.components.tags import Cleared, Collision, Enemy, Memorable
 from game.ecs.managers.entity_lifecycle_manager import EntityLifecycleManager
@@ -79,24 +79,20 @@ class RoomManager:
         for door_id in self._trigger_manager.get_component(
             self._rooms[room.id], Doors
         ).doors:
-            door = esper.component_for_entity(door_id, Door)
-            door.state = DoorState.LOCKED
+            esper.add_component(door_id, DoorState.LOCKED)
             esper.add_component(door_id, Collision())
 
     def unlock_room(self, room: Room):
         for door_id in self._trigger_manager.get_component(
             self._rooms[room.id], Doors
         ).doors:
-            door = esper.component_for_entity(door_id, Door)
-            door.state = DoorState.OPEN
+            esper.add_component(door_id, DoorState.OPEN)
             esper.remove_component(door_id, Collision)
 
     def create_doors(self, room: Room):
         doors = set()
         for door in room.doors:
-            door_id = self._entity_manager.create(
-                door.pos, Door(DoorState.OPEN), Memorable()
-            )
+            door_id = self._entity_manager.create(door.pos, DoorState.OPEN, Memorable())
             doors.add(door_id)
 
         self._trigger_manager.add_component(
