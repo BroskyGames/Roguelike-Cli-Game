@@ -1,9 +1,7 @@
 from collections import deque
-from typing import Callable, cast
+from typing import Callable
 
 import esper
-
-from game.ecs.managers.turn_managers import StepProcessor
 
 Task = esper.Processor | Callable
 
@@ -16,10 +14,10 @@ class TaskScheduler:
     def add(self, processor: Task, instant: bool = False) -> None:
         self.queue.append((processor, instant))
 
-    def start(self) -> None:
-        self._next()
-
     def step(self) -> bool:
+        if self.current is None:
+            self._next()
+
         while True:
             if self.current is None:
                 return False
@@ -40,7 +38,6 @@ class TaskScheduler:
                 self._next()
 
             return self.current is not None
-        return False
 
     def _next(self) -> None:
         if not self.queue:
@@ -49,9 +46,6 @@ class TaskScheduler:
 
         self.current = self.queue.popleft()
         task, _ = self.current
-
-        if hasattr(task, "start"):
-            cast(StepProcessor, task).start()
 
     @staticmethod
     def _run(item) -> None:

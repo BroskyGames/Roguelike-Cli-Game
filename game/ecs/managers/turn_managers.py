@@ -13,14 +13,10 @@ class StepProcessor(esper.Processor, ABC):
         self.processor = None
         self.working: bool = False
 
-    def start(self) -> None:
-        self.processor = self.make_processor()
-        self.working = True
-
     def process(self) -> None:
-        assert self.processor is not None, (
-            "Processor not started. Call start() before processing."
-        )
+        if self.processor is None:
+            self.processor = self.make_processor()
+            self.working = True
         try:
             next(self.processor)
         except StopIteration:

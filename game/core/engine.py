@@ -90,7 +90,6 @@ class Engine:
                     self.state.phase = Phase.RESOLUTION
                     for item, instant in self._turn_queue:
                         self._scheduler.add(item, instant)
-                    self._scheduler.start()
 
                 case RemoveLastAction():
                     self._action_queue.remove_last()
