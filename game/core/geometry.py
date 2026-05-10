@@ -67,6 +67,9 @@ class Vector2:
     def __hash__(self) -> int:
         return (self.x << 10) | (self.y & self.MASK)
 
+    def manhattan(self) -> int:
+        return abs(self.x) + abs(self.y)
+
 
 @dataclass(slots=True, frozen=True)
 class Size:
@@ -120,6 +123,11 @@ DirectionsDiagonals: set[Directions] = set(Directions) | {
 DIRECTION_VECTORS: dict[Directions, Vector2] = {
     d: d.vector() for d in DirectionsDiagonals
 }
+
+
+def manhattan(a: Pos, b: Pos) -> int:
+    return abs(a.x - b.x) + abs(a.y - b.y)
+
 
 if __name__ == "__main__":
     # print(Pos(3, 2) - Pos(3, 2))

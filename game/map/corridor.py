@@ -7,7 +7,14 @@ from heapq import heappop, heappush
 from itertools import count
 from typing import Callable
 
-from game.core.geometry import BaseDirections, DIRECTION_VECTORS, Directions, Pos
+from game.core.geometry import (
+    DIRECTION_VECTORS,
+    BaseDirections,
+    Directions,
+    Pos,
+    manhattan,
+)
+
 from .room import Door, Room
 
 
@@ -86,7 +93,7 @@ def _astar(
             if is_blocked_fn(neighbor):
                 continue
 
-            if _manhattan(neighbor, start) > MAX_SEARCH_DIST:
+            if manhattan(neighbor, start) > MAX_SEARCH_DIST:
                 continue
 
             start_penalty = (
@@ -107,7 +114,7 @@ def _astar(
             if tentative_g < g_score.get(neighbor, 1_000_000):
                 came_from[neighbor] = current
                 g_score[neighbor] = tentative_g
-                f = tentative_g + _manhattan(neighbor, goal)
+                f = tentative_g + manhattan(neighbor, goal)
 
                 heappush(heap, (f, next(counter), neighbor, move_dir))
     raise RuntimeError("No path found between doors")
@@ -147,7 +154,3 @@ def _add_corridor_to_blocked(blocked: set[Pos], corridor: Corridor, padding: int
 
 def _get_door_exit(door: Door) -> Pos:
     return door.pos + DIRECTION_VECTORS[door.direction]
-
-
-def _manhattan(a: Pos, b: Pos) -> int:
-    return abs(a.x - b.x) + abs(a.y - b.y)
