@@ -15,13 +15,10 @@ class MovementProcessor(esper.Processor):
         pos = esper.component_for_entity(action.ent, Pos)
         new_pos = pos + DIRECTION_VECTORS[action.dir]
 
-        if esper.has_component(action.ent, Collision):
-            for ent in self.context.entities_index[new_pos]:
-                if esper.has_component(ent, Collision):
-                    return
+        esper.add_component(action.ent, action.dir)
 
-            if not self.context.map[new_pos].walkable:
-                return
+        if not self.validate(action.ent, new_pos):
+            return
 
         esper.add_component(action.ent, new_pos)
         self.context.entities_index[new_pos].add(action.ent)
@@ -30,3 +27,16 @@ class MovementProcessor(esper.Processor):
         room_id = self.context.map[new_pos].room_id
         room_id = room_id if room_id != -1 else None
         esper.add_component(action.ent, InRoom(room_id))
+
+    def validate(self, action_ent: int, pos: Pos) -> bool:
+        if not esper.has_component(action_ent, Collision):
+            return True
+
+        if not self.context.map[pos].walkable:
+            return False
+
+        for ent in self.context.entities_index[pos]:
+            if esper.has_component(ent, Collision):
+                return False
+
+        return True

@@ -277,14 +277,13 @@ def _get_available_door_pos(room: Room) -> tuple[Pos, ...]:
 
 
 def _find_connection_for(a: Room, b: Room) -> tuple[Pos, Pos]:
-    min_d = float("inf")
+    min_dist = float("inf")
     best_pair = (None, None)
 
     for x1, y1 in _get_available_door_pos(a):
         for x2, y2 in _get_available_door_pos(b):
-            d = abs(x1 - x2) + abs(y1 - y2)
-            if d < min_d:
-                min_d = d
+            if (dist := abs(x1 - x2) + abs(y1 - y2)) < min_dist:
+                min_dist = dist
                 best_pair = (Pos(x1, y1), Pos(x2, y2))
 
     assert best_pair[0] is not None and best_pair[1] is not None, (

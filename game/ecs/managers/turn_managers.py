@@ -36,16 +36,21 @@ class PlayerTurnManager(StepProcessor):
         for _, (queue, ap, _) in esper.get_components(
             ActionQueue, ActionPoints, Player
         ):
-            while queue.actions and ap.current > 0:
-                action = queue.actions.popleft()
+            while queue.actions:
+                action = queue.actions[0]
+
+                if not self.validate(ap.current, action):
+                    break
+
                 self.router.dispatch(action)
                 ap.current -= action.base_cost
-
-                if not (queue.actions and ap.current > 0):
-                    break
+                queue.actions.popleft()
 
                 yield
             ap.current = ap.max
+
+    def validate(self, action_points: float, action: Action) -> bool:
+        return action_points >= action.base_cost
 
 
 class EnemyTurnManager(StepProcessor):
