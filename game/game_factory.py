@@ -41,7 +41,6 @@ def spawn_player(
     player = engine.create_entity(
         rooms[room].center,
         Player(),
-        Display("@", 5),
         Health(20, 20),
         ActionPoints(4, 4),
         FovRange(4),

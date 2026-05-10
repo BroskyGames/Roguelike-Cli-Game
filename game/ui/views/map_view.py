@@ -3,17 +3,16 @@ from dataclasses import dataclass
 import esper
 
 from game.core.context import Context
-from game.core.geometry import Pos
+from game.core.geometry import Directions, Pos
 from game.core.map_types import Tile
 from game.ecs.components.data import (
     Display,
-    Door,
     DoorState,
     FieldOfView,
     InRoom,
     Memory,
 )
-from game.ecs.components.tags import Memorable
+from game.ecs.components.tags import Memorable, Player
 from game.ui.rect import Rect
 
 
@@ -22,6 +21,13 @@ class VisualTile:
     char: str
     dim: bool = False
 
+
+PLAYER_DISPLAY = {
+    Directions.NORTH: Display("^", 5),
+    Directions.EAST: Display(">", 5),
+    Directions.SOUTH: Display("v", 5),
+    Directions.WEST: Display("<", 5),
+}
 
 DOOR_DISPLAY = {
     DoorState.OPEN: Display(char="+"),
@@ -84,8 +90,11 @@ class MapView:
         return VisualTile(str(self._context.map.get(pos, Tile())))
 
     def _get_display(self, ent: int) -> Display | None:
-        if door := esper.try_component(ent, Door):
-            return DOOR_DISPLAY[door.state]
+        if door := esper.try_component(ent, DoorState):
+            return DOOR_DISPLAY[door]
+
+        if esper.has_component(ent, Player):
+            return PLAYER_DISPLAY[esper.component_for_entity(ent, Directions)]
 
         return esper.try_component(ent, Display)
 
