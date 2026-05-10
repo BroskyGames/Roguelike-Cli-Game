@@ -22,5 +22,10 @@ class Memorable:
 
 
 @dataclass(frozen=True, slots=True)
+class Compute:
+    pass
+
+
+@dataclass(frozen=True, slots=True)
 class Cleared:
     pass

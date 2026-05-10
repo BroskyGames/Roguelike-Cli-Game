@@ -92,14 +92,18 @@ game/
         data.py
         tags.py
         stats.py
+        shape.py
     systems/
-      ap_procesor.py
       movement_processor.py
       field_of_view_processor.py
+      trigger_processor.py
+      compute_processor.py
     managers/
-      action_queue_manager.py
       turn_managers.py
+      action_queue_manager.py
       entity_lifecycle_manager.py
+      trigger_manager.py
+      room_manager.py
   ui/
     ui.py
     debug.py

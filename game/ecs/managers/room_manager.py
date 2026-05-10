@@ -76,7 +76,6 @@ class RoomManager:
         return True
 
     def lock_room(self, room: Room):
-        print(f"Locking room {room.id}")
         for door_id in self._trigger_manager.get_component(
             self._rooms[room.id], Doors
         ).doors:

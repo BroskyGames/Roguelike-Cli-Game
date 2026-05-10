@@ -1,11 +1,14 @@
-from dataclasses import InitVar, dataclass, field
-from typing import Protocol, Self
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from typing import Iterator, Protocol, Self
 
 from game.core.geometry import Pos, Size
 
 
 class Shape(Protocol):
     def contains(self, pos: Pos) -> bool: ...
+    def flatten(self) -> Iterator[Pos]: ...
 
 
 @dataclass(slots=True, frozen=True)
@@ -22,17 +25,21 @@ class RectShape:
     def contains(self, pos: Pos) -> bool:
         return self.x <= pos.x < self.x + self.w and self.y <= pos.y < self.y + self.h
 
+    def flatten(self) -> Iterator[Pos]:
+        for dx in range(self.w):
+            for dy in range(self.h):
+                yield Pos(self.x + dx, self.y + dy)
+
 
 @dataclass(slots=True, frozen=True)
 class CircleShape:
     x: int
     y: int
+    r: int
     r2: int = field(init=False)
 
-    r: InitVar[int]
-
-    def __post_init__(self, r: int):
-        object.__setattr__(self, "r2", r * r)
+    def __post_init__(self):
+        object.__setattr__(self, "r2", self.r * self.r)
 
     @classmethod
     def from_pos_radius(cls, pos: Pos, radius: int) -> Self:
@@ -43,6 +50,13 @@ class CircleShape:
         dy = pos.y - self.y
         return dx * dx + dy * dy <= self.r2
 
+    def flatten(self) -> Iterator[Pos]:
+        for dx in range(-self.r, self.r + 1):
+            for dy in range(-self.r, self.r + 1):
+                pos = Pos(self.x + dx, self.y + dy)
+                if self.contains(pos):
+                    yield pos
+
 
 @dataclass(slots=True, frozen=True)
 class SetShape:
@@ -50,6 +64,9 @@ class SetShape:
 
     def contains(self, pos: Pos) -> bool:
         return pos in self.shape
+
+    def flatten(self) -> Iterator[Pos]:
+        return iter(self.shape)
 
 
 @dataclass(slots=True, frozen=True)
@@ -63,3 +80,6 @@ class PointShape:
 
     def contains(self, pos: Pos) -> bool:
         return self.x == pos.x and self.y == pos.y
+
+    def flatten(self) -> Iterator[Pos]:
+        yield Pos(self.x, self.y)

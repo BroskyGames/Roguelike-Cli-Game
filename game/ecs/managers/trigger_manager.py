@@ -3,6 +3,7 @@ from typing import Any, Callable
 
 import esper
 
+from game.core.context import Context
 from game.ecs.components.data import Trigger
 from game.ecs.components.shape import Shape
 
@@ -14,7 +15,8 @@ class CallbackType(Enum):
 
 
 class TriggerManager:
-    def __init__(self):
+    def __init__(self, context: Context):
+        self._context = context
         self.triggers: dict[Shape, int] = {}
 
     def make_trigger(
@@ -36,12 +38,13 @@ class TriggerManager:
                 trigger.on_exit.append(callback)
 
         if is_new:
-            ent = esper.create_entity(trigger)
-            self.triggers[shape] = ent
+            self.add_trigger(trigger)
 
     def add_trigger(self, trigger: Trigger):
         ent = esper.create_entity(trigger)
         self.triggers[trigger.shape] = ent
+        for pos in trigger.shape.flatten():
+            self._context.entities_index[pos].add(ent)
 
     def add_component(self, shape: Shape, component):
         if shape not in self.triggers:

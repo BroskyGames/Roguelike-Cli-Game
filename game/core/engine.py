@@ -4,7 +4,7 @@ from typing import Any
 
 from game.core.geometry import Pos
 from game.core.router import Router
-from game.core.scheduler import TaskScheduler
+from game.core.scheduler import Task, TaskScheduler
 from game.core.state import Phase, State
 from game.domain.actions import (
     Action,
@@ -17,7 +17,8 @@ from game.ecs.managers.action_queue_manager import ActionQueueManager
 from game.ecs.managers.entity_lifecycle_manager import EntityLifecycleManager
 from game.ecs.managers.room_manager import RoomManager
 from game.ecs.managers.trigger_manager import TriggerManager
-from game.ecs.managers.turn_managers import PlayerTurnManager, StepProcessor
+from game.ecs.managers.turn_managers import PlayerTurnManager
+from game.ecs.systems.compute_processor import ComputeProcessor
 from game.ecs.systems.field_of_view_processor import FieldOfViewProcessor
 from game.ecs.systems.movement_processor import MovementProcessor
 from game.ecs.systems.trigger_processor import TriggerProcessor
@@ -39,13 +40,15 @@ class Engine:
         self._router = Router()
 
         self._scheduler = TaskScheduler()
-        self._turn_queue: list[StepProcessor] = [
-            PlayerTurnManager(self._router),
+        self._turn_queue: list[tuple[Task, bool]] = [
+            (PlayerTurnManager(self._router), False),
+            (ComputeProcessor(self.state.context), True),
+            (lambda: print("Enemy Turn"), False),
             # EnemyTurnProcessor(self.router),
         ]
         self._action_queue = ActionQueueManager()
         self._entity_lifecycle = EntityLifecycleManager(self.state.context)
-        self._trigger_manager = TriggerManager()
+        self._trigger_manager = TriggerManager(self.state.context)
         self._room_manager = RoomManager(
             self.state.context, self._trigger_manager, self._entity_lifecycle
         )
@@ -53,7 +56,7 @@ class Engine:
         self._processors: dict[str, Any] = {
             "fov_processor": FieldOfViewProcessor(self.state.context),
             "move_processor": MovementProcessor(self.state.context),
-            "trigger_processor": TriggerProcessor(),
+            "trigger_processor": TriggerProcessor(self.state.context),
         }
 
         self._router.register(MoveAction, self._processors["move_processor"].process)
@@ -82,8 +85,8 @@ class Engine:
             match action:
                 case EndTurnAction():
                     self.state.phase = Phase.RESOLUTION
-                    for item in self._turn_queue:
-                        self._scheduler.add(item)
+                    for item, instant in self._turn_queue:
+                        self._scheduler.add(item, instant)
                     self._scheduler.start()
 
                 case RemoveLastAction():
