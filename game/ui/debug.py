@@ -1,4 +1,4 @@
-from game.core.geometry import Pos
+from game.core.geometry.pos import Pos
 from game.core.map_types import Tile
 from game.map.graph import RoomNode
 
@@ -20,6 +20,13 @@ def display_shape(shape: dict[Pos, Tile]):
             min_y = y
         if max_y is None or y > max_y:
             max_y = y
+
+    assert (
+        min_x is not None
+        and min_y is not None
+        and max_x is not None
+        and max_y is not None
+    ), "Shape cannot be empty"
 
     for y in range(min_y, max_y + 1):
         row = ""

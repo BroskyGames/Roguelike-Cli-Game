@@ -2,9 +2,10 @@ from dataclasses import dataclass, field
 from pprint import pprint
 from random import Random
 
-from game.core.geometry import Pos
+from game.core.geometry.pos import Pos
 from game.core.map_types import Tile
 from game.ui.debug import display_shape, print_nodes
+
 from .corridor import build_corridors
 from .graph import assign_tags, generate_graph
 from .room import Room, build_rooms_from_graph

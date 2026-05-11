@@ -2,8 +2,9 @@ from collections import defaultdict
 from functools import partial
 from typing import cast
 
-from game.core.geometry import DIRECTION_VECTORS, Directions, DirectionsDiagonals, Pos
+from game.core.geometry.pos import Pos
 from game.core.map_types import RoomTypes, Tile, TileType
+from game.domain.directions import DIRECTION_VECTORS, Directions, DirectionsDiagonals
 from game.utils import Reducer, combine_reducers
 
 from .corridor import Corridor

@@ -2,7 +2,7 @@ from random import Random, randint
 
 from game.core.context import Context
 from game.core.engine import Engine
-from game.core.geometry import Pos
+from game.core.geometry.pos import Pos
 from game.core.state import State
 from game.ecs.components.data import AI, ActionQueue, Display, FieldOfView, InRoom
 from game.ecs.components.stats import ActionPoints, FovRange, Health

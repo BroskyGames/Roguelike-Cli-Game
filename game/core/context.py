@@ -1,7 +1,7 @@
 from collections import defaultdict
 from dataclasses import dataclass, field
 
-from game.core.geometry import Pos
+from game.core.geometry.pos import Pos
 from game.core.map_types import Tile
 from game.map import Room
 

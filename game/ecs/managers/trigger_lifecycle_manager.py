@@ -4,8 +4,8 @@ from typing import Any, Callable
 import esper
 
 from game.core.context import Context
+from game.core.geometry.shape import Shape
 from game.ecs.components.data import Trigger
-from game.ecs.components.shape import Shape
 
 
 class CallbackType(Enum):

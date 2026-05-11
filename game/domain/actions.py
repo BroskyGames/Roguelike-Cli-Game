@@ -4,7 +4,7 @@ from abc import ABC
 from dataclasses import dataclass, fields
 from typing import ClassVar
 
-from game.core.geometry import Directions
+from game.domain.directions import Directions
 
 
 @dataclass(frozen=True, slots=True)

@@ -5,16 +5,14 @@ from typing import Callable
 import esper
 
 from game.core.context import Context
-from game.core.geometry import (
-    DIRECTION_VECTORS,
-    BaseDirections,
-    Directions,
+from game.core.geometry.pos import (
     Pos,
-    Vector2,
     manhattan,
 )
+from game.core.geometry.vec import Vector2
 from game.core.logger import Logger
 from game.domain.actions import Action, AttackAction, MoveAction, WaitAction
+from game.domain.directions import DIRECTION_VECTORS, BaseDirections, Directions
 from game.ecs.components.data import AI, AIType, FieldOfView
 from game.ecs.systems.movement_handler import MovementHandler
 

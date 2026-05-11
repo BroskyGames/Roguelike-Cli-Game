@@ -1,8 +1,9 @@
 import esper
 
 from game.core.context import Context
-from game.core.geometry import DIRECTION_VECTORS, Pos
+from game.core.geometry.pos import Pos
 from game.domain.actions import MoveAction
+from game.domain.directions import DIRECTION_VECTORS
 from game.ecs.components.data import InRoom
 from game.ecs.components.tags import Collision
 
