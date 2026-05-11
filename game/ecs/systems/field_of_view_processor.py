@@ -4,7 +4,7 @@ from fractions import Fraction
 import esper
 
 from game.core.context import Context
-from game.core.geometry import Pos
+from game.core.geometry.pos import Pos
 from game.core.map_types import Tile
 from game.domain.actions import MoveAction
 from game.ecs.components.data import FieldOfView

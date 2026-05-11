@@ -7,13 +7,8 @@ from heapq import heappop, heappush
 from itertools import count
 from typing import Callable
 
-from game.core.geometry import (
-    DIRECTION_VECTORS,
-    BaseDirections,
-    Directions,
-    Pos,
-    manhattan,
-)
+from game.core.geometry.pos import Pos, manhattan
+from game.domain.directions import DIRECTION_VECTORS, BaseDirections, Directions
 
 from .room import Door, Room
 

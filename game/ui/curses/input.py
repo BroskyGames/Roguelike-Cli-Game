@@ -1,6 +1,5 @@
 import curses
 
-from game.core.geometry import Directions
 from game.domain.actions import (
     Action,
     AttackAction,
@@ -9,6 +8,7 @@ from game.domain.actions import (
     MoveAction,
     RemoveLastAction,
 )
+from game.domain.directions import Directions
 
 
 class InputAdapter:

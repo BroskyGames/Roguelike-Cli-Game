@@ -1,4 +1,6 @@
-from game.core.geometry import Pos, Size, Vector2
+from game.core.geometry.pos import Pos
+from game.core.geometry.size import Size
+from game.core.geometry.vec import Vector2
 from game.core.map_types import RoomTypes
 from game.utils import Reducer
 

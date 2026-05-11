@@ -2,7 +2,7 @@ from copy import deepcopy
 from random import Random
 from typing import Any
 
-from game.core.geometry import Pos
+from game.core.geometry.pos import Pos
 from game.core.logger import Logger
 from game.core.router import Router
 from game.core.scheduler import Task, TaskScheduler

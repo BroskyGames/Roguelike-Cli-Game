@@ -3,8 +3,9 @@ from dataclasses import dataclass
 import esper
 
 from game.core.context import Context
-from game.core.geometry import Directions, Pos
+from game.core.geometry.pos import Pos
 from game.core.map_types import Tile
+from game.domain.directions import Directions
 from game.ecs.components.data import (
     Display,
     DoorState,

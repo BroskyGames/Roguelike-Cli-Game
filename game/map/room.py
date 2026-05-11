@@ -3,8 +3,10 @@ from __future__ import annotations
 from dataclasses import InitVar, dataclass, field
 from typing import TYPE_CHECKING, ClassVar, cast
 
-from game.core.geometry import BaseDirections, Directions, Pos, Size
+from game.core.geometry.pos import Pos
+from game.core.geometry.size import Size
 from game.core.map_types import RoomTypes
+from game.domain.directions import BaseDirections, Directions
 from game.utils import Reducer
 
 from .graph import RoomNode, bfs
@@ -52,11 +54,11 @@ class Room:
 
     @property
     def width(self) -> int:
-        return self.size.width
+        return self.size.w
 
     @property
     def height(self) -> int:
-        return self.size.height
+        return self.size.h
 
     def connected_directions(self) -> set[Directions]:
         connected = set()
@@ -201,17 +203,17 @@ def _find_room_placement(
     def try_place_in_direction(direction: Directions) -> Pos | None:
         match direction:
             case Directions.NORTH:
-                x = px + rng.randint(-size.width, parent.size.width)
-                y = py - size.height - pad
+                x = px + rng.randint(-size.w, parent.size.w)
+                y = py - size.h - pad
             case Directions.EAST:
-                x = px + parent.size.width + pad
-                y = py + rng.randint(-size.height, parent.size.height)
+                x = px + parent.size.w + pad
+                y = py + rng.randint(-size.h, parent.size.h)
             case Directions.SOUTH:
-                x = px + rng.randint(-size.width, parent.size.width)
-                y = py + parent.size.height + pad
+                x = px + rng.randint(-size.w, parent.size.w)
+                y = py + parent.size.h + pad
             case Directions.WEST:
-                x = px - size.width - pad
-                y = py + rng.randint(-size.height, parent.size.height)
+                x = px - size.w - pad
+                y = py + rng.randint(-size.h, parent.size.h)
             case _:
                 raise TypeError(direction)
 
@@ -223,9 +225,7 @@ def _find_room_placement(
     def search_nearby(padding_check: int) -> Pos | None:
         pcx, pcy = parent.center
         w, h = size
-        min_side = (
-            min(parent.size.width + w, parent.size.height + h) // 2 + padding_check
-        )
+        min_side = min(parent.size.w + w, parent.size.h + h) // 2 + padding_check
 
         for dist in range(min_side, search_radius + 1):
             for dx in range(-dist, dist + 1):

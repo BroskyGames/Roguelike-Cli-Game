@@ -3,10 +3,10 @@ from typing import cast
 import esper
 
 from game.core.context import Context
-from game.core.geometry import Pos
+from game.core.geometry.pos import Pos
+from game.core.geometry.shape import RectShape, Shape
 from game.core.map_types import RoomTypes
 from game.ecs.components.data import Doors, DoorState, InRoom
-from game.ecs.components.shape import RectShape, Shape
 from game.ecs.components.tags import Cleared, Collision, Enemy, Memorable
 from game.ecs.managers.entity_lifecycle_manager import EntityLifecycleManager
 from game.ecs.managers.trigger_lifecycle_manager import (
