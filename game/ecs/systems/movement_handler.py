@@ -7,7 +7,7 @@ from game.ecs.components.data import InRoom
 from game.ecs.components.tags import Collision
 
 
-class MovementProcessor(esper.Processor):
+class MovementHandler(esper.Processor):
     def __init__(self, context: Context):
         self.context = context
 

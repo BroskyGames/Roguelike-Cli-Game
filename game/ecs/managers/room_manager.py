@@ -9,7 +9,10 @@ from game.ecs.components.data import Doors, DoorState, InRoom
 from game.ecs.components.shape import RectShape, Shape
 from game.ecs.components.tags import Cleared, Collision, Enemy, Memorable
 from game.ecs.managers.entity_lifecycle_manager import EntityLifecycleManager
-from game.ecs.managers.trigger_manager import CallbackType, TriggerManager
+from game.ecs.managers.trigger_lifecycle_manager import (
+    CallbackType,
+    TriggerLifecycleManager,
+)
 from game.map.room import Room
 
 
@@ -17,7 +20,7 @@ class RoomManager:
     def __init__(
         self,
         context: Context,
-        trigger_manager: TriggerManager,
+        trigger_manager: TriggerLifecycleManager,
         entity_manager: EntityLifecycleManager,
     ):
         self._context = context

@@ -14,7 +14,7 @@ class CallbackType(Enum):
     ON_EXIT = auto()
 
 
-class TriggerManager:
+class TriggerLifecycleManager:
     def __init__(self, context: Context):
         self._context = context
         self.triggers: dict[Shape, int] = {}

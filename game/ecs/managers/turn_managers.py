@@ -11,8 +11,8 @@ from game.domain.actions import Action
 from game.ecs.components.data import AI, ActionQueue
 from game.ecs.components.stats import ActionPoints
 from game.ecs.components.tags import Compute, Player
-from game.ecs.managers.ai_manager import AIManager
-from game.ecs.systems.movement_processor import MovementProcessor
+from game.ecs.systems.ai_controller import AIController
+from game.ecs.systems.movement_handler import MovementHandler
 
 
 class StepProcessor(esper.Processor, ABC):
@@ -66,17 +66,17 @@ class AITurnManager(StepProcessor):
         router: Router,
         context: Context,
         rng: Random,
-        movement_processor: MovementProcessor,
+        movement_processor: MovementHandler,
         logger: Logger,
     ) -> None:
         super().__init__()
         self.router = router
-        self.ai_manager = AIManager(context, rng, movement_processor, logger)
+        self.ai_processor = AIController(context, rng, movement_processor, logger)
 
     def make_processor(self) -> Generator[None, None, None]:
         for ent, (ap, _, _) in esper.get_components(ActionPoints, AI, Compute):
             while True:
-                action = self.ai_manager.process(ent, ap.current)
+                action = self.ai_processor.process(ent, ap.current)
 
                 if not self.validate(ap.current, action):
                     break

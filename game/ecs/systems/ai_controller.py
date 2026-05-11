@@ -16,22 +16,22 @@ from game.core.geometry import (
 from game.core.logger import Logger
 from game.domain.actions import Action, AttackAction, MoveAction, WaitAction
 from game.ecs.components.data import AI, AIType, FieldOfView
-from game.ecs.systems.movement_processor import MovementProcessor
+from game.ecs.systems.movement_handler import MovementHandler
 
 type ValidateFn = Callable[[int, Pos], bool]
 
 
-class AIManager:
+class AIController:
     def __init__(
         self,
         context: Context,
         rng: Random,
-        movement_processor: MovementProcessor,
+        movement_processor: MovementHandler,
         logger: Logger,
     ) -> None:
         self._context = context
         self.rng = rng
-        self.validator = movement_processor.validate
+        self.move_validator = movement_processor.validate
         self.logger = logger
 
     def process(self, ent: int, action_points: float) -> Action:
@@ -75,7 +75,7 @@ class AIManager:
                 and (pos.x == player_pos.x or pos.y == player_pos.y)
             ):
                 WaitAction(ent)
-            if action := _try_move_to(ent, pos, player_pos - pos, self.validator):
+            if action := _try_move_to(ent, pos, player_pos - pos, self.move_validator):
                 return action
 
         # if self.rng.random() > 0.2:
@@ -102,7 +102,7 @@ class AIManager:
             return MoveAction(ent, _to_base_direction(player_pos - pos))
 
         if fov.contains(player_pos):
-            if action := _try_move_to(ent, pos, player_pos - pos, self.validator):
+            if action := _try_move_to(ent, pos, player_pos - pos, self.move_validator):
                 return action
 
         # if self.rng.random() > 0.2:

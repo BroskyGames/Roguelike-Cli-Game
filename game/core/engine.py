@@ -16,18 +16,32 @@ from game.domain.actions import (
     RemoveLastAction,
     WaitAction,
 )
-from game.ecs.managers.action_queue_manager import ActionQueueManager
 from game.ecs.managers.entity_lifecycle_manager import EntityLifecycleManager
 from game.ecs.managers.room_manager import RoomManager
-from game.ecs.managers.trigger_manager import TriggerManager
+from game.ecs.managers.trigger_lifecycle_manager import TriggerLifecycleManager
 from game.ecs.managers.turn_managers import AITurnManager, PlayerTurnManager
 from game.ecs.systems.compute_processor import ComputeProcessor
 from game.ecs.systems.field_of_view_processor import FieldOfViewProcessor
-from game.ecs.systems.movement_processor import MovementProcessor
+from game.ecs.systems.movement_handler import MovementHandler
+from game.ecs.systems.player_action_queue_service import PlayerActionQueueService
 from game.ecs.systems.trigger_processor import TriggerProcessor
 
 
 class Engine:
+    __slots__ = [
+        "rng",
+        "state",
+        "logger",
+        "_router",
+        "_processors",
+        "_scheduler",
+        "_turn_queue",
+        "_entity_manager",
+        "_trigger_manager",
+        "_room_manager",
+        "_action_queue",
+    ]
+
     def __init__(self, state: State) -> None:
         # RNG
         self.rng = Random(state.seed)
@@ -46,7 +60,7 @@ class Engine:
 
         self._processors: dict[str, Any] = {
             "fov_processor": FieldOfViewProcessor(self.state.context),
-            "move_processor": MovementProcessor(self.state.context),
+            "move_processor": MovementHandler(self.state.context),
             "trigger_processor": TriggerProcessor(self.state.context),
         }
 
@@ -65,11 +79,10 @@ class Engine:
                 False,
             ),
         ]
-        self._action_queue = ActionQueueManager()
-        self._entity_lifecycle = EntityLifecycleManager(self.state.context)
-        self._trigger_manager = TriggerManager(self.state.context)
+        self._entity_manager = EntityLifecycleManager(self.state.context)
+        self._trigger_manager = TriggerLifecycleManager(self.state.context)
         self._room_manager = RoomManager(
-            self.state.context, self._trigger_manager, self._entity_lifecycle
+            self.state.context, self._trigger_manager, self._entity_manager
         )
 
         self._router.register(MoveAction, self._processors["move_processor"].process)
@@ -94,6 +107,7 @@ class Engine:
 
     # --- Engine Logic ---
     def start(self):
+        self._action_queue = PlayerActionQueueService(self.state.context.player)
         self._processors["fov_processor"].process_all()
         self._room_manager.init_rooms()
 
@@ -125,5 +139,5 @@ class Engine:
 
     # --- Engine API ---
     def create_entity(self, pos: Pos, *components) -> int:
-        ent = self._entity_lifecycle.create(pos, *components)
+        ent = self._entity_manager.create(pos, *components)
         return ent
