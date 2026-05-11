@@ -13,7 +13,7 @@ from game.ecs.managers.trigger_lifecycle_manager import (
     CallbackType,
     TriggerLifecycleManager,
 )
-from game.map.room import Room
+from game.map import Room
 
 
 class RoomManager:

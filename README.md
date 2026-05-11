@@ -83,27 +83,32 @@ game/
     engine.py
     scheduler.py
     router.py
-    geometry.py
-    map_types.py
+    geometry/
+      pos.py
+      vec.py
+      size.py
+      shape.py
   domain/
     actions.py
+    directions.py
+    map_types.py
   ecs/
     components/
         data.py
         tags.py
         stats.py
-        shape.py
-    systems/
-      movement_processor.py
-      field_of_view_processor.py
-      trigger_processor.py
-      compute_processor.py
     managers/
       turn_managers.py
-      action_queue_manager.py
       entity_lifecycle_manager.py
-      trigger_manager.py
+      trigger_lifecycle_manager.py
       room_manager.py
+    systems/
+      compute_processor.py
+      trigger_processor.py
+      field_of_view_processor.py
+      movement_handler.py
+      ai_controller.py
+      player_action_queue_service.py
   ui/
     ui.py
     debug.py

@@ -1,8 +1,9 @@
 from typing import Callable
 
-from game.ui.curses.basic import Window
 from game.ui.rect import Rect
 from game.utils.string import center
+
+from .basic import Window
 
 
 class BorderedWindow(Window):

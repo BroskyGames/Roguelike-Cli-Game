@@ -1,5 +1,6 @@
-from game.ui.layout.nodes import LayoutNode
 from game.ui.rect import Rect
+
+from .nodes import LayoutNode
 
 
 class LayoutBuilder:
