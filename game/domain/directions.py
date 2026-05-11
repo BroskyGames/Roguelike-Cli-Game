@@ -1,6 +1,6 @@
 from enum import IntFlag, auto
 
-from game.core.geometry.vec import Vector2
+from game.core.geometry import Vector2
 
 
 class Directions(IntFlag):

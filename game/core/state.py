@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import StrEnum, auto
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
-from game.core.context import Context
+from .context import Context
 
 if TYPE_CHECKING:
     pass

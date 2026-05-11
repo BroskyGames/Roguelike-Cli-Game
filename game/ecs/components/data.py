@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import Callable
 
-from game.core.geometry.pos import Pos
+from game.core.geometry import Pos
 from game.core.geometry.shape import SetShape, Shape
 from game.domain.actions import Action
 

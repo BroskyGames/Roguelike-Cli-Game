@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from random import Random
 
-from game.core.map_types import RoomTypes
+from game.domain.map_types import RoomTypes
 from game.utils import Reducer, combine_reducers
 
 

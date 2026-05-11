@@ -5,6 +5,7 @@ from typing import Callable
 
 from game.ui.layout import LayoutBuilder
 from game.ui.rect import Rect
+
 from .basic import Window
 
 WindowFactory = dict[str, Callable[[Rect], Window]]
@@ -37,15 +38,7 @@ class WindowManager:
             self.windows[name].resize(rect)
         self.draw()
 
-    # def _draw_background(self):
-    #     rows, cols = self.stdscr.getmaxyx()
-    #     if rows > MAX_ROWS or cols > MAX_COLS:
-    #         self.stdscr.bkgd(" ", curses.A_DIM)
-    #         self.stdscr.erase()
-    #         self.stdscr.noutrefresh()
-
     def draw(self):
-        # self._draw_background()
         for window in self.windows.values():
             window.draw()
         curses.doupdate()

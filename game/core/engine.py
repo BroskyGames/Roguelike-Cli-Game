@@ -2,11 +2,6 @@ from copy import deepcopy
 from random import Random
 from typing import Any
 
-from game.core.geometry.pos import Pos
-from game.core.logger import Logger
-from game.core.router import Router
-from game.core.scheduler import Task, TaskScheduler
-from game.core.state import Phase, State
 from game.domain.actions import (
     Action,
     AttackAction,
@@ -25,6 +20,12 @@ from game.ecs.systems.field_of_view_processor import FieldOfViewProcessor
 from game.ecs.systems.movement_handler import MovementHandler
 from game.ecs.systems.player_action_queue_service import PlayerActionQueueService
 from game.ecs.systems.trigger_processor import TriggerProcessor
+
+from .geometry import Pos
+from .logger import Logger
+from .router import Router
+from .scheduler import Task, TaskScheduler
+from .state import Phase, State
 
 
 class Engine:

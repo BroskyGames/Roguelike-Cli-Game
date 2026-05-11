@@ -3,10 +3,9 @@ from __future__ import annotations
 from dataclasses import InitVar, dataclass, field
 from typing import TYPE_CHECKING, ClassVar, cast
 
-from game.core.geometry.pos import Pos
-from game.core.geometry.size import Size
-from game.core.map_types import RoomTypes
+from game.core.geometry import Pos, Size
 from game.domain.directions import BaseDirections, Directions
+from game.domain.map_types import RoomTypes
 from game.utils import Reducer
 
 from .graph import RoomNode, bfs

@@ -1,7 +1,7 @@
 import esper
 
 from game.core.context import Context
-from game.core.geometry.pos import Pos
+from game.core.geometry import Pos
 from game.domain.directions import Directions
 
 

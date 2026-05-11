@@ -1,7 +1,7 @@
 import esper
 
 from game.core.context import Context
-from game.core.geometry.pos import Pos
+from game.core.geometry import Pos
 from game.ecs.components.data import Trigger
 from game.ecs.components.tags import Compute
 
